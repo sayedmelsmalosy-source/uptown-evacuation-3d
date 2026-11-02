@@ -42,6 +42,7 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 #pick .skip{all:unset;cursor:pointer;color:var(--muted);font-size:13px;margin-top:12px;display:inline-block}
 #loading{position:fixed;inset:0;display:grid;place-items:center;z-index:30;background:var(--bg);font-weight:700}
 .lbl{color:#fff;font:700 12px/1 system-ui;background:rgba(10,17,27,.85);padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;border:1px solid rgba(255,255,255,.15)}
+.lbl.go{pointer-events:auto;cursor:pointer;padding:7px 11px;font-size:13px}.lbl.go:hover{outline:2px solid #fff}
 .lbl.stair{background:var(--safe);color:#04150c;border-color:var(--safe)}.lbl.lift{background:var(--amber);color:#1a1400;border-color:var(--amber)}.lbl.ramp{background:var(--info);color:#04101c}.lbl.asm{background:var(--safe);color:#04150c;font-size:15px}
 @media (max-width:760px){#info{width:200px;font-size:12px}#map{width:150px}.brand span{display:none}.seg button{padding:6px 8px;font-size:12px}}
 </style></head><body>
@@ -59,6 +60,7 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
   <label><input type="checkbox" id="ly-lbl" checked> Stair / lift labels</label>
   <label><input type="checkbox" id="ly-noclip"> Walk through walls</label>
   <label><input type="checkbox" id="ly-above"> Show floors above (overview)</label>
+  <div class="src" style="color:var(--fg)">Tip: tap a green STAIR, a RAMP, an exit or the ASSEMBLY POINT label to walk there.</div>
   <div class="src" id="fSrc"></div></div></div>
 <div id="map" class="ui"><canvas id="mapc" width="460" height="290"></canvas><div id="pos"></div></div>
 <div id="stairui" class="ui"><div class="nm" id="stairName"></div><div class="row"><button id="goDown" class="navb">▼ Down</button><button id="goUp" class="navb">▲ Up</button></div></div>
@@ -96,7 +98,7 @@ const stairMat=new THREE.MeshStandardMaterial({color:0x19c37d,roughness:.8,emiss
 const rampMat=new THREE.MeshStandardMaterial({color:0x4aa3ff,roughness:.9});
 function shapeOf(o,h){const s=new THREE.Shape(o.map(([x,y])=>new THREE.Vector2(x,y)));for(const r of (h||[]))s.holes.push(new THREE.Path(r.map(([x,y])=>new THREE.Vector2(x,y))));return s;}
 function polysOf(f){return f.polys==='B'?D.basePolys:f.polys;}
-function mkLabel(t,cls,x,y,z){const d=document.createElement('div');d.className='lbl '+cls;d.textContent=t;const o=new CSS2DObject(d);o.position.set(x,y,z);return o;}
+function mkLabel(t,cls,x,y,z,go){const d=document.createElement('div');d.className='lbl '+cls+(go?' go':'');d.textContent=t;if(go){d.title='Tap to walk here';d.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();goTo(go);});}const o=new CSS2DObject(d);o.position.set(x,y,z);return o;}
 // ---------- build every floor ----------
 const FG=F.map((f,i)=>{
   const g=new THREE.Group();g.position.y=f.ffl;scene.add(g);
@@ -113,9 +115,9 @@ const FG=F.map((f,i)=>{
   if(f.ramp){const len=RAMP.y1-RAMP.y0,ang=Math.atan2(f.h,len);const rg=new THREE.BoxGeometry(RAMP.x1-RAMP.x0,0.3,Math.hypot(len,f.h));rg.rotateX(ang);rg.translate((RAMP.x0+RAMP.x1)/2,f.h/2-0.15,toZ((RAMP.y0+RAMP.y1)/2));g.add(new THREE.Mesh(rg,rampMat));}
   // labels
   const lb=new THREE.Group();g.add(lb);
-  for(const s of f.stairs)lb.add(mkLabel(s.temp?'TEMP STAIR':(s.n.startsWith('External')?s.n.replace('External stair','EXT STAIR'):'STAIR'),'stair',s.x,2.2,toZ(s.y)));
-  for(const l of (f.labels||[])){const t=l.t.toUpperCase();if(t.startsWith('LIFT'))lb.add(mkLabel('LIFT ✕','lift',l.x,1.8,toZ(l.y)));else if(t==='RAMP')lb.add(mkLabel('RAMP','ramp',l.x,1.8,toZ(l.y)));}
-  if(f.gf){lb.add(mkLabel('ASSEMBLY POINT','asm',ASM.x,6,toZ(ASM.y)));for(const e of D.gfExits)lb.add(mkLabel(e.n,'ramp',e.x,2,toZ(e.y)));
+  for(const s of f.stairs)lb.add(mkLabel(s.temp?'TEMP STAIR':(s.n.startsWith('External')?s.n.replace('External stair','EXT STAIR'):'STAIR'),'stair',s.x,2.2,toZ(s.y),{x:s.x,y:s.y,n:s.n,kind:'stair'}));
+  for(const l of (f.labels||[])){const t=l.t.toUpperCase();if(t.startsWith('LIFT'))lb.add(mkLabel('LIFT ✕','lift',l.x,1.8,toZ(l.y)));else if(t==='RAMP')lb.add(mkLabel('RAMP','ramp',l.x,1.8,toZ(l.y),f.ramp?{x:(RAMP.x0+RAMP.x1)/2,y:RAMP.y0+1,n:'the ramp',kind:'ramp'}:{x:l.x,y:l.y,n:'the ramp',kind:'ramp'}));}
+  if(f.gf){lb.add(mkLabel('ASSEMBLY POINT','asm',ASM.x,6,toZ(ASM.y),{x:ASM.x,y:ASM.y,n:'the Assembly Point',kind:'asm'}));for(const e of D.gfExits)lb.add(mkLabel(e.n,'ramp',e.x,2,toZ(e.y),{x:e.x,y:e.y,n:e.n,kind:'exit'}));
     const pole=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,6,8),stairMat);pole.position.set(ASM.x,3,toZ(ASM.y));g.add(pole);
     const ring=new THREE.Mesh(new THREE.RingGeometry(4,6,32),new THREE.MeshBasicMaterial({color:0x19c37d,side:THREE.DoubleSide,transparent:true,opacity:.75}));ring.rotation.x=-Math.PI/2;ring.position.set(ASM.x,.04,toZ(ASM.y));g.add(ring);}
   return {g,conc,floor,st,lb,tex:null,mat:null};
@@ -144,6 +146,20 @@ function distOf(i){if(DIST[i])return DIST[i];const o=occOf(i),d=new Int32Array(N
   for(const s of F[i].stairs){const ci=Math.floor(s.x/CELL),cj=Math.floor(s.y/CELL);for(const R of [4,7,10]){let added=0;const r=Math.ceil(R/CELL);for(let j=cj-r;j<=cj+r;j++)for(let k=ci-r;k<=ci+r;k++){if(k<0||j<0||k>=NX||j>=NY||o[j*NX+k]||Math.hypot(k-ci,j-cj)>r)continue;if(d[j*NX+k]<0){d[j*NX+k]=0;q[t++]=j*NX+k;}added++;}if(added)break;}}
   while(h<t){const c=q[h++],k=c%NX,j=(c-k)/NX,v=d[c]+1;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const kk=k+a,jj=j+b;if(kk<0||jj<0||kk>=NX||jj>=NY)continue;const n=jj*NX+kk;if(!o[n]&&d[n]<0){d[n]=v;q[t++]=n;}}}
   return DIST[i]=d;}
+function fieldTo(i,tx,ty){const o=occOf(i),d=new Int32Array(NX*NY).fill(-1),q=new Int32Array(NX*NY);let h=0,t=0;const ci=Math.floor(tx/CELL),cj=Math.floor(ty/CELL);
+  for(const R of [1.5,4,7,10]){let added=0;const r=Math.ceil(R/CELL);for(let j=cj-r;j<=cj+r;j++)for(let k=ci-r;k<=ci+r;k++){if(k<0||j<0||k>=NX||j>=NY||o[j*NX+k]||Math.hypot(k-ci,j-cj)>r)continue;if(d[j*NX+k]<0){d[j*NX+k]=0;q[t++]=j*NX+k;}added++;}if(added)break;}
+  while(h<t){const c=q[h++],k=c%NX,j=(c-k)/NX,v=d[c]+1;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const kk=k+a,jj=j+b;if(kk<0||jj<0||kk>=NX||jj>=NY)continue;const n=jj*NX+kk;if(!o[n]&&d[n]<0){d[n]=v;q[t++]=n;}}}return d;}
+function followField(d,x,y){let i=Math.floor(x/CELL),j=Math.floor(y/CELL);if(i<0||j<0||i>=NX||j>=NY)return null;
+  if(d[j*NX+i]<0){let fnd=null;for(let r=1;r<16&&!fnd;r++)for(let b=-r;b<=r&&!fnd;b++)for(let a=-r;a<=r&&!fnd;a++){const k=i+a,l=j+b;if(k>=0&&l>=0&&k<NX&&l<NY&&d[l*NX+k]>=0)fnd=[k,l];}if(!fnd)return null;[i,j]=fnd;}
+  const pts=[[x,y]];let g=0;while(d[j*NX+i]>0&&g++<8000){let bi=i,bj=j,bd=d[j*NX+i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const k=i+a,l=j+b;if(k>=0&&l>=0&&k<NX&&l<NY){const v=d[l*NX+k];if(v>=0&&v<bd){bd=v;bi=k;bj=l;}}}if(bi===i&&bj===j)break;i=bi;j=bj;pts.push([(i+.5)*CELL,(j+.5)*CELL]);}
+  return pts.filter((p,k)=>k%3===0||k===pts.length-1);}
+let auto=null;
+function goTo(t){if(mode!=='walk')startOn(cur);const f=F[cur];let pts;
+  if(f.gf){pts=t.kind==='asm'?routeFrom(player.x,player.y):[[player.x,player.y],[t.x,t.y]];}
+  else{pts=followField(fieldTo(cur,t.x,t.y),player.x,player.y);}
+  if(!pts||pts.length<2){toast('You are already at '+t.n);return;}
+  auto={pts,k:1,t};toast('Walking to '+t.n+' — press any arrow to stop');}
+window.__dbg.goTo=goTo;window.__dbg.auto=()=>auto;
 function freeNear(x,y){if(F[cur].gf)return [x,y];const o=occOf(cur);let i=Math.floor(x/CELL),j=Math.floor(y/CELL);for(let r=0;r<200;r++){for(let a=-r;a<=r;a++)for(const [k,l] of [[i+a,j-r],[i+a,j+r],[i-r,j+a],[i+r,j+a]]){if(k>=0&&l>=0&&k<NX&&l<NY&&!o[l*NX+k])return [(k+.5)*CELL,(l+.5)*CELL];}}return [x,y];}
 function routeFrom(x,y){const f=F[cur];
   if(f.gf){let best=D.gfExits[0],bd=1e9;for(const e of D.gfExits){const dd=Math.hypot(e.x-x,e.y-y)+Math.hypot(ASM.x-e.x,ASM.y-e.y);if(dd<bd){bd=dd;best=e;}}return [[x,y],[best.x,best.y],[ASM.x,ASM.y]];}
@@ -247,6 +263,11 @@ function step(dt){
   const run=keys.ShiftLeft||keys.ShiftRight;const sp=(run?6:3.2)*dt;
   let fw=0,sd=0;if(keys.KeyW||keys.ArrowUp)fw+=1;if(keys.KeyS||keys.ArrowDown)fw-=1;if(keys.KeyD)sd+=1;if(keys.KeyA)sd-=1;
   if(keys.ArrowLeft||keys.turnL)player.yaw+=1.7*dt;if(keys.ArrowRight||keys.turnR)player.yaw-=1.7*dt;
+  if(auto&&(fw||sd||keys.ArrowLeft||keys.ArrowRight||keys.turnL||keys.turnR))auto=null;
+  if(auto){const sp2=(run?6:3.6)*dt;let rem=sp2;while(rem>0&&auto&&auto.k<auto.pts.length){const [tx2,ty2]=auto.pts[auto.k];const dx=tx2-player.x,dy=ty2-player.y,dd=Math.hypot(dx,dy);
+      if(dd>0.05){const want=Math.atan2(-dx,dy);let dyaw=want-player.yaw;while(dyaw>Math.PI)dyaw-=2*Math.PI;while(dyaw<-Math.PI)dyaw+=2*Math.PI;player.yaw+=dyaw*Math.min(1,dt*6);}
+      if(dd<=rem){player.x=tx2;player.y=ty2;rem-=dd;auto.k++;}else{player.x+=dx/dd*rem;player.y+=dy/dd*rem;rem=0;}}
+    if(auto&&auto.k>=auto.pts.length){const t=auto.t;auto=null;toast(t.kind==='asm'?'✔ You reached the ASSEMBLY POINT — stay with your supervisor for the roll call':t.kind==='stair'?('At '+t.n+' — press '+(cur>GFI?'▼ Down':'▲ Up')):'You reached '+t.n);}}
   const fx=-Math.sin(player.yaw),fy=Math.cos(player.yaw),rx=Math.cos(player.yaw),ry=Math.sin(player.yaw);
   const f=F[cur];const wasRamp=f.ramp&&player.x>RAMP.x0&&player.x<RAMP.x1&&player.y>RAMP.y0&&player.y<RAMP.y1;
   const nx=player.x+(fx*fw+rx*sd)*sp,ny=player.y+(fy*fw+ry*sd)*sp;
