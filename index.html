@@ -42,7 +42,9 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 #pick .skip{all:unset;cursor:pointer;color:var(--muted);font-size:13px;margin-top:12px;display:inline-block}
 #loading{position:fixed;inset:0;display:grid;place-items:center;z-index:30;background:var(--bg);font-weight:700}
 .lbl{color:#fff;font:700 12px/1 system-ui;background:rgba(10,17,27,.85);padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;border:1px solid rgba(255,255,255,.15)}
-.lbl.go{pointer-events:auto;cursor:pointer;padding:7px 11px;font-size:13px}.lbl.go:hover{outline:2px solid #fff}
+.lbl.go{pointer-events:auto;cursor:pointer;padding:7px 11px;font-size:13px}
+.lbl.review{background:#f5b50a;color:#1a1400;border:2px dashed #e5484d}.lbl.open{background:#fff;color:#b42318;border:2px dashed #e5484d;font-size:11px}.lbl.open.ok{color:#04150c;border-color:#19c37d}.lbl.flag{background:#e5484d;color:#fff;font-size:13px;padding:7px 10px}.lbl.door{background:rgba(25,195,125,.9);color:#04150c;font-size:10px;padding:3px 6px}
+#info .leg{margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6}#info .leg b{color:var(--fg)}#info .ops{margin-top:6px;font-size:11.5px}#info .ops div{padding:3px 0;border-top:1px solid var(--line)}#info .warn{color:#f5b50a}.lbl.go:hover{outline:2px solid #fff}
 .lbl.stair{background:var(--safe);color:#04150c;border-color:var(--safe)}.lbl.lift{background:var(--amber);color:#1a1400;border-color:var(--amber)}.lbl.ramp{background:var(--info);color:#04101c}.lbl.asm{background:var(--safe);color:#04150c;font-size:15px}
 @media (max-width:760px){#info{width:200px;font-size:12px}#map{width:150px}.brand span{display:none}.seg button{padding:6px 8px;font-size:12px}}
 </style></head><body>
@@ -61,7 +63,8 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
   <label><input type="checkbox" id="ly-noclip"> Walk through walls</label>
   <label><input type="checkbox" id="ly-above"> Show floors above (overview)</label>
   <div class="src" style="color:var(--fg)">Tip: tap a green STAIR, a RAMP, an exit or the ASSEMBLY POINT label to walk there.</div>
-  <div class="src" id="fSrc"></div></div></div>
+  <div class="src" id="fSrc"></div><div class="ops" id="fOps"></div>
+  <div class="leg"><b>Legend</b><br><span style="color:#e5484d">▭✕ dashed red</span> slab opening · green stair + landing + arrow = stair to the level shown on its sign · <span style="color:#19c37d">▯ green frame</span> = opening in the wall on the route · <span style="color:#e5484d">⚑</span> = route blocked, no approved opening → HSE review</div></div></div>
 <div id="map" class="ui"><canvas id="mapc" width="460" height="290"></canvas><div id="pos"></div></div>
 <div id="stairui" class="ui"><div class="nm" id="stairName"></div><div class="row"><button id="goDown" class="navb">▼ Down</button><button id="goUp" class="navb">▲ Up</button></div></div>
 <div id="dpad" class="ui"><button data-k="turnL">↶</button><button data-k="KeyW">▲</button><button data-k="turnR">↷</button><button data-k="KeyA">◀</button><button data-k="KeyS">▼</button><button data-k="KeyD">▶</button></div>
@@ -96,6 +99,11 @@ const ceilMat=new THREE.MeshBasicMaterial({color:0xc9ced4,side:THREE.DoubleSide}
 const glassMat=new THREE.MeshBasicMaterial({color:0x7fb6e6,transparent:true,opacity:.22,side:THREE.DoubleSide,depthWrite:false});
 const stairMat=new THREE.MeshStandardMaterial({color:0x19c37d,roughness:.8,emissive:0x0a5a38,emissiveIntensity:.4});
 const rampMat=new THREE.MeshStandardMaterial({color:0x4aa3ff,roughness:.9});
+const scafMat=new THREE.MeshStandardMaterial({color:0xf5b50a,roughness:.8});
+const holeMat=new THREE.MeshBasicMaterial({color:0x0b0f14});
+const doorMat=new THREE.MeshBasicMaterial({color:0x19c37d});
+const landMat=new THREE.MeshStandardMaterial({color:0x6fe0ad,roughness:.9});
+const destOf=i=>i>GFI?i-1:(i<GFI?i+1:null);
 function shapeOf(o,h){const s=new THREE.Shape(o.map(([x,y])=>new THREE.Vector2(x,y)));for(const r of (h||[]))s.holes.push(new THREE.Path(r.map(([x,y])=>new THREE.Vector2(x,y))));return s;}
 function polysOf(f){return f.polys==='B'?D.basePolys:f.polys;}
 function mkLabel(t,cls,x,y,z,go){const d=document.createElement('div');d.className='lbl '+cls+(go?' go':'');d.textContent=t;if(go){d.title='Tap to walk here';d.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();goTo(go);});}const o=new CSS2DObject(d);o.position.set(x,y,z);return o;}
@@ -111,11 +119,30 @@ const FG=F.map((f,i)=>{
   else{const pg=new THREE.PlaneGeometry(W,H);pg.rotateX(-Math.PI/2);pg.translate(W/2,0.02,-H/2);floor=new THREE.Mesh(pg,slabMat);g.add(floor);}
   // stairs (simple flights) and ramp
   const st=new THREE.Group();g.add(st);
-  for(const s of f.stairs){const n=8,run=0.28,rise=f.h/2/n;for(let fl=0;fl<2;fl++)for(let k=0;k<n;k++){const b=new THREE.BoxGeometry(1.1,rise,run);const yy=fl===0?s.y-1.2+k*run:s.y+1.2-k*run;b.translate(s.x+(fl===0?-0.65:0.65),fl===0?(k+.5)*rise:f.h/2+(k+.5)*rise,toZ(yy));st.add(new THREE.Mesh(b,stairMat));}}
+  const dst=destOf(i);
+  for(const s of f.stairs){
+    if(s.review){ // scaffold stair: flight from this slab down through the opening (if any) to the level below
+      const prevH=i>0?F[i-1].h:3.5,n=12,rise=prevH/n,run=Math.min(0.17,1.9/n);
+      for(let k=0;k<n;k++){const b=new THREE.BoxGeometry(0.9,0.06,0.3);b.translate(s.x,-k*rise,toZ(s.y-0.75+k*run*1.0));st.add(new THREE.Mesh(b,scafMat));}
+      continue;}
+    const n=8,run=0.28,rise=f.h/2/n;for(let fl=0;fl<2;fl++)for(let k=0;k<n;k++){const b=new THREE.BoxGeometry(1.1,rise,run);const yy=fl===0?s.y-1.2+k*run:s.y+1.2-k*run;b.translate(s.x+(fl===0?-0.65:0.65),fl===0?(k+.5)*rise:f.h/2+(k+.5)*rise,toZ(yy));st.add(new THREE.Mesh(b,stairMat));}
+    // landing + arrow showing the direction of travel (down above GF, up below GF)
+    const ld=new THREE.BoxGeometry(2.6,0.12,1.3);ld.translate(s.x,0.06,toZ(s.y-1.95));st.add(new THREE.Mesh(ld,landMat));
+    if(dst!==null){const dir=new THREE.Vector3(0,i>GFI?-1:1,0);const ar=new THREE.ArrowHelper(dir,new THREE.Vector3(s.x,i>GFI?2.6:0.4,toZ(s.y-1.95)),2.0,i>GFI?0x19c37d:0x4aa3ff,0.7,0.5);st.add(ar);}}
+  // slab openings in the reference-sheet style: dark hole, dashed outline, cross
+  const opg=new THREE.Group();g.add(opg);
+  for(const o of (f.openings||[])){const P=o.poly;const col=o.type==='boom'?0x2b8a8a:0xe5484d;
+    const sh=new THREE.ShapeGeometry(new THREE.Shape(P.map(([x,y])=>new THREE.Vector2(x,y))));sh.rotateX(-Math.PI/2);sh.translate(0,0.04,0);opg.add(new THREE.Mesh(sh,holeMat));
+    const ring=[...P,P[0]].map(([x,y])=>new THREE.Vector3(x,0.07,toZ(y)));const lg=new THREE.BufferGeometry().setFromPoints(ring);const ln=new THREE.Line(lg,new THREE.LineDashedMaterial({color:col,dashSize:0.25,gapSize:0.15}));ln.computeLineDistances();opg.add(ln);
+    const xg=new THREE.BufferGeometry().setFromPoints([P[0],P[2],P[1],P[3]].map(([x,y])=>new THREE.Vector3(x,0.07,toZ(y))));opg.add(new THREE.LineSegments(xg,new THREE.LineBasicMaterial({color:col})));}
   if(f.ramp){const len=RAMP.y1-RAMP.y0,ang=Math.atan2(f.h,len);const rg=new THREE.BoxGeometry(RAMP.x1-RAMP.x0,0.3,Math.hypot(len,f.h));rg.rotateX(ang);rg.translate((RAMP.x0+RAMP.x1)/2,f.h/2-0.15,toZ((RAMP.y0+RAMP.y1)/2));g.add(new THREE.Mesh(rg,rampMat));}
   // labels
   const lb=new THREE.Group();g.add(lb);
-  for(const s of f.stairs)lb.add(mkLabel(s.temp?'TEMP STAIR':(s.n.startsWith('External')?s.n.replace('External stair','EXT STAIR'):'STAIR'),'stair',s.x,2.2,toZ(s.y),{x:s.x,y:s.y,n:s.n,kind:'stair'}));
+  for(const s of f.stairs){const id=s.id||'STAIR';
+    if(s.review){lb.add(mkLabel(id+' ⚠ HSE review','review',s.x,2.4,toZ(s.y),{x:s.x,y:s.y-1.6,n:id,kind:'stair',review:true,s}));continue;}
+    const txt=dst===null?id:(id+' '+(i>GFI?'▼ ':'▲ ')+F[dst].k);lb.add(mkLabel(txt,'stair',s.x,2.2,toZ(s.y),{x:s.x,y:s.y,n:id+(dst===null?'':' → '+F[dst].name),kind:'stair',s}));}
+  for(const o of (f.openings||[])){const c=o.poly.reduce((a,p)=>[a[0]+p[0]/o.poly.length,a[1]+p[1]/o.poly.length],[0,0]);
+    lb.add(mkLabel(o.id+(o.status==='approved'?' ✓':' ⚠'),'open'+(o.status==='approved'?' ok':''),c[0],1.0,toZ(c[1]),{x:c[0],y:c[1],n:o.label,kind:'info',o}));}
   for(const l of (f.labels||[])){const t=l.t.toUpperCase();if(t.startsWith('LIFT'))lb.add(mkLabel('LIFT ✕','lift',l.x,1.8,toZ(l.y)));else if(t==='RAMP')lb.add(mkLabel('RAMP','ramp',l.x,1.8,toZ(l.y),f.ramp?{x:(RAMP.x0+RAMP.x1)/2,y:RAMP.y0+1,n:'the ramp',kind:'ramp'}:{x:l.x,y:l.y,n:'the ramp',kind:'ramp'}));}
   if(f.gf){lb.add(mkLabel('ASSEMBLY POINT','asm',ASM.x,6,toZ(ASM.y),{x:ASM.x,y:ASM.y,n:'the Assembly Point',kind:'asm'}));for(const e of D.gfExits)lb.add(mkLabel(e.n,'ramp',e.x,2,toZ(e.y),{x:e.x,y:e.y,n:e.n,kind:'exit'}));
     const pole=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,6,8),stairMat);pole.position.set(ASM.x,3,toZ(ASM.y));g.add(pole);
@@ -136,14 +163,15 @@ function occOf(i){if(OCC[i])return OCC[i];const f=F[i];const cv=document.createE
   const path=pp=>{x.beginPath();pp.forEach(([a,b],k)=>k?x.lineTo(a,b):x.moveTo(a,b));x.closePath();};
   x.fillStyle='#fff';for(const fp of (f.foot||[])){path(fp.o);x.fill();}
   x.strokeStyle='#000';x.lineWidth=0.7;for(const fp of (f.foot||[])){path(fp.o);x.stroke();}
-  x.fillStyle='#000';for(const p of polysOf(f)){path(p.o);x.fill();x.stroke();}
+  x.fillStyle='#000';x.lineWidth=0.25;for(const p of polysOf(f)){x.beginPath();for(const r of [p.o,...(p.h||[])]){r.forEach(([a,b],k)=>k?x.lineTo(a,b):x.moveTo(a,b));x.closePath();}x.fill('evenodd');x.stroke();}
   if(f.ramp){x.fillStyle='#fff';x.fillRect(RAMP.x0,RAMP.y0,RAMP.x1-RAMP.x0,RAMP.y1-RAMP.y0);}
+  x.fillStyle='#000';x.lineWidth=0.5;for(const op of (f.openings||[])){path(op.poly);x.fill();x.stroke();}
   const px=x.getImageData(0,0,NX,NY).data;const o=new Uint8Array(NX*NY);
   for(let j=0;j<NY;j++)for(let k=0;k<NX;k++){const yy=NY-1-j;o[j*NX+k]=px[(yy*NX+k)*4]<128?1:0;}
   return OCC[i]=o;}
 function blocked(x,y){const f=F[cur];if(f.gf||document.getElementById('ly-noclip').checked)return false;if(f.ramp&&x>RAMP.x0&&x<RAMP.x1&&y>RAMP.y0&&y<RAMP.y1)return false;const i=Math.floor(x/CELL),j=Math.floor(y/CELL);if(i<0||j<0||i>=NX||j>=NY)return true;return occOf(cur)[j*NX+i]===1;}
 function distOf(i){if(DIST[i])return DIST[i];const o=occOf(i),d=new Int32Array(NX*NY).fill(-1),q=new Int32Array(NX*NY);let h=0,t=0;
-  for(const s of F[i].stairs){const ci=Math.floor(s.x/CELL),cj=Math.floor(s.y/CELL);for(const R of [4,7,10]){let added=0;const r=Math.ceil(R/CELL);for(let j=cj-r;j<=cj+r;j++)for(let k=ci-r;k<=ci+r;k++){if(k<0||j<0||k>=NX||j>=NY||o[j*NX+k]||Math.hypot(k-ci,j-cj)>r)continue;if(d[j*NX+k]<0){d[j*NX+k]=0;q[t++]=j*NX+k;}added++;}if(added)break;}}
+  for(const s of F[i].stairs){if(s.review)continue;const ci=Math.floor(s.x/CELL),cj=Math.floor(s.y/CELL);for(const R of (F[i].gf?[4,7,10]:[1.25,2.0,4,7,10])){let added=0;const r=Math.ceil(R/CELL);for(let j=cj-r;j<=cj+r;j++)for(let k=ci-r;k<=ci+r;k++){if(k<0||j<0||k>=NX||j>=NY||o[j*NX+k]||Math.hypot(k-ci,j-cj)>r)continue;if(d[j*NX+k]<0){d[j*NX+k]=0;q[t++]=j*NX+k;}added++;}if(added)break;}}
   while(h<t){const c=q[h++],k=c%NX,j=(c-k)/NX,v=d[c]+1;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const kk=k+a,jj=j+b;if(kk<0||jj<0||kk>=NX||jj>=NY)continue;const n=jj*NX+kk;if(!o[n]&&d[n]<0){d[n]=v;q[t++]=n;}}}
   return DIST[i]=d;}
 function fieldTo(i,tx,ty){const o=occOf(i),d=new Int32Array(NX*NY).fill(-1),q=new Int32Array(NX*NY);let h=0,t=0;const ci=Math.floor(tx/CELL),cj=Math.floor(ty/CELL);
@@ -154,32 +182,60 @@ function followField(d,x,y){let i=Math.floor(x/CELL),j=Math.floor(y/CELL);if(i<0
   const pts=[[x,y]];let g=0;while(d[j*NX+i]>0&&g++<8000){let bi=i,bj=j,bd=d[j*NX+i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const k=i+a,l=j+b;if(k>=0&&l>=0&&k<NX&&l<NY){const v=d[l*NX+k];if(v>=0&&v<bd){bd=v;bi=k;bj=l;}}}if(bi===i&&bj===j)break;i=bi;j=bj;pts.push([(i+.5)*CELL,(j+.5)*CELL]);}
   return pts.filter((p,k)=>k%3===0||k===pts.length-1);}
 let auto=null;
-function goTo(t){if(mode!=='walk')startOn(cur);const f=F[cur];let pts;
+function goTo(t){if(t.kind==='info'){toast((t.o.status==='approved'?'✓ ':'⚠ ')+t.o.label+' — '+t.o.src);return;}
+  if(mode!=='walk')startOn(cur);const f=F[cur];let pts;
+  if(t.kind==='stair'&&Math.hypot(t.x-player.x,t.y-player.y)<4.5){arriveStair(t);return;}
   if(f.gf){pts=t.kind==='asm'?routeFrom(player.x,player.y):[[player.x,player.y],[t.x,t.y]];}
   else{pts=followField(fieldTo(cur,t.x,t.y),player.x,player.y);}
   if(!pts||pts.length<2){toast('You are already at '+t.n);return;}
   auto={pts,k:1,t};toast('Walking to '+t.n+' — press any arrow to stop');}
 window.__dbg.goTo=goTo;window.__dbg.auto=()=>auto;
+function arriveStair(t){const d=cur>GFI?-1:(cur<GFI?1:0);if(!d){toast('At '+t.n);return;}
+  if(t.review){toast('⚑ '+t.n+': '+(t.s&&t.s.reason||'opening not on an approved drawing')+' — use the ▼/▲ button only after HSE review');return;}
+  setTimeout(()=>changeFloor(d),250);}
 function freeNear(x,y){if(F[cur].gf)return [x,y];const o=occOf(cur);let i=Math.floor(x/CELL),j=Math.floor(y/CELL);for(let r=0;r<200;r++){for(let a=-r;a<=r;a++)for(const [k,l] of [[i+a,j-r],[i+a,j+r],[i-r,j+a],[i+r,j+a]]){if(k>=0&&l>=0&&k<NX&&l<NY&&!o[l*NX+k])return [(k+.5)*CELL,(l+.5)*CELL];}}return [x,y];}
 function routeFrom(x,y){const f=F[cur];
   if(f.gf){let best=D.gfExits[0],bd=1e9;for(const e of D.gfExits){const dd=Math.hypot(e.x-x,e.y-y)+Math.hypot(ASM.x-e.x,ASM.y-e.y);if(dd<bd){bd=dd;best=e;}}return [[x,y],[best.x,best.y],[ASM.x,ASM.y]];}
   const d=distOf(cur);let i=Math.floor(x/CELL),j=Math.floor(y/CELL);if(i<0||j<0||i>=NX||j>=NY)return null;
-  if(d[j*NX+i]<0){let fnd=null;for(let r=1;r<16&&!fnd;r++)for(let b=-r;b<=r&&!fnd;b++)for(let a=-r;a<=r&&!fnd;a++){const k=i+a,l=j+b;if(k>=0&&l>=0&&k<NX&&l<NY&&d[l*NX+k]>=0)fnd=[k,l];}if(!fnd)return null;[i,j]=fnd;}
+  if(d[j*NX+i]<0){let fnd=null;for(let r=1;r<16&&!fnd;r++)for(let b=-r;b<=r&&!fnd;b++)for(let a=-r;a<=r&&!fnd;a++){const k=i+a,l=j+b;if(k>=0&&l>=0&&k<NX&&l<NY&&d[l*NX+k]>=0)fnd=[k,l];}if(!fnd)return blockedRoute(x,y);[i,j]=fnd;}
   const pts=[[x,y]];let g=0;while(d[j*NX+i]>0&&g++<8000){let bi=i,bj=j,bd=d[j*NX+i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=i+a,l=j+b;if(k>=0&&l>=0&&k<NX&&l<NY){const v=d[l*NX+k];if(v>=0&&v<bd){bd=v;bi=k;bj=l;}}}if(bi===i&&bj===j)break;i=bi;j=bj;pts.push([(i+.5)*CELL,(j+.5)*CELL]);}
   return pts.filter((p,k)=>k%5===0||k===pts.length-1);}
+// no approved route: walk straight towards the nearest approved stair and stop at the first wall/slab edge — never cut a new opening
+function blockedRoute(x,y){const f=F[cur];let best=null,bd=1e9;for(const s of f.stairs){if(s.review)continue;const dd=Math.hypot(s.x-x,s.y-y);if(dd<bd){bd=dd;best=s;}}if(!best)return null;
+  const o=occOf(cur);const n=Math.ceil(bd/0.2);let lx=x,ly=y;for(let k=1;k<=n;k++){const px=x+(best.x-x)*k/n,py=y+(best.y-y)*k/n;const i=Math.floor(px/CELL),j=Math.floor(py/CELL);if(i<0||j<0||i>=NX||j>=NY||o[j*NX+i])break;lx=px;ly=py;}
+  const pts=[[x,y],[lx,ly]];pts.flag={x:lx,y:ly,to:best.id||'stair',reason:'Wall or slab blocks the route to '+(best.id||'the stair')+' and the drawings show no approved opening here — HSE review'};return pts;}
+// openings in walls along the route: narrow gaps between concrete that the route passes through
+function doorwaysOn(pts){if(!pts||F[cur].gf)return [];const o=occOf(cur);const isB=(x,y)=>{const i=Math.floor(x/CELL),j=Math.floor(y/CELL);return i<0||j<0||i>=NX||j>=NY||o[j*NX+i]===1;};
+  const out=[];let run=null;
+  const clear=(x,y,nx,ny)=>{let a=0,b=0;for(;a<2.6;a+=0.125)if(isB(x+nx*a,y+ny*a))break;for(;b<2.6;b+=0.125)if(isB(x-nx*b,y-ny*b))break;return [a,b];};
+  for(let k=1;k<pts.length;k++){const [ax,ay]=pts[k-1],[bx,by]=pts[k];const L=Math.hypot(bx-ax,by-ay);if(L<0.01)continue;const ux=(bx-ax)/L,uy=(by-ay)/L,nx=-uy,ny=ux;
+    for(let t=0;t<L;t+=0.25){const x=ax+ux*t,y=ay+uy*t;const [a,b]=clear(x,y,nx,ny);const narrow=a<1.6&&b<1.6&&a+b<2.6;
+      if(narrow){if(!run)run={pts:[],w:[],ux,uy,nx,ny};run.pts.push([x,y]);run.w.push([a,b]);}
+      else if(run){if(run.pts.length>=2&&run.pts.length<=24)out.push(run);run=null;}}}
+  if(run&&run.pts.length>=2&&run.pts.length<=24)out.push(run);
+  return out.map(r=>{const m=Math.floor(r.pts.length/2);const [x,y]=r.pts[m];const [a,b]=r.w[m];return {x:x+r.nx*(a-b)/2,y:y+r.ny*(a-b)/2,w:a+b,ux:r.ux,uy:r.uy};}).filter(d=>d.w>=0.7);}
 // ---------- state ----------
 let cur=GFI,mode='orbit';const EYE=1.6;const player=window.__dbg.player={x:W/2,y:H/2,yaw:0};let pitch=0;
 const orbit=new OrbitControls(camera,renderer.domElement);orbit.enableDamping=true;orbit.maxPolarAngle=Math.PI/2.02;
 const routeLine=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0x19c37d}));routeLine.frustumCulled=false;scene.add(routeLine);
 const routeTube=new THREE.Group();scene.add(routeTube);
-let routePts=null;
+let routePts=null,routeDoors=[];
 function updateRoute(){routePts=(mode==='walk')?routeFrom(player.x,player.y):null;routeTube.clear();
   if(!routePts||!document.getElementById('ly-guide').checked){routeLine.visible=false;return;}
   const y0=F[cur].ffl+0.08;const arr=new Float32Array(routePts.length*3);routePts.forEach(([x,y],k)=>{arr[k*3]=x;arr[k*3+1]=y0;arr[k*3+2]=toZ(y);});
   routeLine.geometry.dispose();routeLine.geometry=new THREE.BufferGeometry();routeLine.geometry.setAttribute('position',new THREE.BufferAttribute(arr,3));routeLine.visible=true;
   // flat green ribbon (visible on phones where lines are 1px)
   const m=new THREE.MeshBasicMaterial({color:0x19c37d,transparent:true,opacity:.85});
-  for(let k=1;k<routePts.length;k++){const [ax,ay]=routePts[k-1],[bx,by]=routePts[k];const L=Math.hypot(bx-ax,by-ay);if(L<0.01)continue;const b=new THREE.Mesh(new THREE.PlaneGeometry(L,0.45),m);b.rotation.x=-Math.PI/2;b.rotation.z=Math.atan2(by-ay,bx-ax);b.position.set((ax+bx)/2,y0,toZ((ay+by)/2));routeTube.add(b);}}
+  for(let k=1;k<routePts.length;k++){const [ax,ay]=routePts[k-1],[bx,by]=routePts[k];const L=Math.hypot(bx-ax,by-ay);if(L<0.01)continue;const b=new THREE.Mesh(new THREE.PlaneGeometry(L,0.45),m);b.rotation.x=-Math.PI/2;b.rotation.z=Math.atan2(by-ay,bx-ax);b.position.set((ax+bx)/2,y0,toZ((ay+by)/2));routeTube.add(b);}
+  routeDoors=doorwaysOn(routePts);const fy0=F[cur].ffl;
+  for(const dw of routeDoors){const fr=new THREE.Group();const hw=Math.max(0.45,dw.w/2),ht=2.3;
+    for(const sgn of [-1,1]){const post=new THREE.Mesh(new THREE.BoxGeometry(0.12,ht,0.12),doorMat);post.position.set(sgn*hw,ht/2,0);fr.add(post);}
+    const lint=new THREE.Mesh(new THREE.BoxGeometry(hw*2+0.12,0.12,0.12),doorMat);lint.position.set(0,ht,0);fr.add(lint);
+    fr.position.set(dw.x,fy0,toZ(dw.y));fr.rotation.y=Math.atan2(dw.uy,dw.ux)+Math.PI/2;routeTube.add(fr);
+    routeTube.add(mkLabel('DOORWAY '+dw.w.toFixed(1)+' m','door',dw.x,fy0+2.6,toZ(dw.y)));}
+  if(routePts.flag){const fl=routePts.flag;const pole=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,2.4,8),new THREE.MeshBasicMaterial({color:0xe5484d}));pole.position.set(fl.x,fy0+1.2,toZ(fl.y));routeTube.add(pole);
+    routeTube.add(mkLabel('⚑ HSE REVIEW — no approved opening','flag',fl.x,fy0+2.7,toZ(fl.y)));
+    document.getElementById('fDir').textContent='⚑ '+fl.reason;}}
 function dirText(i){const f=F[i];if(f.gf)return 'Follow the green line out of the building to the ASSEMBLY POINT.';return i>GFI?'Go to the nearest stair and walk DOWN to the ground floor. Never use the lifts.':'Go to the nearest stair (or the ramp) and walk UP to the ground floor. Never use the lifts.';}
 function applyFloor(){const f=F[cur];
   FG.forEach((fg,i)=>{const show=mode==='walk'?(i===cur):(i<=cur||document.getElementById('ly-above').checked);fg.g.visible=show;
@@ -197,6 +253,7 @@ function applyFloor(){const f=F[cur];
   document.getElementById('fLvl').textContent='FFL '+(f.ffl>=0?'+':'')+f.ffl.toFixed(2)+' m';
   document.getElementById('fDir').textContent=dirText(cur);
   document.getElementById('fSrc').textContent='Drawing: '+f.src;
+  const ops=f.openings||[];document.getElementById('fOps').innerHTML=(f.k.startsWith('L')?'<b>Slab openings</b>':'')+ops.map(o=>`<div class="${o.status==='approved'?'':'warn'}">${o.status==='approved'?'✓':'⚠'} ${o.label}<br><span style="color:var(--muted)">${o.src}</span></div>`).join('')+(f.k.startsWith('L')&&!ops.length?`<div style="color:var(--muted)">${f.openingsSrc||''}</div>`:'')+f.stairs.filter(s=>s.review).map(s=>`<div class="warn">⚠ ${s.id}: ${s.reason}</div>`).join('');
   try{history.replaceState(null,'','#'+f.k);}catch(e){}
   updateRoute();}
 function setMode(m){mode=m;document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));orbit.enabled=m!=='walk';
@@ -211,17 +268,19 @@ function startOn(i){cur=i;const f=F[i];
   let cx=W/2,cy=H/2;if(f.foot&&f.foot.length){let a=0,sx=0,sy=0;for(const fp of f.foot)for(const [x,y] of fp.o){sx+=x;sy+=y;a++;}cx=sx/a;cy=sy/a;}
   if(f.gf){cx=60;cy=60;}
   walkTo(cx,cy,0);toast(f.name+' — follow the green line');}
-window.__dbg.startOn=startOn;window.__dbg.routeFrom=(x,y)=>routeFrom(x,y);window.__dbg.cur=()=>cur;window.__dbg.setMode=setMode;window.__dbg.walkTo=walkTo;
+window.__dbg.reach=(i)=>{const o=occOf(i),d=distOf(i);let free=0,reach=0;for(let k=0;k<o.length;k++){if(!o[k]){free++;if(d[k]>=0)reach++;}}return [free,reach];};window.__dbg.startOn=startOn;window.__dbg.routeFrom=(x,y)=>routeFrom(x,y);window.__dbg.cur=()=>cur;window.__dbg.setMode=setMode;window.__dbg.walkTo=walkTo;
 // ---------- stairs / ramp ----------
 const nearStair=()=>{const f=F[cur];let best=null,bd=f.gf?6:11;for(const s of f.stairs){const d=Math.hypot(s.x-player.x,s.y-player.y);if(d<bd){bd=d;best=s;}}
+  if(best&&best.review)return bd<4.5?best:null;
   if(best&&!f.gf&&bd>4.5){const d=distOf(cur);const i=Math.floor(player.x/CELL),j=Math.floor(player.y/CELL);const v=(i>=0&&j>=0&&i<NX&&j<NY)?d[j*NX+i]:-1;if(v<0||v>12)return null;}
   return best;};
 let anim=null;
 function changeFloor(d){const t=cur+d;if(t<0||t>=N||anim)return;const s=nearStair();if(!s)return;
-  let tgt=null,bd=15;for(const q of F[t].stairs){const dd=Math.hypot(q.x-s.x,q.y-s.y);if(dd<bd){bd=dd;tgt=q;}}
-  if(!tgt&&!F[t].gf){toast('This stair does not continue to '+F[t].name+' — use another stair');return;}
-  anim={t0:performance.now(),from:F[cur].ffl+EYE,to:F[t].ffl+EYE,f:t,tgt:tgt||s,sw:false};
-  toast((d<0?'Down to ':'Up to ')+F[t].name+(F[t].gf?' — now go out to the Assembly Point':''));}
+  let tgt=null,bd=15;for(const q of F[t].stairs){if(!!q.review!==!!s.review&&!F[t].gf)continue;const dd=Math.hypot(q.x-s.x,q.y-s.y)-(q.id&&q.id===s.id?5:0);if(dd<bd){bd=dd;tgt=q;}}
+  if(s.review&&d<0&&t>=0&&!(F[t].stairs.some(q=>q.review))&&!F[cur].openings.some(o=>Math.hypot(o.poly[0][0]-s.x,o.poly[0][1]-s.y)<4)){toast('⚑ '+s.id+' — no approved slab opening continues to '+F[t].name+' — HSE review');return;}
+  if(!tgt&&!F[t].gf){toast('⚑ '+(s.id||'This stair')+' does not continue to '+F[t].name+' on the drawings — HSE review; use another stair');return;}
+  anim={t0:performance.now(),from:F[cur].ffl+EYE,to:F[t].ffl+EYE,f:t,tgt:tgt||s,sw:false,sid:(tgt&&tgt.id)||s.id};
+  toast((s.review?'⚠ '+s.id+' (HSE review) — ':'')+(d<0?'Down to ':'Up to ')+F[t].name+(F[t].gf?' — now go out to the Assembly Point':''));}
 window.__dbg.changeFloor=changeFloor;
 document.getElementById('goUp').addEventListener('click',()=>changeFloor(1));document.getElementById('goDown').addEventListener('click',()=>changeFloor(-1));
 function toast(m){const el=document.getElementById('toast');el.textContent=m;el.style.opacity=1;clearTimeout(el._t);el._t=setTimeout(()=>el.style.opacity=0,2600);}
@@ -250,9 +309,12 @@ const mc=document.getElementById('mapc'),mx=mc.getContext('2d');const ms=Math.mi
 function drawMap(){const f=F[cur];mx.fillStyle='#e9edf1';mx.fillRect(0,0,mc.width,mc.height);
   const P=pp=>{mx.beginPath();pp.forEach(([x,y],k)=>k?mx.lineTo(x*ms,(H-y)*ms):mx.moveTo(x*ms,(H-y)*ms));mx.closePath();};
   mx.fillStyle='#fff';for(const fp of (f.foot||[])){P(fp.o);mx.fill();}
-  mx.fillStyle='#6b7480';for(const p of polysOf(f)){P(p.o);mx.fill();}
+  mx.fillStyle='#6b7480';for(const p of polysOf(f)){mx.beginPath();for(const r of [p.o,...(p.h||[])]){r.forEach(([x,y],k)=>k?mx.lineTo(x*ms,(H-y)*ms):mx.moveTo(x*ms,(H-y)*ms));mx.closePath();}mx.fill('evenodd');}
   if(routePts){mx.strokeStyle='#19c37d';mx.lineWidth=3;mx.beginPath();routePts.forEach(([x,y],k)=>k?mx.lineTo(x*ms,(H-y)*ms):mx.moveTo(x*ms,(H-y)*ms));mx.stroke();}
-  mx.fillStyle='#19c37d';for(const s of f.stairs){mx.beginPath();mx.arc(s.x*ms,(H-s.y)*ms,5,0,7);mx.fill();}
+  for(const s of f.stairs){mx.fillStyle=s.review?'#f5b50a':'#19c37d';mx.beginPath();mx.arc(s.x*ms,(H-s.y)*ms,5,0,7);mx.fill();}
+  mx.strokeStyle='#e5484d';mx.lineWidth=1.5;for(const o of (f.openings||[])){P(o.poly);mx.stroke();mx.beginPath();mx.moveTo(o.poly[0][0]*ms,(H-o.poly[0][1])*ms);mx.lineTo(o.poly[2][0]*ms,(H-o.poly[2][1])*ms);mx.stroke();}
+  for(const dw of routeDoors){mx.fillStyle='#0a7a4c';mx.fillRect(dw.x*ms-3,(H-dw.y)*ms-3,6,6);}
+  if(routePts&&routePts.flag){mx.fillStyle='#e5484d';mx.beginPath();mx.arc(routePts.flag.x*ms,(H-routePts.flag.y)*ms,6,0,7);mx.fill();}
   if(mode==='walk'){mx.save();mx.translate(player.x*ms,(H-player.y)*ms);mx.rotate(-player.yaw);mx.fillStyle='#e5484d';mx.beginPath();mx.moveTo(0,-8);mx.lineTo(6,6);mx.lineTo(-6,6);mx.closePath();mx.fill();mx.restore();}
   const togo=routePts?Math.round(routePts.reduce((a,p,k)=>k?a+Math.hypot(p[0]-routePts[k-1][0],p[1]-routePts[k-1][1]):0,0)):null;
   document.getElementById('pos').textContent=f.name+(mode==='walk'&&togo!==null?' · '+togo+' m to '+(f.gf?'Assembly Point':'stair'):'');}
@@ -267,7 +329,7 @@ function step(dt){
   if(auto){const sp2=(run?6:3.6)*dt;let rem=sp2;while(rem>0&&auto&&auto.k<auto.pts.length){const [tx2,ty2]=auto.pts[auto.k];const dx=tx2-player.x,dy=ty2-player.y,dd=Math.hypot(dx,dy);
       if(dd>0.05){const want=Math.atan2(-dx,dy);let dyaw=want-player.yaw;while(dyaw>Math.PI)dyaw-=2*Math.PI;while(dyaw<-Math.PI)dyaw+=2*Math.PI;player.yaw+=dyaw*Math.min(1,dt*6);}
       if(dd<=rem){player.x=tx2;player.y=ty2;rem-=dd;auto.k++;}else{player.x+=dx/dd*rem;player.y+=dy/dd*rem;rem=0;}}
-    if(auto&&auto.k>=auto.pts.length){const t=auto.t;auto=null;toast(t.kind==='asm'?'✔ You reached the ASSEMBLY POINT — stay with your supervisor for the roll call':t.kind==='stair'?('At '+t.n+' — press '+(cur>GFI?'▼ Down':'▲ Up')):'You reached '+t.n);}}
+    if(auto&&auto.k>=auto.pts.length){const t=auto.t;auto=null;if(t.kind==='stair'){arriveStair(t);}else toast(t.kind==='asm'?'✔ You reached the ASSEMBLY POINT — stay with your supervisor for the roll call':'You reached '+t.n);}}
   const fx=-Math.sin(player.yaw),fy=Math.cos(player.yaw),rx=Math.cos(player.yaw),ry=Math.sin(player.yaw);
   const f=F[cur];const wasRamp=f.ramp&&player.x>RAMP.x0&&player.x<RAMP.x1&&player.y>RAMP.y0&&player.y<RAMP.y1;
   const nx=player.x+(fx*fw+rx*sd)*sp,ny=player.y+(fy*fw+ry*sd)*sp;
@@ -277,11 +339,11 @@ function step(dt){
     if(wasRamp&&onX&&player.y>=RAMP.y1){cur++;applyFloor();toast('Up the ramp to '+F[cur].name);}
     else if(onX&&player.y>RAMP.y0&&player.y<RAMP.y1){eye=f.ffl+(player.y-RAMP.y0)/(RAMP.y1-RAMP.y0)*f.h+EYE;}}
   const s=nearStair();const su=document.getElementById('stairui');
-  if(s&&!anim){su.style.display='flex';document.getElementById('stairName').textContent=s.n;const up=document.getElementById('goUp'),dn=document.getElementById('goDown');
+  if(s&&!anim){su.style.display='flex';document.getElementById('stairName').textContent=(s.id?s.id+' — ':'')+(s.review?'⚠ HSE review: opening not on an approved drawing':s.n);const up=document.getElementById('goUp'),dn=document.getElementById('goDown');
     up.disabled=cur>=N-1;dn.disabled=cur<=0;up.classList.toggle('rec',cur<GFI);dn.classList.toggle('rec',cur>GFI);
-    up.textContent=cur+1===GFI?'▲ Up to Ground floor':'▲ Up';dn.textContent=cur-1===GFI?'▼ Down to Ground floor':'▼ Down';}else su.style.display='none';
+    up.textContent=(cur+1===GFI?'▲ Up to Ground floor':'▲ Up to '+(F[cur+1]?F[cur+1].k:''));dn.textContent=(cur-1===GFI?'▼ Down to Ground floor':'▼ Down to '+(F[cur-1]?F[cur-1].k:''));if(s.review){up.classList.remove('rec');dn.classList.remove('rec');}}else su.style.display='none';
   if(anim){const t=Math.min(1,(performance.now()-anim.t0)/1200),k=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;eye=anim.from+(anim.to-anim.from)*k;
-    if(t>=.5&&!anim.sw){anim.sw=true;cur=anim.f;const p=F[cur].gf?[anim.tgt.x,anim.tgt.y]:(()=>{const q=freeNear(anim.tgt.x,anim.tgt.y);return q;})();player.x=p[0];player.y=p[1];applyFloor();}
+    if(t>=.5&&!anim.sw){anim.sw=true;cur=anim.f;const p=F[cur].gf?[anim.tgt.x,anim.tgt.y]:(()=>{const q=freeNear(anim.tgt.x,anim.tgt.y);return q;})();player.x=p[0];player.y=p[1];applyFloor();toast('Landing — '+(anim.sid||'stair')+' at '+F[cur].name+(F[cur].gf?' — follow the line out to the Assembly Point':' — follow the green line'));}
     if(t>=1)anim=null;}
   rt+=dt;if(rt>0.35){rt=0;updateRoute();}
   if(F[cur].gf&&Math.hypot(player.x-ASM.x,player.y-ASM.y)<6&&!arrived){arrived=true;toast('✔ You reached the ASSEMBLY POINT — stay with your supervisor for the roll call');}
