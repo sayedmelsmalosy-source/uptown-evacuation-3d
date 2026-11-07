@@ -18,6 +18,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Fetch the Uptown BIM viewer package (uptown-bim.zip from Google Drive, if configured)
+        run: |
+          if [ -f uptown-bim.src ]; then
+            ID=$(tr -d ' \n' < uptown-bim.src)
+            pip install -q gdown
+            gdown --id "$ID" -O uptown-bim.zip
+            rm -rf uptown-bim && mkdir -p uptown-bim && unzip -q -o uptown-bim.zip -d uptown-bim-tmp
+            if [ -d uptown-bim-tmp/uptown-bim ]; then mv uptown-bim-tmp/uptown-bim/* uptown-bim/; else mv uptown-bim-tmp/* uptown-bim/; fi
+            rm -rf uptown-bim-tmp uptown-bim.zip
+            ls uptown-bim | head
+          fi
       - uses: actions/configure-pages@v5
         with:
           enablement: true
