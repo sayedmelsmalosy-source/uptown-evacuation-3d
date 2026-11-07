@@ -23,8 +23,8 @@ jobs:
           if [ -f uptown-bim.src ]; then
             ID=$(tr -d ' \n' < uptown-bim.src)
             pip install -q gdown
-            gdown --id "$ID" -O uptown-bim.zip
-            rm -rf uptown-bim && mkdir -p uptown-bim && unzip -q -o uptown-bim.zip -d uptown-bim-tmp
+            gdown "https://drive.google.com/uc?id=$ID" -O uptown-bim.zip
+            rm -rf uptown-bim uptown-bim-tmp && mkdir -p uptown-bim && unzip -q -o uptown-bim.zip -d uptown-bim-tmp
             if [ -d uptown-bim-tmp/uptown-bim ]; then mv uptown-bim-tmp/uptown-bim/* uptown-bim/; else mv uptown-bim-tmp/* uptown-bim/; fi
             rm -rf uptown-bim-tmp uptown-bim.zip
             ls uptown-bim | head
