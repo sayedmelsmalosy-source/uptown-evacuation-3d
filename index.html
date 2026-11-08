@@ -77,7 +77,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {CSS2DRenderer,CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
-const D=await (await fetch('data/building.json?v=20261109c',{cache:'no-store'})).json();
+const D=await (await fetch('data/building.json?v=20261109e',{cache:'no-store'})).json();
 const W=D.W,H=D.H,F=D.floors,N=F.length,GFI=F.findIndex(f=>f.gf),RAMP=D.ramp,ASM=D.assembly;
 const LITE=new URLSearchParams(location.search).has('lite');
 window.__dbg={};
@@ -184,11 +184,20 @@ function followField(d,x,y){let i=Math.floor(x/CELL),j=Math.floor(y/CELL);if(i<0
   if(d[j*NX+i]<0){let fnd=null;for(let r=1;r<16&&!fnd;r++)for(let b=-r;b<=r&&!fnd;b++)for(let a=-r;a<=r&&!fnd;a++){const k=i+a,l=j+b;if(k>=0&&l>=0&&k<NX&&l<NY&&d[l*NX+k]>=0)fnd=[k,l];}if(!fnd)return null;[i,j]=fnd;}
   const pts=[[x,y]];let g=0;while(d[j*NX+i]>0&&g++<8000){let bi=i,bj=j,bd=d[j*NX+i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const k=i+a,l=j+b;if(k>=0&&l>=0&&k<NX&&l<NY){const v=d[l*NX+k];if(v>=0&&v<bd){bd=v;bi=k;bj=l;}}}if(bi===i&&bj===j)break;i=bi;j=bj;pts.push([(i+.5)*CELL,(j+.5)*CELL]);}
   return pts.filter((p,k)=>k%3===0||k===pts.length-1);}
+// path along the marked ground-floor green route between any two points (the network is a tree rooted at the assembly point)
+function netPath(x,y,tx,ty){const G=D.gfNet;if(!G)return [[x,y],[tx,ty]];
+  const near=(px,py)=>{let k=-1,b=1e9;for(let i=0;i<G.pts.length;i++){const dd=Math.hypot(G.pts[i][0]-px,G.pts[i][1]-py);if(dd<b){b=dd;k=i;}}return [k,b];};
+  const [a,da]=near(x,y),[b,db]=near(tx,ty);if(a<0||b<0||da+db>Math.hypot(tx-x,ty-y)*1.2+40)return [[x,y],[tx,ty]];
+  const up=k=>{const L=[];let g=0;while(k>=0&&g++<5000){L.push(k);k=G.nxt[k];}return L;};
+  const A=up(a),Bp=up(b),inB=new Map(Bp.map((k,i)=>[k,i]));let ia=A.findIndex(k=>inB.has(k));if(ia<0)ia=A.length-1;
+  const lca=A[ia],ib=inB.has(lca)?inB.get(lca):Bp.length-1;
+  const chain=[...A.slice(0,ia+1),...Bp.slice(0,ib).reverse()].map(k=>G.pts[k]);
+  const pts=[[x,y],...chain.filter((p,i)=>i%3===0||i===chain.length-1),[tx,ty]];return pts;}
 let auto=null;
 function goTo(t){if(t.kind==='info'){toast(((t.o.status==='approved'||t.o.status==='access')?'✓ ':'⚠ ')+t.o.label+' — '+t.o.src);return;}
   if(mode!=='walk')startOn(cur);const f=F[cur];let pts;
   if(t.kind==='stair'&&Math.hypot(t.x-player.x,t.y-player.y)<4.5){arriveStair(t);return;}
-  if(f.gf){pts=t.kind==='asm'?routeFrom(player.x,player.y):[[player.x,player.y],[t.x,t.y]];}
+  if(f.gf){pts=t.kind==='asm'?routeFrom(player.x,player.y):netPath(player.x,player.y,t.x,t.y);}
   else{pts=followField(fieldTo(cur,t.x,t.y),player.x,player.y);}
   if(!pts||pts.length<2){toast('You are already at '+t.n);return;}
   auto={pts,k:1,t};toast('Walking to '+t.n+' — press any arrow to stop');}
@@ -225,7 +234,7 @@ const orbit=new OrbitControls(camera,renderer.domElement);orbit.enableDamping=tr
 const routeLine=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0x19c37d}));routeLine.frustumCulled=false;scene.add(routeLine);
 const routeTube=new THREE.Group();scene.add(routeTube);
 let routePts=null,routeDoors=[];
-function updateRoute(){routePts=(mode==='walk')?routeFrom(player.x,player.y):null;routeTube.clear();
+function updateRoute(){routePts=(mode==='walk')?(auto&&auto.pts?[[player.x,player.y],...auto.pts.slice(auto.k)]:routeFrom(player.x,player.y)):null;routeTube.clear();
   if(!routePts||!document.getElementById('ly-guide').checked){routeLine.visible=false;return;}
   const y0=F[cur].ffl+0.08;const arr=new Float32Array(routePts.length*3);routePts.forEach(([x,y],k)=>{arr[k*3]=x;arr[k*3+1]=y0;arr[k*3+2]=toZ(y);});
   routeLine.geometry.dispose();routeLine.geometry=new THREE.BufferGeometry();routeLine.geometry.setAttribute('position',new THREE.BufferAttribute(arr,3));routeLine.visible=true;
@@ -271,8 +280,15 @@ function setMode(m){mode=m;document.querySelectorAll('#mode button').forEach(b=>
 function walkTo(x,y,yaw){const p=freeNear(x,y);player.x=p[0];player.y=p[1];if(yaw!==undefined)player.yaw=yaw;setMode('walk');}
 function startOn(i){cur=i;const f=F[i];
   let cx=W/2,cy=H/2;if(f.foot&&f.foot.length){let a=0,sx=0,sy=0;for(const fp of f.foot)for(const [x,y] of fp.o){sx+=x;sy+=y;a++;}cx=sx/a;cy=sy/a;}
-  if(f.gf){cx=60;cy=60;}
-  walkTo(cx,cy,0);toast(f.name+' — follow the green line');}
+  if(f.gf){cx=60;cy=60;walkTo(cx,cy,0);}
+  else{ // start in an open, reachable spot (not inside a core or against a wall) and face along the green line
+    const o=occOf(i),d=distOf(i),i0=Math.floor(cx/CELL),j0=Math.floor(cy/CELL),R=5;let sp=null;
+    const clear=(k,l)=>{for(let b=-R;b<=R;b++)for(let a=-R;a<=R;a++){if(a*a+b*b>R*R)continue;const kk=k+a,ll=l+b;if(kk<0||ll<0||kk>=NX||ll>=NY||o[ll*NX+kk])return false;}return true;};
+    for(let r=0;r<400&&!sp;r++)for(let a=-r;a<=r&&!sp;a++)for(const [k,l] of [[i0+a,j0-r],[i0+a,j0+r],[i0-r,j0+a],[i0+r,j0+a]]){if(k<0||l<0||k>=NX||l>=NY)continue;const v=d[l*NX+k];if(v>=4&&clear(k,l)){sp=[(k+.5)*CELL,(l+.5)*CELL];break;}}
+    if(!sp)sp=freeNear(cx,cy);
+    let yaw=0;const rt=routeFrom(sp[0],sp[1]);if(rt&&rt.length>1){const q=rt[Math.min(2,rt.length-1)];yaw=Math.atan2(-(q[0]-sp[0]),q[1]-sp[1]);}
+    walkTo(sp[0],sp[1],yaw);}
+  toast(f.name+' — follow the green line');}
 window.__dbg.reach=(i)=>{const o=occOf(i),d=distOf(i);let free=0,reach=0;for(let k=0;k<o.length;k++){if(!o[k]){free++;if(d[k]>=0)reach++;}}return [free,reach];};window.__dbg.startOn=startOn;window.__dbg.routeFrom=(x,y)=>routeFrom(x,y);window.__dbg.cur=()=>cur;window.__dbg.setMode=setMode;window.__dbg.walkTo=walkTo;
 // ---------- stairs / ramp ----------
 const nearStair=()=>{const f=F[cur];let best=null,bd=f.gf?6:11;for(const s of f.stairs){if(s.landOnly)continue;const d=Math.hypot(s.x-player.x,s.y-player.y);if(d<bd){bd=d;best=s;}}
