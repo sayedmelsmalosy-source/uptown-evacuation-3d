@@ -121,9 +121,11 @@ const FG=F.map((f,i)=>{
   const st=new THREE.Group();g.add(st);
   const dst=destOf(i);
   for(const s of f.stairs){
-    if(s.review){ // scaffold stair: flight from this slab down through the opening (if any) to the level below
+    if(s.landOnly){const ld=new THREE.BoxGeometry(2.0,0.12,1.5);ld.translate(s.x,0.06,toZ(s.y));st.add(new THREE.Mesh(ld,landMat));continue;}
+    if(s.review||s.temp){ // temporary stair: flight from this slab down through the opening to the level below
       const prevH=i>0?F[i-1].h:3.5,n=12,rise=prevH/n,run=Math.min(0.17,1.9/n);
       for(let k=0;k<n;k++){const b=new THREE.BoxGeometry(0.9,0.06,0.3);b.translate(s.x,-k*rise,toZ(s.y-0.75+k*run*1.0));st.add(new THREE.Mesh(b,scafMat));}
+      if(s.temp&&!s.review&&dst!==null){const ld=new THREE.BoxGeometry(2.0,0.12,1.2);ld.translate(s.x,0.06,toZ(s.y-1.9));st.add(new THREE.Mesh(ld,landMat));st.add(new THREE.ArrowHelper(new THREE.Vector3(0,-1,0),new THREE.Vector3(s.x,2.6,toZ(s.y)),2.0,0x19c37d,0.7,0.5));}
       continue;}
     const n=8,run=0.28,rise=f.h/2/n;for(let fl=0;fl<2;fl++)for(let k=0;k<n;k++){const b=new THREE.BoxGeometry(1.1,rise,run);const yy=fl===0?s.y-1.2+k*run:s.y+1.2-k*run;b.translate(s.x+(fl===0?-0.65:0.65),fl===0?(k+.5)*rise:f.h/2+(k+.5)*rise,toZ(yy));st.add(new THREE.Mesh(b,stairMat));}
     // landing + arrow showing the direction of travel (down above GF, up below GF)
@@ -139,10 +141,11 @@ const FG=F.map((f,i)=>{
   // labels
   const lb=new THREE.Group();g.add(lb);
   for(const s of f.stairs){const id=s.id||'STAIR';
+    if(s.landOnly){lb.add(mkLabel(id+' landing (from L01)','stair',s.x,2.2,toZ(s.y)));continue;}
     if(s.review){lb.add(mkLabel(id+' ⚠ HSE review','review',s.x,2.4,toZ(s.y),{x:s.x,y:s.y-1.6,n:id,kind:'stair',review:true,s}));continue;}
     const txt=dst===null?id:(id+' '+(i>GFI?'▼ ':'▲ ')+F[dst].k);lb.add(mkLabel(txt,'stair',s.x,2.2,toZ(s.y),{x:s.x,y:s.y,n:id+(dst===null?'':' → '+F[dst].name),kind:'stair',s}));}
   for(const o of (f.openings||[])){const c=o.poly.reduce((a,p)=>[a[0]+p[0]/o.poly.length,a[1]+p[1]/o.poly.length],[0,0]);
-    lb.add(mkLabel(o.id+(o.status==='approved'?' ✓':' ⚠'),'open'+(o.status==='approved'?' ok':''),c[0],1.0,toZ(c[1]),{x:c[0],y:c[1],n:o.label,kind:'info',o}));}
+    lb.add(mkLabel(o.id+((o.status==='approved'||o.status==='access')?' ✓':' ⚠'),'open'+((o.status==='approved'||o.status==='access')?' ok':''),c[0],1.0,toZ(c[1]),{x:c[0],y:c[1],n:o.label,kind:'info',o}));}
   for(const l of (f.labels||[])){const t=l.t.toUpperCase();if(t.startsWith('LIFT'))lb.add(mkLabel('LIFT ✕','lift',l.x,1.8,toZ(l.y)));else if(t==='RAMP')lb.add(mkLabel('RAMP','ramp',l.x,1.8,toZ(l.y),f.ramp?{x:(RAMP.x0+RAMP.x1)/2,y:RAMP.y0+1,n:'the ramp',kind:'ramp'}:{x:l.x,y:l.y,n:'the ramp',kind:'ramp'}));}
   if(f.gf){lb.add(mkLabel('ASSEMBLY POINT','asm',ASM.x,6,toZ(ASM.y),{x:ASM.x,y:ASM.y,n:'the Assembly Point',kind:'asm'}));for(const e of D.gfExits)lb.add(mkLabel(e.n,'ramp',e.x,2,toZ(e.y),{x:e.x,y:e.y,n:e.n,kind:'exit'}));
     const pole=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,6,8),stairMat);pole.position.set(ASM.x,3,toZ(ASM.y));g.add(pole);
@@ -171,7 +174,7 @@ function occOf(i){if(OCC[i])return OCC[i];const f=F[i];const cv=document.createE
   return OCC[i]=o;}
 function blocked(x,y){const f=F[cur];if(f.gf||document.getElementById('ly-noclip').checked)return false;if(f.ramp&&x>RAMP.x0&&x<RAMP.x1&&y>RAMP.y0&&y<RAMP.y1)return false;const i=Math.floor(x/CELL),j=Math.floor(y/CELL);if(i<0||j<0||i>=NX||j>=NY)return true;return occOf(cur)[j*NX+i]===1;}
 function distOf(i){if(DIST[i])return DIST[i];const o=occOf(i),d=new Int32Array(NX*NY).fill(-1),q=new Int32Array(NX*NY);let h=0,t=0;
-  for(const s of F[i].stairs){if(s.review)continue;const ci=Math.floor(s.x/CELL),cj=Math.floor(s.y/CELL);for(const R of (F[i].gf?[4,7,10]:[1.25,2.0,4,7,10])){let added=0;const r=Math.ceil(R/CELL);for(let j=cj-r;j<=cj+r;j++)for(let k=ci-r;k<=ci+r;k++){if(k<0||j<0||k>=NX||j>=NY||o[j*NX+k]||Math.hypot(k-ci,j-cj)>r)continue;if(d[j*NX+k]<0){d[j*NX+k]=0;q[t++]=j*NX+k;}added++;}if(added)break;}}
+  for(const s of F[i].stairs){if(s.review||s.landOnly)continue;const ci=Math.floor(s.x/CELL),cj=Math.floor(s.y/CELL);for(const R of (F[i].gf?[4,7,10]:[1.25,2.0,4,7,10])){let added=0;const r=Math.ceil(R/CELL);for(let j=cj-r;j<=cj+r;j++)for(let k=ci-r;k<=ci+r;k++){if(k<0||j<0||k>=NX||j>=NY||o[j*NX+k]||Math.hypot(k-ci,j-cj)>r)continue;if(d[j*NX+k]<0){d[j*NX+k]=0;q[t++]=j*NX+k;}added++;}if(added)break;}}
   while(h<t){const c=q[h++],k=c%NX,j=(c-k)/NX,v=d[c]+1;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const kk=k+a,jj=j+b;if(kk<0||jj<0||kk>=NX||jj>=NY)continue;const n=jj*NX+kk;if(!o[n]&&d[n]<0){d[n]=v;q[t++]=n;}}}
   return DIST[i]=d;}
 function fieldTo(i,tx,ty){const o=occOf(i),d=new Int32Array(NX*NY).fill(-1),q=new Int32Array(NX*NY);let h=0,t=0;const ci=Math.floor(tx/CELL),cj=Math.floor(ty/CELL);
@@ -201,7 +204,7 @@ function routeFrom(x,y){const f=F[cur];
   const pts=[[x,y]];let g=0;while(d[j*NX+i]>0&&g++<8000){let bi=i,bj=j,bd=d[j*NX+i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=i+a,l=j+b;if(k>=0&&l>=0&&k<NX&&l<NY){const v=d[l*NX+k];if(v>=0&&v<bd){bd=v;bi=k;bj=l;}}}if(bi===i&&bj===j)break;i=bi;j=bj;pts.push([(i+.5)*CELL,(j+.5)*CELL]);}
   return pts.filter((p,k)=>k%5===0||k===pts.length-1);}
 // no approved route: walk straight towards the nearest approved stair and stop at the first wall/slab edge — never cut a new opening
-function blockedRoute(x,y){const f=F[cur];let best=null,bd=1e9;for(const s of f.stairs){if(s.review)continue;const dd=Math.hypot(s.x-x,s.y-y);if(dd<bd){bd=dd;best=s;}}if(!best)return null;
+function blockedRoute(x,y){const f=F[cur];let best=null,bd=1e9;for(const s of f.stairs){if(s.review||s.landOnly)continue;const dd=Math.hypot(s.x-x,s.y-y);if(dd<bd){bd=dd;best=s;}}if(!best)return null;
   const o=occOf(cur);const n=Math.ceil(bd/0.2);let lx=x,ly=y;for(let k=1;k<=n;k++){const px=x+(best.x-x)*k/n,py=y+(best.y-y)*k/n;const i=Math.floor(px/CELL),j=Math.floor(py/CELL);if(i<0||j<0||i>=NX||j>=NY||o[j*NX+i])break;lx=px;ly=py;}
   const pts=[[x,y],[lx,ly]];pts.flag={x:lx,y:ly,to:best.id||'stair',reason:'Wall or slab blocks the route to '+(best.id||'the stair')+' and the drawings show no approved opening here — HSE review'};return pts;}
 // openings in walls along the route: narrow gaps between concrete that the route passes through
@@ -253,7 +256,7 @@ function applyFloor(){const f=F[cur];
   document.getElementById('fLvl').textContent='FFL '+(f.ffl>=0?'+':'')+f.ffl.toFixed(2)+' m';
   document.getElementById('fDir').textContent=dirText(cur);
   document.getElementById('fSrc').textContent='Drawing: '+f.src;
-  const ops=f.openings||[];document.getElementById('fOps').innerHTML=(f.k.startsWith('L')?'<b>Slab openings</b>':'')+ops.map(o=>`<div class="${o.status==='approved'?'':'warn'}">${o.status==='approved'?'✓':'⚠'} ${o.label}<br><span style="color:var(--muted)">${o.src}</span></div>`).join('')+(f.k.startsWith('L')&&!ops.length?`<div style="color:var(--muted)">${f.openingsSrc||''}</div>`:'')+f.stairs.filter(s=>s.review).map(s=>`<div class="warn">⚠ ${s.id}: ${s.reason}</div>`).join('');
+  const ops=f.openings||[];document.getElementById('fOps').innerHTML=(f.k.startsWith('L')?'<b>Slab openings</b>':'')+ops.map(o=>`<div class="${(o.status==='approved'||o.status==='access')?'':'warn'}">${(o.status==='approved'||o.status==='access')?'✓':'⚠'} ${o.label}<br><span style="color:var(--muted)">${o.src}</span></div>`).join('')+(f.k.startsWith('L')&&!ops.length?`<div style="color:var(--muted)">${f.openingsSrc||''}</div>`:'')+f.stairs.filter(s=>s.review).map(s=>`<div class="warn">⚠ ${s.id}: ${s.reason}</div>`).join('');
   try{history.replaceState(null,'','#'+f.k);}catch(e){}
   updateRoute();}
 function setMode(m){mode=m;document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));orbit.enabled=m!=='walk';
@@ -270,8 +273,9 @@ function startOn(i){cur=i;const f=F[i];
   walkTo(cx,cy,0);toast(f.name+' — follow the green line');}
 window.__dbg.reach=(i)=>{const o=occOf(i),d=distOf(i);let free=0,reach=0;for(let k=0;k<o.length;k++){if(!o[k]){free++;if(d[k]>=0)reach++;}}return [free,reach];};window.__dbg.startOn=startOn;window.__dbg.routeFrom=(x,y)=>routeFrom(x,y);window.__dbg.cur=()=>cur;window.__dbg.setMode=setMode;window.__dbg.walkTo=walkTo;
 // ---------- stairs / ramp ----------
-const nearStair=()=>{const f=F[cur];let best=null,bd=f.gf?6:11;for(const s of f.stairs){const d=Math.hypot(s.x-player.x,s.y-player.y);if(d<bd){bd=d;best=s;}}
+const nearStair=()=>{const f=F[cur];let best=null,bd=f.gf?6:11;for(const s of f.stairs){if(s.landOnly)continue;const d=Math.hypot(s.x-player.x,s.y-player.y);if(d<bd){bd=d;best=s;}}
   if(best&&best.review)return bd<4.5?best:null;
+  if(best&&best.temp)return bd<6?best:null;
   if(best&&!f.gf&&bd>4.5){const d=distOf(cur);const i=Math.floor(player.x/CELL),j=Math.floor(player.y/CELL);const v=(i>=0&&j>=0&&i<NX&&j<NY)?d[j*NX+i]:-1;if(v<0||v>12)return null;}
   return best;};
 let anim=null;
@@ -311,7 +315,7 @@ function drawMap(){const f=F[cur];mx.fillStyle='#e9edf1';mx.fillRect(0,0,mc.widt
   mx.fillStyle='#fff';for(const fp of (f.foot||[])){P(fp.o);mx.fill();}
   mx.fillStyle='#6b7480';for(const p of polysOf(f)){mx.beginPath();for(const r of [p.o,...(p.h||[])]){r.forEach(([x,y],k)=>k?mx.lineTo(x*ms,(H-y)*ms):mx.moveTo(x*ms,(H-y)*ms));mx.closePath();}mx.fill('evenodd');}
   if(routePts){mx.strokeStyle='#19c37d';mx.lineWidth=3;mx.beginPath();routePts.forEach(([x,y],k)=>k?mx.lineTo(x*ms,(H-y)*ms):mx.moveTo(x*ms,(H-y)*ms));mx.stroke();}
-  for(const s of f.stairs){mx.fillStyle=s.review?'#f5b50a':'#19c37d';mx.beginPath();mx.arc(s.x*ms,(H-s.y)*ms,5,0,7);mx.fill();}
+  for(const s of f.stairs){mx.fillStyle=s.review?'#f5b50a':s.temp?'#19c37d':'#19c37d';mx.beginPath();mx.arc(s.x*ms,(H-s.y)*ms,5,0,7);mx.fill();}
   mx.strokeStyle='#e5484d';mx.lineWidth=1.5;for(const o of (f.openings||[])){P(o.poly);mx.stroke();mx.beginPath();mx.moveTo(o.poly[0][0]*ms,(H-o.poly[0][1])*ms);mx.lineTo(o.poly[2][0]*ms,(H-o.poly[2][1])*ms);mx.stroke();}
   for(const dw of routeDoors){mx.fillStyle='#0a7a4c';mx.fillRect(dw.x*ms-3,(H-dw.y)*ms-3,6,6);}
   if(routePts&&routePts.flag){mx.fillStyle='#e5484d';mx.beginPath();mx.arc(routePts.flag.x*ms,(H-routePts.flag.y)*ms,6,0,7);mx.fill();}
