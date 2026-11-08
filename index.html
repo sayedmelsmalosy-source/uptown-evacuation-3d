@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Uptown T3 & T4 — Evacuation 3D</title>
 <style>
 :root{--bg:#0a111b;--panel:rgba(16,26,39,.93);--line:#2a3a4f;--fg:#edf2f8;--muted:#95a6ba;--safe:#19c37d;--amber:#f5b50a;--info:#4aa3ff;--fire:#e5484d}
@@ -77,7 +77,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {CSS2DRenderer,CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
-const D=await (await fetch('data/building.json')).json();
+const D=await (await fetch('data/building.json?v=20261109b',{cache:'no-store'})).json();
 const W=D.W,H=D.H,F=D.floors,N=F.length,GFI=F.findIndex(f=>f.gf),RAMP=D.ramp,ASM=D.assembly;
 const LITE=new URLSearchParams(location.search).has('lite');
 window.__dbg={};
@@ -145,7 +145,7 @@ const FG=F.map((f,i)=>{
     if(s.review){lb.add(mkLabel(id+' ⚠ HSE review','review',s.x,2.4,toZ(s.y),{x:s.x,y:s.y-1.6,n:id,kind:'stair',review:true,s}));continue;}
     const txt=dst===null?id:(id+' '+(i>GFI?'▼ ':'▲ ')+F[dst].k);lb.add(mkLabel(txt,'stair',s.x,2.2,toZ(s.y),{x:s.x,y:s.y,n:id+(dst===null?'':' → '+F[dst].name),kind:'stair',s}));}
   for(const o of (f.openings||[])){const c=o.poly.reduce((a,p)=>[a[0]+p[0]/o.poly.length,a[1]+p[1]/o.poly.length],[0,0]);
-    lb.add(mkLabel(o.id+((o.status==='approved'||o.status==='access')?' ✓':' ⚠'),'open'+((o.status==='approved'||o.status==='access')?' ok':''),c[0],1.0,toZ(c[1]),{x:c[0],y:c[1],n:o.label,kind:'info',o}));}
+    lb.add(mkLabel(o.id+(o.status==='access'?' ✓ ACCESS':o.status==='approved'?' ✓':' ⚠'),'open'+((o.status==='approved'||o.status==='access')?' ok':''),c[0],1.0,toZ(c[1]),{x:c[0],y:c[1],n:o.label,kind:'info',o}));}
   for(const l of (f.labels||[])){const t=l.t.toUpperCase();if(t.startsWith('LIFT'))lb.add(mkLabel('LIFT ✕','lift',l.x,1.8,toZ(l.y)));else if(t==='RAMP')lb.add(mkLabel('RAMP','ramp',l.x,1.8,toZ(l.y),f.ramp?{x:(RAMP.x0+RAMP.x1)/2,y:RAMP.y0+1,n:'the ramp',kind:'ramp'}:{x:l.x,y:l.y,n:'the ramp',kind:'ramp'}));}
   if(f.gf){lb.add(mkLabel('ASSEMBLY POINT','asm',ASM.x,6,toZ(ASM.y),{x:ASM.x,y:ASM.y,n:'the Assembly Point',kind:'asm'}));for(const e of D.gfExits)lb.add(mkLabel(e.n,'ramp',e.x,2,toZ(e.y),{x:e.x,y:e.y,n:e.n,kind:'exit'}));
     const pole=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,6,8),stairMat);pole.position.set(ASM.x,3,toZ(ASM.y));g.add(pole);
@@ -185,7 +185,7 @@ function followField(d,x,y){let i=Math.floor(x/CELL),j=Math.floor(y/CELL);if(i<0
   const pts=[[x,y]];let g=0;while(d[j*NX+i]>0&&g++<8000){let bi=i,bj=j,bd=d[j*NX+i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const k=i+a,l=j+b;if(k>=0&&l>=0&&k<NX&&l<NY){const v=d[l*NX+k];if(v>=0&&v<bd){bd=v;bi=k;bj=l;}}}if(bi===i&&bj===j)break;i=bi;j=bj;pts.push([(i+.5)*CELL,(j+.5)*CELL]);}
   return pts.filter((p,k)=>k%3===0||k===pts.length-1);}
 let auto=null;
-function goTo(t){if(t.kind==='info'){toast((t.o.status==='approved'?'✓ ':'⚠ ')+t.o.label+' — '+t.o.src);return;}
+function goTo(t){if(t.kind==='info'){toast(((t.o.status==='approved'||t.o.status==='access')?'✓ ':'⚠ ')+t.o.label+' — '+t.o.src);return;}
   if(mode!=='walk')startOn(cur);const f=F[cur];let pts;
   if(t.kind==='stair'&&Math.hypot(t.x-player.x,t.y-player.y)<4.5){arriveStair(t);return;}
   if(f.gf){pts=t.kind==='asm'?routeFrom(player.x,player.y):[[player.x,player.y],[t.x,t.y]];}
