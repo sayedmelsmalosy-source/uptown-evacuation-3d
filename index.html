@@ -64,6 +64,10 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 .bigbtn{all:unset;cursor:pointer;background:var(--safe);color:#04150c;font-weight:800;padding:10px 14px;border-radius:10px;text-align:center}.bigbtn.ghost{background:#1c2a3b;color:var(--fg)}.bigbtn:disabled,.bigbtn[disabled]{opacity:.4;cursor:not-allowed}
 #prog{height:8px;background:#0b1320;border-radius:5px;overflow:hidden;margin-top:8px}#prog i{display:block;height:100%;width:0;background:var(--safe);transition:width .2s}
 #steps{margin-top:8px;font-size:12px}#steps ol{margin:4px 0 0;padding-left:18px}#steps li{margin:3px 0}#steps .fl{color:#e5484d}
+#sub{left:50%;top:calc(var(--tb,56px) + 46px);transform:translateX(-50%);z-index:9;display:none;flex-direction:column;align-items:center;gap:6px;background:rgba(6,11,18,.92);border:2px solid var(--safe);border-radius:14px;padding:10px 14px;width:min(560px,calc(100vw - 32px));text-align:center}
+#subT{font-size:17px;font-weight:800;line-height:1.35}#subN{font-size:12px;color:#f5b50a}#sub .r{display:flex;gap:8px}#sub button{all:unset;cursor:pointer;padding:6px 14px;border-radius:9px;font-weight:800;font-size:14px;background:#15202f;border:1px solid var(--line)}#sub #subGo{background:var(--safe);color:#04150c}
+#langB{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:10px}#langB button{all:unset;cursor:pointer;text-align:center;padding:14px 8px;border-radius:12px;border:1px solid var(--line);background:#15202f;font-size:19px;font-weight:800}#langB button.on{border-color:var(--safe)}#langB button:hover{background:var(--safe);color:#04150c}
+#btnGuide{background:var(--safe);color:#04150c;font-weight:800}
 #chatBtn{right:12px;bottom:calc(12px + 200px);width:52px;height:52px;border-radius:50%;background:var(--safe);color:#04150c;font-size:24px;display:grid;place-items:center;cursor:pointer;border:0;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 #chat{right:12px;bottom:12px;width:min(380px,calc(100vw - 24px));height:min(520px,70vh);background:#101a27;border:1px solid var(--line);border-radius:14px;display:none;flex-direction:column;z-index:12}
 #chat .hd{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}#chat .hd b{font-size:15px}#chat .hd small{color:var(--muted);font-size:11px}#chat .hd .x{all:unset;cursor:pointer;margin-left:auto;color:var(--muted);font-size:18px;padding:2px 6px}
@@ -84,7 +88,7 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 <canvas id="c" tabindex="0"></canvas>
 <div id="top" class="ui">
   <div class="brand"><i></i><span>UPTOWN T3 &amp; T4</span><small>EVACUATION 3D</small></div>
-  <div class="seg" id="mode"><button data-m="orbit" class="on">3D</button><button data-m="plan">2D plan</button><button data-m="walk">Walk</button></div><button id="btnOverall" class="pill">⌂ Overall</button><button id="btnLoc" class="pill go">📍 Where am I?</button><button id="net" class="pill"></button>
+  <div class="seg" id="mode"><button data-m="orbit" class="on">3D</button><button data-m="plan">2D plan</button><button data-m="walk">Walk</button></div><button id="btnOverall" class="pill">⌂ Overall</button><button id="btnLoc" class="pill go">📍 Where am I?</button><button id="btnGuide" class="pill">🔊 Guide me</button><button id="net" class="pill"></button>
   <select id="floorSel" aria-label="Floor"></select>
 </div>
 <div id="info" class="ui"><button class="toggle" id="infoT">▾</button><h3>You are on</h3><div class="body">
@@ -104,6 +108,8 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 <div id="toast" class="ui"></div>
 <div id="crumb" class="ui"></div>
 <div id="tip" class="ui"></div>
+<div id="lang" class="sheet"><div class="box"><div class="hd"><b id="langH">Choose your language</b><button class="x" id="langX" aria-label="Close">✕</button></div><div class="note" id="langS"></div><div id="langB"></div></div></div>
+<div id="sub" class="ui"><div id="subT"></div><div id="subN"></div><div class="r"><button id="subGo" style="display:none"></button><button id="subX">■</button></div></div>
 <div id="loc" class="sheet"><div class="box">
   <div class="hd"><b>Where are you?</b><span class="ar">إنت فين؟</span><button class="x" id="locX" aria-label="Close">✕</button></div>
   <div class="note" id="locQR"></div>
@@ -439,7 +445,7 @@ function step(dt){
     camera.position.set(player.x-fx*d,cy,toZ(player.y-fy*d));camera.rotation.set(pitch-0.15,player.yaw,0,'YXZ');}
   else{camera.position.set(player.x,eye,toZ(player.y));camera.rotation.set(pitch,player.yaw,0,'YXZ');}
 }
-function loop(){const dt=Math.min(clock.getDelta(),0.05);step(dt);updAvatar(dt);renderer.render(scene,camera);labelR.render(scene,camera);drawMap();requestAnimationFrame(loop);}
+function loop(){const dt=Math.min(clock.getDelta(),0.05);step(dt);guideTick(dt);updAvatar(dt);renderer.render(scene,camera);labelR.render(scene,camera);drawMap();requestAnimationFrame(loop);}
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);labelR.setSize(innerWidth,innerHeight);});
 // =====================================================================
 // v2: location picker, clickable floors, full evacuation chain, assistant, voice, offline
@@ -579,7 +585,7 @@ function drawPlaces(){const P=$('locP');if(locF===null){P.innerHTML='';$('locPn'
   const f=F[locF];
   P.innerHTML=`<button data-k="-1">📍 Somewhere on this floor (start in an open area of ${f.k.startsWith('L')?locTw:'the floor'})</button>`+list.map((p,k)=>`<button data-k="${all.indexOf(p)}">${p.kind==='stair'?'🟩':p.kind==='asm'?'🟢':'▫'} ${p.n}</button>`).join('');
   $('locPn').textContent=(f.places&&f.places.length?'Room, corridor and lobby names are read from the BSBG floor plan for this level.':'This drawing has no room names — choose a stair/access or “Somewhere on this floor”.')+(q&&!list.length?' No match for that name on this floor.':'');
-  P.querySelectorAll('button').forEach(b=>b.onclick=()=>{const k=+b.dataset.k;closeLoc();if(k<0){startHere(locF,locTw);}else{const p=all[k];setHere(locF,p.x,p.y,locTw,p.n);}});}
+  P.querySelectorAll('button').forEach(b=>b.onclick=()=>{const k=+b.dataset.k;closeLoc();if(k<0){startHere(locF,locTw);}else{const p=all[k];setHere(locF,p.x,p.y,locTw,p.n);}if(GV.pending)startGuide();});}
 function startHere(i,tw){const f=F[i];let cx,cy;if(f.gf){cx=60;cy=60;}else if(f.k.startsWith('L')){[cx,cy]=TWC[tw];}else{[cx,cy]=TWC[tw];}
   const o=occOf(i),d=distOf(i),i0=Math.floor(cx/CELL),j0=Math.floor(cy/CELL),R=5;let sp=null;
   const clear=(k,l)=>{for(let b=-R;b<=R;b++)for(let a=-R;a<=R;a++){if(a*a+b*b>R*R)continue;const kk=k+a,ll=l+b;if(kk<0||ll<0||kk>=NX||ll>=NY||o[ll*NX+kk])return false;}return true;};
@@ -837,12 +843,71 @@ function updAvatar(dt){const show=AV.ready&&AV.on&&!overall&&(mode==='walk'||(he
   AV.grp.rotation.y=Math.atan2(camera.position.x-AV.grp.position.x,camera.position.z-AV.grp.position.z);
   AV.grp.scale.setScalar(mode==='walk'?1:Math.max(3,camera.position.distanceTo(AV.grp.position)/12));
   const top=mode!=='walk';if(AV.mat&&AV.mat.depthTest===top){AV.mat.depthTest=!top;AV.mat.needsUpdate=true;}AV.grp.traverse(o=>{o.renderOrder=top?20:0;});}
-{const mp=new URLSearchParams(location.search).get('me');if(mp&&/^[\w\/.-]+\.png$/.test(mp))loadAvatar(mp);else fetch('config.json',{cache:'no-store'}).then(r=>r.json()).then(c=>{if(c&&c.avatar)loadAvatar(c.avatar);}).catch(()=>{});}
+{const mp=new URLSearchParams(location.search).get('me');if(window.__AVATAR)loadAvatar(window.__AVATAR);else if(mp&&/^[\w\/.-]+\.png$/.test(mp))loadAvatar(mp);else fetch('config.json',{cache:'no-store'}).then(r=>r.json()).then(c=>{if(c&&c.avatar)loadAvatar(c.avatar);}).catch(()=>{});}
 window.__dbg.AV=AV;
 // ---------- layout: panels sit under the (wrapping) top bar; the info panel starts folded on phones ----------
 function layoutTop(){document.documentElement.style.setProperty('--tb',$('top').offsetHeight+'px');}
 addEventListener('resize',layoutTop);layoutTop();
 if(innerWidth<760){$('info').classList.add('min');$('infoT').textContent='▸';}
+// ---------- guided evacuation: pick language + place, then "I" walk and the voice explains every step ----------
+const GLANG=[['en','English'],['ar','العربية'],['ur','اردو'],['hi','हिन्दी'],['bn','বাংলা'],['ml','മലയാളം'],['ta','தமிழ்']];
+const GT={
+en:{pick:'Choose your language',pickSub:'Then choose where you are. The guide starts by itself and walks you to the assembly point.',start:'Evacuation started. Stay calm and follow me. Never use the lifts.',walkDown:'{f}. Walk {m} metres to {s}, then go down to {f2}.',walkUp:'{f}. Walk {m} metres to {s}, then go up to {f2}.',down:'{f}. Go down {s} to {f2}.',up:'{f}. Go up {s} to {f2}.',floor:'{f}.',gf:'Ground floor. Go out and follow the green route {m} metres to the assembly point.',done:'You reached the assembly point. Stay with your supervisor for the roll call.',review:'The route here needs HSE review. Stop and ask your supervisor.',lv:'Level {n}',pd:'Podium {n}',bs:'Basement {n}',g:'Ground floor',op:'temporary opening {n}',st:'stair {n}',btn:'Guide me',stop:'Stop',resume:'Resume guide',paused:'Guide paused — you are moving by yourself.',again:'Start again',noVoice:'No {l} voice on this phone — read the text.'},
+ar:{pick:'اختار لغتك',pickSub:'وبعدها اختار إنت فين. الدليل هيبدأ لوحده ويمشّيك لحد نقطة التجمع.',start:'بدأنا الإخلاء. خليك هادي وامشي ورايا. ممنوع تستخدم الأسانسير.',walkDown:'{f}. امشي {m} متر لحد {s}، وبعدين انزل لحد {f2}.',walkUp:'{f}. امشي {m} متر لحد {s}، وبعدين اطلع لحد {f2}.',down:'{f}. انزل من {s} لحد {f2}.',up:'{f}. اطلع من {s} لحد {f2}.',floor:'{f}.',gf:'الدور الأرضي. اطلع برّه وامشي على الخط الأخضر {m} متر لحد نقطة التجمع.',done:'وصلت نقطة التجمع. خليك مع المشرف بتاعك لحد ما يتعمل التمام.',review:'المسار هنا محتاج مراجعة HSE. اقف واسأل المشرف.',lv:'الدور {n}',pd:'البوديوم {n}',bs:'البيسمنت {n}',g:'الدور الأرضي',op:'الفتحة المؤقتة {n}',st:'السلم {n}',btn:'مشّيني',stop:'وقف',resume:'كمّل الدليل',paused:'الدليل واقف — إنت بتتحرك بنفسك.',again:'ابدأ تاني',noVoice:'مفيش صوت {l} على الموبايل ده — اقرا الكلام المكتوب.'},
+ur:{pick:'اپنی زبان منتخب کریں',pickSub:'پھر بتائیں آپ کہاں ہیں۔ گائیڈ خود شروع ہو کر آپ کو اسمبلی پوائنٹ تک لے جائے گا۔',start:'انخلا شروع ہو گیا ہے۔ پرسکون رہیں اور میرے پیچھے چلیں۔ لفٹ ہرگز استعمال نہ کریں۔',walkDown:'{f}۔ {s} تک {m} میٹر چلیں، پھر نیچے {f2} تک جائیں۔',walkUp:'{f}۔ {s} تک {m} میٹر چلیں، پھر اوپر {f2} تک جائیں۔',down:'{f}۔ {s} سے نیچے {f2} تک جائیں۔',up:'{f}۔ {s} سے اوپر {f2} تک جائیں۔',floor:'{f}۔',gf:'گراؤنڈ فلور۔ باہر نکلیں اور سبز راستے پر {m} میٹر چل کر اسمبلی پوائنٹ تک جائیں۔',done:'آپ اسمبلی پوائنٹ پہنچ گئے ہیں۔ حاضری تک اپنے سپروائزر کے ساتھ رہیں۔',review:'یہاں راستے کا HSE جائزہ ضروری ہے۔ رکیں اور اپنے سپروائزر سے پوچھیں۔',lv:'لیول {n}',pd:'پوڈیم {n}',bs:'بیسمنٹ {n}',g:'گراؤنڈ فلور',op:'عارضی اوپننگ {n}',st:'سیڑھی {n}',btn:'مجھے لے چلیں',stop:'رکیں',resume:'گائیڈ جاری رکھیں',paused:'گائیڈ رکا ہوا ہے — آپ خود چل رہے ہیں۔',again:'دوبارہ شروع کریں',noVoice:'اس فون میں {l} آواز نہیں — لکھا ہوا پڑھیں۔'},
+hi:{pick:'अपनी भाषा चुनें',pickSub:'फिर बताइए आप कहाँ हैं। गाइड अपने आप शुरू होकर आपको असेंबली पॉइंट तक ले जाएगा।',start:'निकासी शुरू हो गई है। शांत रहें और मेरे पीछे चलें। लिफ्ट का इस्तेमाल बिल्कुल न करें।',walkDown:'{f}। {s} तक {m} मीटर चलें, फिर नीचे {f2} तक जाएं।',walkUp:'{f}। {s} तक {m} मीटर चलें, फिर ऊपर {f2} तक जाएं।',down:'{f}। {s} से नीचे {f2} तक जाएं।',up:'{f}। {s} से ऊपर {f2} तक जाएं।',floor:'{f}।',gf:'ग्राउंड फ्लोर। बाहर निकलें और हरे रास्ते पर {m} मीटर चलकर असेंबली पॉइंट तक जाएं।',done:'आप असेंबली पॉइंट पहुंच गए हैं। हाज़िरी होने तक अपने सुपरवाइज़र के साथ रहें।',review:'यहां रास्ते की HSE समीक्षा ज़रूरी है। रुकें और अपने सुपरवाइज़र से पूछें।',lv:'लेवल {n}',pd:'पोडियम {n}',bs:'बेसमेंट {n}',g:'ग्राउंड फ्लोर',op:'अस्थायी ओपनिंग {n}',st:'सीढ़ी {n}',btn:'मुझे ले चलो',stop:'रुकें',resume:'गाइड जारी रखें',paused:'गाइड रुका है — आप खुद चल रहे हैं।',again:'फिर से शुरू करें',noVoice:'इस फ़ोन में {l} आवाज़ नहीं है — लिखा हुआ पढ़ें।'},
+bn:{pick:'আপনার ভাষা বেছে নিন',pickSub:'তারপর বলুন আপনি কোথায় আছেন। গাইড নিজে থেকেই শুরু হয়ে আপনাকে অ্যাসেম্বলি পয়েন্টে নিয়ে যাবে।',start:'জরুরি বহির্গমন শুরু হয়েছে। শান্ত থাকুন এবং আমার পিছনে আসুন। কখনও লিফট ব্যবহার করবেন না।',walkDown:'{f}। {s} পর্যন্ত {m} মিটার হাঁটুন, তারপর নিচে {f2}-এ নামুন।',walkUp:'{f}। {s} পর্যন্ত {m} মিটার হাঁটুন, তারপর উপরে {f2}-এ উঠুন।',down:'{f}। {s} দিয়ে নিচে {f2}-এ নামুন।',up:'{f}। {s} দিয়ে উপরে {f2}-এ উঠুন।',floor:'{f}।',gf:'গ্রাউন্ড ফ্লোর। বাইরে যান এবং সবুজ পথ ধরে {m} মিটার হেঁটে অ্যাসেম্বলি পয়েন্টে পৌঁছান।',done:'আপনি অ্যাসেম্বলি পয়েন্টে পৌঁছে গেছেন। হাজিরা না হওয়া পর্যন্ত আপনার সুপারভাইজারের সাথে থাকুন।',review:'এখানে পথটির HSE পর্যালোচনা দরকার। থামুন এবং সুপারভাইজারকে জিজ্ঞাসা করুন।',lv:'লেভেল {n}',pd:'পোডিয়াম {n}',bs:'বেসমেন্ট {n}',g:'গ্রাউন্ড ফ্লোর',op:'অস্থায়ী ওপেনিং {n}',st:'সিঁড়ি {n}',btn:'আমাকে নিয়ে চলুন',stop:'থামুন',resume:'গাইড চালু রাখুন',paused:'গাইড থেমে আছে — আপনি নিজে চলছেন।',again:'আবার শুরু করুন',noVoice:'এই ফোনে {l} কণ্ঠ নেই — লেখাটি পড়ুন।'},
+ml:{pick:'നിങ്ങളുടെ ഭാഷ തിരഞ്ഞെടുക്കുക',pickSub:'പിന്നെ നിങ്ങൾ എവിടെയാണെന്ന് തിരഞ്ഞെടുക്കുക. ഗൈഡ് സ്വയം തുടങ്ങി നിങ്ങളെ അസംബ്ലി പോയിന്റിലേക്ക് കൊണ്ടുപോകും.',start:'ഒഴിപ്പിക്കൽ ആരംഭിച്ചു. ശാന്തരായിരിക്കുക, എന്നെ പിന്തുടരുക. ഒരിക്കലും ലിഫ്റ്റ് ഉപയോഗിക്കരുത്.',walkDown:'{f}. {s} വരെ {m} മീറ്റർ നടക്കുക, എന്നിട്ട് താഴെ {f2} ലേക്ക് ഇറങ്ങുക.',walkUp:'{f}. {s} വരെ {m} മീറ്റർ നടക്കുക, എന്നിട്ട് മുകളിൽ {f2} ലേക്ക് കയറുക.',down:'{f}. {s} വഴി താഴെ {f2} ലേക്ക് ഇറങ്ങുക.',up:'{f}. {s} വഴി മുകളിൽ {f2} ലേക്ക് കയറുക.',floor:'{f}.',gf:'ഗ്രൗണ്ട് ഫ്ലോർ. പുറത്തിറങ്ങി പച്ച വഴിയിലൂടെ {m} മീറ്റർ നടന്ന് അസംബ്ലി പോയിന്റിൽ എത്തുക.',done:'നിങ്ങൾ അസംബ്ലി പോയിന്റിൽ എത്തി. ഹാജർ എടുക്കുന്നത് വരെ സൂപ്പർവൈസറുടെ കൂടെ നിൽക്കുക.',review:'ഇവിടെ വഴിക്ക് HSE പരിശോധന ആവശ്യമാണ്. നിൽക്കുക, സൂപ്പർവൈസറോട് ചോദിക്കുക.',lv:'ലെവൽ {n}',pd:'പോഡിയം {n}',bs:'ബേസ്മെന്റ് {n}',g:'ഗ്രൗണ്ട് ഫ്ലോർ',op:'താൽക്കാലിക ഓപ്പണിംഗ് {n}',st:'കോണി {n}',btn:'എന്നെ കൊണ്ടുപോകൂ',stop:'നിർത്തുക',resume:'ഗൈഡ് തുടരുക',paused:'ഗൈഡ് നിർത്തി — നിങ്ങൾ സ്വയം നീങ്ങുന്നു.',again:'വീണ്ടും തുടങ്ങുക',noVoice:'ഈ ഫോണിൽ {l} ശബ്ദം ഇല്ല — എഴുത്ത് വായിക്കുക.'},
+ta:{pick:'உங்கள் மொழியைத் தேர்ந்தெடுக்கவும்',pickSub:'பிறகு நீங்கள் எங்கே இருக்கிறீர்கள் என்று தேர்வு செய்யுங்கள். வழிகாட்டி தானாகத் தொடங்கி உங்களைக் கூடும் இடத்திற்கு அழைத்துச் செல்லும்.',start:'வெளியேற்றம் தொடங்கியது. அமைதியாக இருங்கள், என்னைப் பின்தொடருங்கள். ஒருபோதும் லிஃப்ட் பயன்படுத்த வேண்டாம்.',walkDown:'{f}. {s} வரை {m} மீட்டர் நடக்கவும், பிறகு கீழே {f2} க்கு இறங்கவும்.',walkUp:'{f}. {s} வரை {m} மீட்டர் நடக்கவும், பிறகு மேலே {f2} க்கு ஏறவும்.',down:'{f}. {s} வழியாக கீழே {f2} க்கு இறங்கவும்.',up:'{f}. {s} வழியாக மேலே {f2} க்கு ஏறவும்.',floor:'{f}.',gf:'தரைத்தளம். வெளியே சென்று பச்சை பாதையில் {m} மீட்டர் நடந்து கூடும் இடத்தை அடையுங்கள்.',done:'நீங்கள் கூடும் இடத்தை அடைந்துவிட்டீர்கள். வருகைப் பதிவு முடியும் வரை உங்கள் மேற்பார்வையாளருடன் இருங்கள்.',review:'இங்கே பாதைக்கு HSE ஆய்வு தேவை. நின்று உங்கள் மேற்பார்வையாளரிடம் கேளுங்கள்.',lv:'லெவல் {n}',pd:'போடியம் {n}',bs:'பேஸ்மென்ட் {n}',g:'தரைத்தளம்',op:'தற்காலிக திறப்பு {n}',st:'படிக்கட்டு {n}',btn:'என்னை அழைத்துச் செல்லுங்கள்',stop:'நிறுத்து',resume:'வழிகாட்டியைத் தொடரவும்',paused:'வழிகாட்டி நிறுத்தப்பட்டது — நீங்களே நகர்கிறீர்கள்.',again:'மீண்டும் தொடங்கு',noVoice:'இந்த ஃபோனில் {l} குரல் இல்லை — எழுத்தைப் படியுங்கள்.'}};
+const GV={on:false,pending:false,lang:'en',lastF:-1,runId:null,act:null,wait:0,kind:''};
+try{const s=localStorage.getItem('uptown-lang');if(s&&GT[s])GV.lang=s;}catch(e){}
+const gT=(k,a,lg)=>(GT[lg||GV.lang][k]||GT.en[k]).replace(/\{(\w+)\}/g,(m,x)=>a&&a[x]!==undefined?a[x]:m);
+function gFloor(i){const k=F[i].k,n=String(parseInt(k.replace(/\D/g,''),10));if(k==='GF')return gT('g');if(k[0]==='L')return gT('lv',{n});if(k[0]==='P')return gT('pd',{n});if(k[0]==='B')return gT('bs',{n});return F[i].name;}
+function gStair(s){const id=s.id||'';const n=String(parseInt((id.match(/(\d+)\D*$/)||[0,1])[1],10));return s.temp?gT('op',{n}):gT('st',{n});}
+function gVoice(){const lg=GV.lang;const vs='speechSynthesis' in window?speechSynthesis.getVoices():[];return vs.find(v=>v.lang&&v.lang.toLowerCase().replace('_','-')===TTSL[lg].toLowerCase())||vs.find(v=>v.lang&&v.lang.toLowerCase().startsWith(lg));}
+// say(): shows the sentence on screen and reads it out. kind 'floor' = short floor call that may be cut by the next one.
+function gSay(show,spoken,kind){const b=$('sub');b.style.display='flex';$('subT').textContent=show;$('subT').dir=/^(ar|ur)$/.test(GV.lang)?'rtl':'ltr';
+  if(!('speechSynthesis' in window))return;const busy=speechSynthesis.speaking||speechSynthesis.pending;
+  if(kind==='floor'){if(busy&&GV.kind&&GV.kind!=='floor')return;speechSynthesis.cancel();}else if(GV.kind==='floor')speechSynthesis.cancel();GV.kind=kind||'say';
+  const u=new SpeechSynthesisUtterance(spoken);u.lang=TTSL[GV.lang];const v=gVoice();if(v)u.voice=v;else $('subN').textContent=gT('noVoice',{l:GLANG.find(x=>x[0]===GV.lang)[1]});
+  u.rate=GV.lang==='en'?1:0.95;u.onend=()=>{if(GV.kind===kind)GV.kind='';};speechSynthesis.speak(u);}
+function gLine(key,a){const sa=Object.assign({},a);if(a.sObj)sa.s=gStair(a.sObj);const da=Object.assign({},a);if(a.sObj)da.s=a.sObj.id;return [gT(key,da),gT(key,sa)];}
+function openLang(then){const P=$('langB');P.innerHTML=GLANG.map(([k,n])=>`<button data-l="${k}" class="${k===GV.lang?'on':''}">${n}</button>`).join('');
+  $('langH').textContent=gT('pick');$('langS').textContent=gT('pickSub');$('lang').style.display='grid';
+  P.querySelectorAll('button').forEach(b=>{b.onmouseenter=()=>{$('langH').textContent=gT('pick',0,b.dataset.l);$('langS').textContent=gT('pickSub',0,b.dataset.l);};
+    b.onclick=()=>{GV.lang=b.dataset.l;RL=GV.lang;try{localStorage.setItem('uptown-lang',GV.lang);}catch(e){}
+      const ml={ar:'ar-EG',ur:'ur-PK',hi:'hi-IN',bn:'bn-IN',ml:'ml-IN',ta:'ta-IN',en:'en-US'}[GV.lang];$('micLang').value=ml;$('btnGuide').textContent='🔊 '+gT('btn');
+      if('speechSynthesis' in window){try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}} // unlock speech on phones (needs a tap)
+      $('lang').style.display='none';if(then==='go')startGuide();else{GV.pending=true;openLoc(1);}};});}
+$('langX').onclick=()=>{$('lang').style.display='none';};
+function startGuide(){GV.pending=false;closeLoc();if(!here){openLang();return;}
+  if(cur!==here.i){cur=here.i;}player.x=here.x;player.y=here.y;overall=false;if(mode!=='walk')setMode('walk');auto=null;
+  GV.on=true;GV.lastF=-1;GV.saidF=-1;GV.runId=null;GV.act=null;GV.wait=2.6;arrived=false;$('subN').textContent='';$('subGo').style.display='none';$('subX').style.display='';
+  const l=gT('start');gSay(l,l);}
+function stopGuide(paused){GV.on=false;GV.act=null;auto=null;if('speechSynthesis' in window)speechSynthesis.cancel();
+  if(paused){$('subT').textContent=gT('paused');$('subGo').textContent='▶ '+gT('resume');$('subGo').style.display='';}else $('sub').style.display='none';}
+$('subX').onclick=()=>stopGuide(true);$('subGo').onclick=()=>{if(F[cur].gf&&Math.hypot(player.x-ASM.x,player.y-ASM.y)<6){here={i:cur,x:player.x,y:player.y,tw:focusTw,place:'here'};}
+  GV.on=true;GV.lastF=-1;GV.runId=null;GV.wait=0.4;$('subGo').style.display='none';};
+$('btnGuide').onclick=()=>{if(here&&!overall)openLang('go');else openLang();};$('btnGuide').textContent='🔊 '+gT('btn');
+function guideTick(dt){if(!GV.on)return;
+  if(keys.KeyW||keys.KeyS||keys.KeyA||keys.KeyD||keys.ArrowUp||keys.ArrowDown||keys.ArrowLeft||keys.ArrowRight||keys.turnL||keys.turnR){stopGuide(true);return;}
+  if(GV.wait>0){GV.wait-=dt;return;}if(anim||auto)return;
+  const f=F[cur];
+  if(f.gf&&Math.hypot(player.x-ASM.x,player.y-ASM.y)<6){const l=gT('done');gSay('✔ '+l,l);GV.on=false;$('subX').style.display='none';$('subGo').textContent='↻ '+gT('again');$('subGo').style.display='';
+    $('subGo').onclick=()=>{$('subGo').onclick=null;openLoc(1);GV.pending=true;};return;}
+  if(GV.act){const a=GV.act;GV.act=null;goTo(a);GV.wait=0.7;return;}
+  if(GV.lastF===cur){GV.lastF=-1;return;} // stood still on the same floor: work the route out again
+  GV.lastF=cur;const ch=chainFrom(cur,player.x,player.y);const c=ch[0];const fn=gFloor(cur);
+  if(!c||c.end==='none'||c.end==='flag'){const l=gT('review');gSay('⚑ '+l,l);GV.on=false;return;}
+  const m=Math.round(plen(c.pts));
+  if(c.end==='asm'){const [a,b]=gLine('gf',{m});gSay(a,b);GV.act={kind:'asm',x:ASM.x,y:ASM.y,n:'the Assembly Point'};GV.wait=0.6;return;}
+  let j=0;while(j+1<ch.length&&ch[j+1].end==='stair'&&ch[j+1].s.id===c.s.id&&plen(ch[j+1].pts)<8)j++;
+  const dn=cur>GFI,f2=gFloor(ch[j].t);
+  if(c.s.id!==GV.runId||m>=8){GV.runId=c.s.id;const key=m>4.5?(dn?'walkDown':'walkUp'):(dn?'down':'up');const [a,b]=gLine(key,{f:fn,m,f2,sObj:c.s});gSay(a,b);GV.wait=m>4.5?0.8:1.6;}
+  else{if(GV.saidF!==cur)gSay(fn,fn,'floor');GV.wait=0.15;}GV.saidF=cur;
+  GV.act=Object.assign({},c.s,{kind:'stair',n:c.s.id||'the stair'});}
+window.__dbg.guide=()=>({on:GV.on,lang:GV.lang,cur,k:F[cur].k,sub:$('subT').textContent});window.__dbg.startGuide=startGuide;
+
 // ---------- start ----------
 document.getElementById('loading').remove();
 // deep link from a QR: #T3/L05/Corridor%201 (tower/floor/place) or the old #L05
@@ -850,9 +915,9 @@ document.getElementById('loading').remove();
  for(const p of parts){const u=p.toUpperCase();if(u==='T3'||u==='T4')tw=u;else if(F.some(f=>f.k===u))fk=u;else pl=p;}
  const fi=fk?F.findIndex(f=>f.k===fk):-1;cur=GFI;
  if(fi>=0){const t=tw||'T3';const P=pl?placesOf(fi,t).find(x=>normTxt(x.n)===normTxt(pl)):null;
-   if(P){mode='orbit';setHere(fi,P.x,P.y,t,P.n);$('locQR').textContent='Opened from the QR code: '+P.n+' — change it below if you are somewhere else.';toast('📍 '+t+' → '+F[fi].name+' → '+P.n+' (from the QR) — tap the bar above to change');}
+   if(P){mode='orbit';setHere(fi,P.x,P.y,t,P.n);$('locQR').textContent='Opened from the QR code: '+P.n+' — change it below if you are somewhere else.';toast('📍 '+t+' → '+F[fi].name+' → '+P.n+' (from the QR) — tap the bar above to change');openLang('go');}
    else{selectFloor(fi,t,true);setMode('orbit');}}
- else{setMode('orbit');openLoc(1);}
+ else{setMode('orbit');openLang();}
  readMeta().then(()=>{netPill();if(navigator.onLine)checkUpdate(false);else offStatus();drawLoc();});}
 loop();
 </script></body></html>
