@@ -1,0 +1,275 @@
+{
+"version": "2026.11.10-2251",
+"date": "2026-11-10",
+"core": [
+{
+"p": "index.html",
+"size": 100839,
+"sha": "6adb1017b5cfffd83a63ebcfbc463cbc728cb9c5f1951a05fc4dec4de99cc507"
+},
+{
+"p": "manifest.webmanifest",
+"size": 345,
+"sha": "f42c77c782ca09ab8106e4df7901d660a5dc19425c0b14b5b235af13fe801162"
+},
+{
+"p": "config.json",
+"size": 18,
+"sha": "31a413608c2cdcfe942ed5ea102f024f72ed486a2ed410e3ec440c7b6c089b9c"
+},
+{
+"p": "icons/icon-192.png",
+"size": 1436,
+"sha": "0c73d6b2b006d854ab3379b91de90051c42982ce34f27ead54e10a51d4677c91"
+},
+{
+"p": "icons/icon-512.png",
+"size": 4144,
+"sha": "a60d70298ba3b54e7f836ec74bff71cd9584ba7830321ee3fb41b5082683f68d"
+},
+{
+"p": "data/building.json",
+"size": 1438149,
+"sha": "e10d909e83ecaa2dd50f45392cd591a701c8698d5bd835c08ae2659b90ffd372"
+},
+{
+"p": "vendor/three/three.module.js",
+"size": 1272972,
+"sha": "76dea8151bc9352aef3528b4262e249b2604f62543828328db978d060d61a495"
+},
+{
+"p": "vendor/three/addons/controls/OrbitControls.js",
+"size": 29868,
+"sha": "5a44a9e86a2a0fb11933eed69bc2cd33c76a496854c1aed6ed776efa87d7b064"
+},
+{
+"p": "vendor/three/addons/renderers/CSS2DRenderer.js",
+"size": 4407,
+"sha": "a4f0f79184c043f6b9d2654d8ba051e49a7d631d34e8f437c1804798a68c379f"
+},
+{
+"p": "vendor/three/addons/utils/BufferGeometryUtils.js",
+"size": 31906,
+"sha": "9be041e96308775d00e2695cc607645b9a9b64fd7c0e759dd8f7c00a8d92becb"
+}
+],
+"floors": {
+"B3": [
+{
+"p": "tex/evac_basement.jpg",
+"size": 417778,
+"sha": "1ad254203c7ccc1e7b359368c87ef8504eae1e6137c43f4533643445a8942ae6"
+}
+],
+"B2": [
+{
+"p": "tex/evac_basement.jpg",
+"size": 417778,
+"sha": "1ad254203c7ccc1e7b359368c87ef8504eae1e6137c43f4533643445a8942ae6"
+}
+],
+"B1": [
+{
+"p": "tex/evac_basement.jpg",
+"size": 417778,
+"sha": "1ad254203c7ccc1e7b359368c87ef8504eae1e6137c43f4533643445a8942ae6"
+}
+],
+"GF": [
+{
+"p": "tex/evac_gf.jpg",
+"size": 604094,
+"sha": "83a9cd53cf79eb1597fe05f6572e30db8bca1475a2199e61f684ad3aa72a0aa0"
+}
+],
+"P1": [
+{
+"p": "tex/PODIUM_1.jpg",
+"size": 408894,
+"sha": "ec3c28d27b01b0744775af2340e06e4ccfe4c1afebcc1e922e85147c10403145"
+}
+],
+"P2": [
+{
+"p": "tex/PODIUM_2.jpg",
+"size": 434506,
+"sha": "25604bd1f46cdde0b6d62157dc0126a7697446330147de973fa75a435999b97c"
+}
+],
+"P3": [
+{
+"p": "tex/PODIUM_3.jpg",
+"size": 423434,
+"sha": "2dc820f762ee155ada1b1a01bd9a955f95ef1222015bb4a0ff85cdf2f7cdcef9"
+}
+],
+"P4": [
+{
+"p": "tex/PODIUM_4.jpg",
+"size": 400070,
+"sha": "8a40bd3d8c141e4ce89b66fb078ef7c26059b86c9120ad83c6d80e625cada679"
+}
+],
+"P5": [
+{
+"p": "tex/PODIUM_5.jpg",
+"size": 382302,
+"sha": "1b2751fded03e4f7f73bed5259be386ec30e371caa44b2fc7519a54b484e69b1"
+}
+],
+"L01": [
+{
+"p": "tex/LEVEL_01.jpg",
+"size": 213232,
+"sha": "27b33b8c5139f6e54e7b44a55133d4d463c0c6da9ef5c97940653752fc24828e"
+}
+],
+"L02": [
+{
+"p": "tex/LEVEL_03.jpg",
+"size": 151100,
+"sha": "7433b2ca402ec0f8dd385b1cd663cde238eddf8aae61d610b3ed0940cd30065d"
+}
+],
+"L03": [
+{
+"p": "tex/LEVEL_03.jpg",
+"size": 151100,
+"sha": "7433b2ca402ec0f8dd385b1cd663cde238eddf8aae61d610b3ed0940cd30065d"
+}
+],
+"L04": [
+{
+"p": "tex/LEVEL_04_-_08.jpg",
+"size": 143871,
+"sha": "f1f80a137a31dc1eaa7e3d4b513fd2b4db4155a5f40d2fccef274b57470a1415"
+}
+],
+"L05": [
+{
+"p": "tex/LEVEL_04_-_08.jpg",
+"size": 143871,
+"sha": "f1f80a137a31dc1eaa7e3d4b513fd2b4db4155a5f40d2fccef274b57470a1415"
+}
+],
+"L06": [
+{
+"p": "tex/LEVEL_04_-_08.jpg",
+"size": 143871,
+"sha": "f1f80a137a31dc1eaa7e3d4b513fd2b4db4155a5f40d2fccef274b57470a1415"
+}
+],
+"L07": [
+{
+"p": "tex/LEVEL_04_-_08.jpg",
+"size": 143871,
+"sha": "f1f80a137a31dc1eaa7e3d4b513fd2b4db4155a5f40d2fccef274b57470a1415"
+}
+],
+"L08": [
+{
+"p": "tex/LEVEL_04_-_08.jpg",
+"size": 143871,
+"sha": "f1f80a137a31dc1eaa7e3d4b513fd2b4db4155a5f40d2fccef274b57470a1415"
+}
+],
+"L09": [
+{
+"p": "tex/LEVEL_09.jpg",
+"size": 139111,
+"sha": "cdccfe1a6bf540883fe23324e41b63c70eb21a363967d8e4be138b5cd1313c9c"
+}
+],
+"L10": [
+{
+"p": "tex/LEVEL_10.jpg",
+"size": 139577,
+"sha": "51e6615de41416d996a81a2a23258d0650df095a3ea84f2be800743629b3e763"
+}
+],
+"L11": [
+{
+"p": "tex/LEVEL_11.jpg",
+"size": 137850,
+"sha": "fdf68b2ee3e070f262819032379b10b197cd177acce56b244e043d6c94bebfab"
+}
+],
+"L12": [
+{
+"p": "tex/LEVEL_12.jpg",
+"size": 137790,
+"sha": "a320a5363e2d984440484a9b89e890f45b92a199ba4b7d16997521d497478f74"
+}
+],
+"L13": [
+{
+"p": "tex/LEVEL_13.jpg",
+"size": 137893,
+"sha": "7da282ca5afe92980fb19e466c2efbf5d209636ef90d52be8268d3810b14b839"
+}
+],
+"L14": [
+{
+"p": "tex/LEVEL_14_-_15.jpg",
+"size": 136738,
+"sha": "23e713a0832c61039ce98e331d1c46e2adefceb5d2eff490e7d7116b7fa33e68"
+}
+],
+"L15": [
+{
+"p": "tex/LEVEL_14_-_15.jpg",
+"size": 136738,
+"sha": "23e713a0832c61039ce98e331d1c46e2adefceb5d2eff490e7d7116b7fa33e68"
+}
+],
+"L16": [
+{
+"p": "tex/LEVEL_16.jpg",
+"size": 135650,
+"sha": "542d6a84598831522e12cc58a0cdd88cc34bcb896664733209461825441670c6"
+}
+],
+"L17": [
+{
+"p": "tex/LEVEL_17.jpg",
+"size": 138701,
+"sha": "28253b392512cb078ee71a2592f594178376c87278e1e6f7c635acb468e1d24b"
+}
+],
+"L18": [
+{
+"p": "tex/LEVEL_18_-_20.jpg",
+"size": 159138,
+"sha": "0ca598c49674549c74beceab2a314f586c98ee4c6ecae2def9669a7f4d8992cf"
+}
+],
+"L19": [
+{
+"p": "tex/LEVEL_18_-_20.jpg",
+"size": 159138,
+"sha": "0ca598c49674549c74beceab2a314f586c98ee4c6ecae2def9669a7f4d8992cf"
+}
+],
+"L20": [
+{
+"p": "tex/LEVEL_18_-_20.jpg",
+"size": 159138,
+"sha": "0ca598c49674549c74beceab2a314f586c98ee4c6ecae2def9669a7f4d8992cf"
+}
+],
+"L21": [
+{
+"p": "tex/LEVEL_21.jpg",
+"size": 131493,
+"sha": "0ce84fe0aa491ffb95cd79056eae6300f3b0309aabc224825fc6abc669a12045"
+}
+],
+"L22": [
+{
+"p": "tex/LEVEL_22.jpg",
+"size": 142622,
+"sha": "8188b4ba3dda57d52112e418487cd1912c6f3198f7ed67ae038e2012afae82af"
+}
+]
+}
+}

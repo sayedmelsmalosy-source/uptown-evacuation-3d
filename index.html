@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Uptown T3 & T4 — Evacuation 3D</title>
+<title>Uptown T3 & T4 — Evacuation 3D</title><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0a111b"><link rel="apple-touch-icon" href="icons/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes">
 <style>
 :root{--bg:#0a111b;--panel:rgba(16,26,39,.93);--line:#2a3a4f;--fg:#edf2f8;--muted:#95a6ba;--safe:#19c37d;--amber:#f5b50a;--info:#4aa3ff;--fire:#e5484d}
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans Arabic',sans-serif;overflow:hidden}
@@ -12,7 +12,7 @@
 .seg button{all:unset;cursor:pointer;padding:6px 11px;border-radius:7px;font-size:13px;font-weight:700}
 .seg button.on{background:var(--safe);color:#04150c}
 select{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px;font-weight:700}
-#info{left:12px;top:calc(62px + env(safe-area-inset-top,0px));width:250px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12.5px;max-height:calc(100vh - 300px);overflow:auto}
+#info{left:12px;top:calc(var(--tb,56px) + 44px);width:250px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12.5px;max-height:calc(100vh - 300px);overflow:auto}
 #info h3{margin:0 0 6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-family:ui-monospace,monospace}
 #info .big{font-size:18px;font-weight:800;margin:2px 0}
 #info .dir{margin:8px 0;padding:8px 10px;border-radius:8px;background:rgba(25,195,125,.14);border:1px solid var(--safe);font-weight:700}
@@ -46,32 +46,93 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 .lbl.review{background:#f5b50a;color:#1a1400;border:2px dashed #e5484d}.lbl.open{background:#fff;color:#b42318;border:2px dashed #e5484d;font-size:11px}.lbl.open.ok{color:#04150c;border-color:#19c37d}.lbl.flag{background:#e5484d;color:#fff;font-size:13px;padding:7px 10px}.lbl.door{background:rgba(25,195,125,.9);color:#04150c;font-size:10px;padding:3px 6px}
 #info .leg{margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6}#info .leg b{color:var(--fg)}#info .ops{margin-top:6px;font-size:11.5px}#info .ops div{padding:3px 0;border-top:1px solid var(--line)}#info .warn{color:#f5b50a}.lbl.go:hover{outline:2px solid #fff}
 .lbl.stair{background:var(--safe);color:#04150c;border-color:var(--safe)}.lbl.lift{background:var(--amber);color:#1a1400;border-color:var(--amber)}.lbl.ramp{background:var(--info);color:#04101c}.lbl.asm{background:var(--safe);color:#04150c;font-size:15px}
+.pill{all:unset;cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:12.5px;font-weight:700;white-space:nowrap}.pill.go{border-color:var(--safe)}.pill .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+#crumb{left:50%;transform:translateX(-50%);top:calc(var(--tb,56px) + 4px);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;white-space:nowrap;max-width:94vw;overflow:hidden;text-overflow:ellipsis}
+#crumb a{color:var(--fg);text-decoration:none;cursor:pointer}#crumb a:hover{color:var(--safe)}#crumb .sep{color:var(--muted);margin:0 6px}
+#tip{pointer-events:none;background:#19c37d;color:#04150c;font-weight:800;font-size:13px;padding:6px 10px;border-radius:8px;display:none;z-index:7;white-space:nowrap}
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(6,11,18,.78);display:none;place-items:center;padding:12px;overflow:auto}
+.sheet .box{background:#101a27;border:1px solid var(--line);border-radius:16px;padding:16px;max-width:640px;width:100%;max-height:94vh;overflow:auto}
+.sheet .hd{display:flex;align-items:center;gap:10px;margin-bottom:8px}.sheet .hd b{font-size:18px}.sheet .hd .ar{direction:rtl;color:#d9fff0;font-weight:700}.sheet .hd .x{all:unset;cursor:pointer;margin-left:auto;font-size:18px;color:var(--muted);padding:4px 8px}
+.sheet h4{margin:12px 0 6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-family:ui-monospace,monospace}
+.sheet .row{display:flex;gap:8px;flex-wrap:wrap}.sheet .row button,.sheet .grid button{all:unset;cursor:pointer;text-align:center;padding:9px 12px;border-radius:9px;border:1px solid var(--line);font-weight:800;background:#15202f;font-size:14px}
+.sheet .row button.on,.sheet .grid button.on{background:var(--safe);color:#04150c;border-color:var(--safe)}
+.sheet .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:6px}.sheet .grid button{padding:8px 0;position:relative}.sheet .grid button i{position:absolute;top:1px;right:4px;font-style:normal;font-size:10px;color:var(--safe)}
+.sheet input[type=search],.sheet input[type=text]{width:100%;background:#0b1320;border:1px solid var(--line);border-radius:9px;color:var(--fg);padding:9px 10px;font-size:14px}
+.sheet .list{display:flex;flex-direction:column;gap:4px;max-height:34vh;overflow:auto;margin-top:6px}.sheet .list button{all:unset;cursor:pointer;padding:8px 10px;border-radius:8px;background:#15202f;border:1px solid transparent;font-size:13.5px}.sheet .list button:hover{border-color:var(--safe)}.sheet .list button small{color:var(--muted);margin-left:6px}
+.sheet .note{color:var(--muted);font-size:12px;margin-top:6px}.sheet .warnb{color:#f5b50a;font-size:12.5px;margin-top:6px}
+.sheet .skip{all:unset;cursor:pointer;color:var(--muted);font-size:13px;margin-top:12px;display:inline-block}
+.bigbtn{all:unset;cursor:pointer;background:var(--safe);color:#04150c;font-weight:800;padding:10px 14px;border-radius:10px;text-align:center}.bigbtn.ghost{background:#1c2a3b;color:var(--fg)}.bigbtn:disabled,.bigbtn[disabled]{opacity:.4;cursor:not-allowed}
+#prog{height:8px;background:#0b1320;border-radius:5px;overflow:hidden;margin-top:8px}#prog i{display:block;height:100%;width:0;background:var(--safe);transition:width .2s}
+#steps{margin-top:8px;font-size:12px}#steps ol{margin:4px 0 0;padding-left:18px}#steps li{margin:3px 0}#steps .fl{color:#e5484d}
+#chatBtn{right:12px;bottom:calc(12px + 200px);width:52px;height:52px;border-radius:50%;background:var(--safe);color:#04150c;font-size:24px;display:grid;place-items:center;cursor:pointer;border:0;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#chat{right:12px;bottom:12px;width:min(380px,calc(100vw - 24px));height:min(520px,70vh);background:#101a27;border:1px solid var(--line);border-radius:14px;display:none;flex-direction:column;z-index:12}
+#chat .hd{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}#chat .hd b{font-size:15px}#chat .hd small{color:var(--muted);font-size:11px}#chat .hd .x{all:unset;cursor:pointer;margin-left:auto;color:var(--muted);font-size:18px;padding:2px 6px}
+#msgs{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+#msgs .m{max-width:88%;padding:7px 10px;border-radius:10px;line-height:1.45;white-space:pre-wrap}#msgs .u{align-self:flex-end;background:#1f6f4a}#msgs .a{align-self:flex-start;background:#18263a}#msgs .a.err{border:1px solid #f5b50a}
+#msgs .m[dir=rtl]{text-align:right}
+#sugg{display:flex;gap:6px;flex-wrap:wrap;padding:0 10px 6px}#sugg button{all:unset;cursor:pointer;font-size:12px;padding:5px 8px;border-radius:999px;border:1px solid var(--line);background:#15202f}
+#chat .bar{display:flex;gap:6px;padding:8px;border-top:1px solid var(--line)}#chat .bar input{flex:1;background:#0b1320;border:1px solid var(--line);border-radius:9px;color:var(--fg);padding:9px 10px;font-size:14px;min-width:0}
+#chat .bar button{all:unset;cursor:pointer;width:40px;text-align:center;border-radius:9px;background:#1c2a3b;font-size:18px}#chat .bar button#send{background:var(--safe);color:#04150c}#mic.on{background:#e5484d!important}
+#chat .bar2{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:0 10px 8px;font-size:11.5px;color:var(--muted)}#chat .bar2 select{padding:3px 6px;font-size:11.5px;border-radius:7px}#chat .bar2 button{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:7px;padding:3px 7px}
+#micSt{font-weight:700}#micSt.listen{color:#e5484d}#micSt.proc{color:#f5b50a}#micSt.done{color:var(--safe)}
+.lbl.here{background:#e5484d;color:#fff;font-size:13px;border:2px solid #fff}.lbl.pulse{animation:pl 1s ease-in-out 4}@keyframes pl{50%{transform:scale(1.25);box-shadow:0 0 0 6px rgba(25,195,125,.5)}}
+@media (max-width:760px){#crumb{font-size:12px}#info{top:calc(var(--tb,56px) + 44px)!important}#floorSel{display:none}.brand small{display:none}#chatBtn{bottom:calc(12px + 120px)}}
+
 @media (max-width:760px){#info{width:200px;font-size:12px}#map{width:150px}.brand span{display:none}.seg button{padding:6px 8px;font-size:12px}}
 </style></head><body>
 <div id="loading">Loading the building…</div>
 <canvas id="c" tabindex="0"></canvas>
 <div id="top" class="ui">
   <div class="brand"><i></i><span>UPTOWN T3 &amp; T4</span><small>EVACUATION 3D</small></div>
-  <div class="seg" id="mode"><button data-m="orbit" class="on">Overview</button><button data-m="walk">Walk</button><button data-m="plan">Plan</button></div>
+  <div class="seg" id="mode"><button data-m="orbit" class="on">3D</button><button data-m="plan">2D plan</button><button data-m="walk">Walk</button></div><button id="btnOverall" class="pill">⌂ Overall</button><button id="btnLoc" class="pill go">📍 Where am I?</button><button id="net" class="pill"></button>
   <select id="floorSel" aria-label="Floor"></select>
 </div>
 <div id="info" class="ui"><button class="toggle" id="infoT">▾</button><h3>You are on</h3><div class="body">
   <div class="big" id="fName">—</div><div id="fLvl" style="color:var(--muted)"></div>
-  <div class="dir" id="fDir"></div>
+  <div class="dir" id="fDir"></div><div id="steps"></div>
   <label><input type="checkbox" id="ly-guide" checked> Guide me out (green line)</label>
   <label><input type="checkbox" id="ly-lbl" checked> Stair / lift labels</label>
   <label><input type="checkbox" id="ly-noclip"> Walk through walls</label>
   <label><input type="checkbox" id="ly-above"> Show floors above (overview)</label>
-  <div class="src" style="color:var(--fg)">Tip: tap a green STAIR, a RAMP, an exit or the ASSEMBLY POINT label to walk there.</div>
+  <div class="src" style="color:var(--fg)">Tip: tap any floor in 3D to open it, tap your spot on the open floor (or use 📍 Where am I?) to see your route; tap a green STAIR / ASSEMBLY POINT label to walk there.</div>
   <div class="src" id="fSrc"></div><div class="ops" id="fOps"></div>
   <div class="leg"><b>Legend</b><br><span style="color:#e5484d">▭✕ dashed red</span> slab opening · green stair + landing + arrow = stair to the level shown on its sign · <span style="color:#19c37d">▯ green frame</span> = opening in the wall on the route · <span style="color:#e5484d">⚑</span> = route blocked, no approved opening → HSE review</div></div></div>
 <div id="map" class="ui"><canvas id="mapc" width="460" height="290"></canvas><div id="pos"></div></div>
 <div id="stairui" class="ui"><div class="nm" id="stairName"></div><div class="row"><button id="goDown" class="navb">▼ Down</button><button id="goUp" class="navb">▲ Up</button></div></div>
 <div id="dpad" class="ui"><button data-k="turnL">↶</button><button data-k="KeyW">▲</button><button data-k="turnR">↷</button><button data-k="KeyA">◀</button><button data-k="KeyS">▼</button><button data-k="KeyD">▶</button></div>
 <div id="toast" class="ui"></div>
-<div id="pick" style="display:none"><div class="box"><h2>Which floor are you on?</h2><div class="ar">انت في أنهي دور؟</div><p>Pick your floor — the green line will guide you to the nearest stair, down (or up) to the ground floor and out to the Assembly Point.</p><div class="grid" id="pickGrid"></div><button class="skip" id="pickSkip">Just show me the building →</button></div></div>
+<div id="crumb" class="ui"></div>
+<div id="tip" class="ui"></div>
+<div id="loc" class="sheet"><div class="box">
+  <div class="hd"><b>Where are you?</b><span class="ar">إنت فين؟</span><button class="x" id="locX" aria-label="Close">✕</button></div>
+  <div class="note" id="locQR"></div>
+  <h4>1 · Tower · البرج</h4><div class="row" id="locT"></div>
+  <h4>2 · Floor · الدور</h4><div class="grid" id="locF"></div><div class="warnb" id="locFw"></div>
+  <h4>3 · Place · المكان (from the floor drawing)</h4><input type="search" id="locQ" placeholder="Search: corridor, lobby, office, TO-1 … / ابحث: ممر، لوبي، مكتب"><div class="list" id="locP"></div><div class="note" id="locPn"></div>
+  <button class="skip" id="locLook">Just look at the whole project →</button>
+</div></div>
+<div id="off" class="sheet"><div class="box">
+  <div class="hd"><b>Use without internet</b><span class="ar">الاستخدام بدون إنترنت</span><button class="x" id="offX" aria-label="Close">✕</button></div>
+  <div id="offSt" class="note" style="color:var(--fg);font-size:13px"></div>
+  <h4>What to save on this phone · تنزيل إيه</h4>
+  <div class="row" id="offScope"><button data-s="all" class="on">Whole project</button><button data-s="T3">Tower T3 floors</button><button data-s="T4">Tower T4 floors</button><button data-s="pick">Choose floors</button></div>
+  <div class="grid" id="offF" style="display:none;margin-top:8px"></div>
+  <div class="note" id="offSize"></div>
+  <div id="prog"><i></i></div><div class="note" id="offProg"></div>
+  <div class="row" style="margin-top:10px"><button class="bigbtn" id="offGo">⬇ Download the plan for offline use</button><button class="bigbtn ghost" id="offUpd">↻ Check for update</button><button class="bigbtn ghost" id="offDel">🗑 Delete offline copy</button></div>
+  <h4>Add to home screen · على الشاشة الرئيسية</h4>
+  <div class="note"><b>Android (Chrome):</b> ⋮ menu → <i>Install app</i> / <i>Add to Home screen</i>.<br><b>iPhone (Safari):</b> Share ⬆ → <i>Add to Home Screen</i>.<br>The offline copy belongs to <b>this phone and this browser</b>: scan the QR with the same browser you downloaded with (on iPhone open the saved icon, or Safari). Another browser or app will not see the saved copy and needs internet.</div>
+</div></div>
+<button id="chatBtn" class="ui" aria-label="Assistant">💬</button>
+<div id="chat" class="ui">
+  <div class="hd"><b>Assistant · المساعد</b><small id="chatMode"></small><button class="x" id="chatX" aria-label="Close">✕</button></div>
+  <div id="msgs"></div><div id="sugg"></div>
+  <div class="bar"><button id="mic" title="Speak">🎤</button><input id="chatIn" placeholder="اكتب أمرك… / Type a command" autocomplete="off"><button id="send" title="Send">➤</button></div>
+  <div class="bar2"><span id="micSt">Mic: ready</span><select id="micLang"><option value="ar-EG">عربي (مصري)</option><option value="ar-SA">عربي</option><option value="en-US">English</option></select><label><input type="checkbox" id="ttsOn"> 🔊 Voice reply</label><button id="ttsStop">■ Stop reading</button></div>
+</div>
 
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
@@ -208,18 +269,18 @@ window.__dbg.goTo=goTo;window.__dbg.auto=()=>auto;
 function arriveStair(t){const d=cur>GFI?-1:(cur<GFI?1:0);if(!d){toast('At '+t.n);return;}
   if(t.review){toast('⚑ '+t.n+': '+(t.s&&t.s.reason||'opening not on an approved drawing')+' — use the ▼/▲ button only after HSE review');return;}
   setTimeout(()=>changeFloor(d),250);}
-function freeNear(x,y){if(F[cur].gf)return [x,y];const o=occOf(cur);let i=Math.floor(x/CELL),j=Math.floor(y/CELL);for(let r=0;r<200;r++){for(let a=-r;a<=r;a++)for(const [k,l] of [[i+a,j-r],[i+a,j+r],[i-r,j+a],[i+r,j+a]]){if(k>=0&&l>=0&&k<NX&&l<NY&&!o[l*NX+k])return [(k+.5)*CELL,(l+.5)*CELL];}}return [x,y];}
-function routeFrom(x,y){const f=F[cur];
+function freeNear(x,y,fi=cur){if(F[fi].gf)return [x,y];const o=occOf(fi);let i=Math.floor(x/CELL),j=Math.floor(y/CELL);for(let r=0;r<200;r++){for(let a=-r;a<=r;a++)for(const [k,l] of [[i+a,j-r],[i+a,j+r],[i-r,j+a],[i+r,j+a]]){if(k>=0&&l>=0&&k<NX&&l<NY&&!o[l*NX+k])return [(k+.5)*CELL,(l+.5)*CELL];}}return [x,y];}
+function routeFrom(x,y,fi=cur){const f=F[fi];
   if(f.gf){const G=D.gfNet;if(!G)return [[x,y],[ASM.x,ASM.y]];let k=-1,bd=1e9;for(let i=0;i<G.pts.length;i++){const c=1.6*Math.hypot(G.pts[i][0]-x,G.pts[i][1]-y)+G.d[i];if(c<bd){bd=c;k=i;}}
     // the marked GF evacuation route (revised assembly point): join the nearest part of it and follow it to the assembly point
     const pts=[[x,y]];let g=0;while(k>=0&&g++<5000){pts.push(G.pts[k]);k=G.nxt[k];}pts.push([ASM.x,ASM.y]);return pts.filter((p,i)=>i===0||i%3===0||i===pts.length-1);}
-  const d=distOf(cur);let i=Math.floor(x/CELL),j=Math.floor(y/CELL);if(i<0||j<0||i>=NX||j>=NY)return null;
-  if(d[j*NX+i]<0){let fnd=null;for(let r=1;r<16&&!fnd;r++)for(let b=-r;b<=r&&!fnd;b++)for(let a=-r;a<=r&&!fnd;a++){const k=i+a,l=j+b;if(k>=0&&l>=0&&k<NX&&l<NY&&d[l*NX+k]>=0)fnd=[k,l];}if(!fnd)return blockedRoute(x,y);[i,j]=fnd;}
+  const d=distOf(fi);let i=Math.floor(x/CELL),j=Math.floor(y/CELL);if(i<0||j<0||i>=NX||j>=NY)return null;
+  if(d[j*NX+i]<0){let fnd=null;for(let r=1;r<16&&!fnd;r++)for(let b=-r;b<=r&&!fnd;b++)for(let a=-r;a<=r&&!fnd;a++){const k=i+a,l=j+b;if(k>=0&&l>=0&&k<NX&&l<NY&&d[l*NX+k]>=0)fnd=[k,l];}if(!fnd)return blockedRoute(x,y,fi);[i,j]=fnd;}
   const pts=[[x,y]];let g=0;while(d[j*NX+i]>0&&g++<8000){let bi=i,bj=j,bd=d[j*NX+i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=i+a,l=j+b;if(k>=0&&l>=0&&k<NX&&l<NY){const v=d[l*NX+k];if(v>=0&&v<bd){bd=v;bi=k;bj=l;}}}if(bi===i&&bj===j)break;i=bi;j=bj;pts.push([(i+.5)*CELL,(j+.5)*CELL]);}
   return pts.filter((p,k)=>k%5===0||k===pts.length-1);}
 // no approved route: walk straight towards the nearest approved stair and stop at the first wall/slab edge — never cut a new opening
-function blockedRoute(x,y){const f=F[cur];let best=null,bd=1e9;for(const s of f.stairs){if(s.review||s.landOnly)continue;const dd=Math.hypot(s.x-x,s.y-y);if(dd<bd){bd=dd;best=s;}}if(!best)return null;
-  const o=occOf(cur);const n=Math.ceil(bd/0.2);let lx=x,ly=y;for(let k=1;k<=n;k++){const px=x+(best.x-x)*k/n,py=y+(best.y-y)*k/n;const i=Math.floor(px/CELL),j=Math.floor(py/CELL);if(i<0||j<0||i>=NX||j>=NY||o[j*NX+i])break;lx=px;ly=py;}
+function blockedRoute(x,y,fi=cur){const f=F[fi];let best=null,bd=1e9;for(const s of f.stairs){if(s.review||s.landOnly)continue;const dd=Math.hypot(s.x-x,s.y-y);if(dd<bd){bd=dd;best=s;}}if(!best)return null;
+  const o=occOf(fi);const n=Math.ceil(bd/0.2);let lx=x,ly=y;for(let k=1;k<=n;k++){const px=x+(best.x-x)*k/n,py=y+(best.y-y)*k/n;const i=Math.floor(px/CELL),j=Math.floor(py/CELL);if(i<0||j<0||i>=NX||j>=NY||o[j*NX+i])break;lx=px;ly=py;}
   const pts=[[x,y],[lx,ly]];pts.flag={x:lx,y:ly,to:best.id||'stair',reason:'Wall or slab blocks the route to '+(best.id||'the stair')+' and the drawings show no approved opening here — HSE review'};return pts;}
 // openings in walls along the route: narrow gaps between concrete that the route passes through
 function doorwaysOn(pts){if(!pts||F[cur].gf)return [];const o=occOf(cur);const isB=(x,y)=>{const i=Math.floor(x/CELL),j=Math.floor(y/CELL);return i<0||j<0||i>=NX||j>=NY||o[j*NX+i]===1;};
@@ -237,13 +298,14 @@ const orbit=new OrbitControls(camera,renderer.domElement);orbit.enableDamping=tr
 const routeLine=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0x19c37d}));routeLine.frustumCulled=false;scene.add(routeLine);
 const routeTube=new THREE.Group();scene.add(routeTube);
 let routePts=null,routeDoors=[];
-function updateRoute(){routePts=(mode==='walk')?(auto&&auto.pts?[[player.x,player.y],...auto.pts.slice(auto.k)]:routeFrom(player.x,player.y)):null;routeTube.clear();
+function updateRoute(){routePts=(mode==='walk'||(here&&here.i===cur&&!overall))?(auto&&auto.pts?[[player.x,player.y],...auto.pts.slice(auto.k)]:routeFrom(player.x,player.y)):null;routeTube.clear();
   if(!routePts||!document.getElementById('ly-guide').checked){routeLine.visible=false;return;}
   const y0=F[cur].ffl+0.08;const arr=new Float32Array(routePts.length*3);routePts.forEach(([x,y],k)=>{arr[k*3]=x;arr[k*3+1]=y0;arr[k*3+2]=toZ(y);});
   routeLine.geometry.dispose();routeLine.geometry=new THREE.BufferGeometry();routeLine.geometry.setAttribute('position',new THREE.BufferAttribute(arr,3));routeLine.visible=true;
   // flat green ribbon (visible on phones where lines are 1px)
   const m=new THREE.MeshBasicMaterial({color:0x19c37d,transparent:true,opacity:.85});
   for(let k=1;k<routePts.length;k++){const [ax,ay]=routePts[k-1],[bx,by]=routePts[k];const L=Math.hypot(bx-ax,by-ay);if(L<0.01)continue;const b=new THREE.Mesh(new THREE.PlaneGeometry(L,0.45),m);b.rotation.x=-Math.PI/2;b.rotation.z=Math.atan2(by-ay,bx-ax);b.position.set((ax+bx)/2,y0,toZ((ay+by)/2));routeTube.add(b);}
+  addArrows(routeTube,routePts,y0+0.05);
   routeDoors=doorwaysOn(routePts);const fy0=F[cur].ffl;
   for(const dw of routeDoors){const fr=new THREE.Group();const hw=Math.max(0.45,dw.w/2),ht=2.3;
     for(const sgn of [-1,1]){const post=new THREE.Mesh(new THREE.BoxGeometry(0.12,ht,0.12),doorMat);post.position.set(sgn*hw,ht/2,0);fr.add(post);}
@@ -255,10 +317,10 @@ function updateRoute(){routePts=(mode==='walk')?(auto&&auto.pts?[[player.x,playe
     document.getElementById('fDir').textContent='⚑ '+fl.reason;}}
 function dirText(i){const f=F[i];if(f.gf)return 'Follow the green line out of the building to the ASSEMBLY POINT.';return i>GFI?'Go to the nearest stair and walk DOWN to the ground floor. Never use the lifts.':'Go to the nearest stair (or the ramp) and walk UP to the ground floor. Never use the lifts.';}
 function applyFloor(){const f=F[cur];
-  FG.forEach((fg,i)=>{const show=mode==='walk'?(i===cur):(i<=cur||document.getElementById('ly-above').checked);fg.g.visible=show;
-    if(fg.conc)fg.conc.material=i===cur?concCur:concMat;
-    fg.floor.material=(i===cur&&fg.mat)?fg.mat:slabMat;
-    const lv=i===cur&&document.getElementById('ly-lbl').checked;fg.lb.visible=lv;fg.lb.children.forEach(o=>{if(o.isCSS2DObject)o.visible=lv&&show;});fg.st.visible=i===cur||mode!=='walk';});
+  FG.forEach((fg,i)=>{const show=mode==='walk'||mode==='plan'?(i===cur):(overall||i<=cur||document.getElementById('ly-above').checked);fg.g.visible=show;
+    if(fg.conc)fg.conc.material=(i===cur&&!overall)?concCur:concMat;
+    fg.floor.material=(i===cur&&fg.mat&&!overall)?fg.mat:(i===hov?hoverMat:slabMat);
+    const lv=i===cur&&!overall&&document.getElementById('ly-lbl').checked;fg.lb.visible=lv;fg.lb.children.forEach(o=>{if(o.isCSS2DObject)o.visible=lv&&show;});fg.st.visible=i===cur||mode!=='walk';});
   floorTexture(cur);
   if(ceil){scene.remove(ceil);ceil.traverse(o=>{if(o.geometry)o.geometry.dispose();});ceil=null;}
   if(mode==='walk'&&!f.gf&&f.foot&&f.foot.length){const cg=mergeGeometries(f.foot.map(fp=>{const s=new THREE.ShapeGeometry(shapeOf(fp.o,fp.h));s.rotateX(-Math.PI/2);return s.toNonIndexed();}));ceil=new THREE.Group();const cm=new THREE.Mesh(cg,ceilMat);cm.position.y=f.h-0.25;ceil.add(cm);ceil.position.y=f.ffl;
@@ -271,8 +333,8 @@ function applyFloor(){const f=F[cur];
   document.getElementById('fDir').textContent=dirText(cur);
   document.getElementById('fSrc').textContent='Drawing: '+f.src;
   const ops=f.openings||[];document.getElementById('fOps').innerHTML=(f.k.startsWith('L')?'<b>Slab openings</b>':'')+ops.map(o=>`<div class="${(o.status==='approved'||o.status==='access')?'':'warn'}">${(o.status==='approved'||o.status==='access')?'✓':'⚠'} ${o.label}<br><span style="color:var(--muted)">${o.src}</span></div>`).join('')+(f.k.startsWith('L')&&!ops.length?`<div style="color:var(--muted)">${f.openingsSrc||''}</div>`:'')+f.stairs.filter(s=>s.review).map(s=>`<div class="warn">⚠ ${s.id}: ${s.reason}</div>`).join('');
-  try{history.replaceState(null,'','#'+f.k);}catch(e){}
-  updateRoute();}
+  try{history.replaceState(null,'',overall?location.pathname+location.search:'#'+[focusTw||towerAt(player.x),f.k,here&&here.i===cur?encodeURIComponent(here.place):''].filter(Boolean).join('/'));}catch(e){}
+  updateRoute();drawChain();crumb();}
 function setMode(m){mode=m;document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));orbit.enabled=m!=='walk';
   document.getElementById('dpad').style.display=m==='walk'?'grid':'none';
   const f=F[cur];
@@ -281,7 +343,7 @@ function setMode(m){mode=m;document.querySelectorAll('#mode button').forEach(b=>
     if(m==='plan')camera.position.set(cx,f.ffl+260,cz+0.01);else camera.position.set(cx+120,f.ffl+95,cz+150);}
   camera.updateProjectionMatrix();applyFloor();if(m==='walk')setTimeout(()=>canvas.focus({preventScroll:true}),30);}
 function walkTo(x,y,yaw){const p=freeNear(x,y);player.x=p[0];player.y=p[1];if(yaw!==undefined)player.yaw=yaw;setMode('walk');}
-function startOn(i){cur=i;const f=F[i];
+function startOn(i){cur=i;overall=false;const f=F[i];
   let cx=W/2,cy=H/2;if(f.foot&&f.foot.length){let a=0,sx=0,sy=0;for(const fp of f.foot)for(const [x,y] of fp.o){sx+=x;sy+=y;a++;}cx=sx/a;cy=sy/a;}
   if(f.gf){cx=60;cy=60;walkTo(cx,cy,0);}
   else{ // start in an open, reachable spot (not inside a core or against a wall) and face along the green line
@@ -291,6 +353,7 @@ function startOn(i){cur=i;const f=F[i];
     if(!sp)sp=freeNear(cx,cy);
     let yaw=0;const rt=routeFrom(sp[0],sp[1]);if(rt&&rt.length>1){const q=rt[Math.min(2,rt.length-1)];yaw=Math.atan2(-(q[0]-sp[0]),q[1]-sp[1]);}
     walkTo(sp[0],sp[1],yaw);}
+  focusTw=focusTw||towerAt(player.x);here={i,x:player.x,y:player.y,tw:focusTw,place:'Start point'};drawChain();crumb();
   toast(f.name+' — follow the green line');}
 window.__dbg.reach=(i)=>{const o=occOf(i),d=distOf(i);let free=0,reach=0;for(let k=0;k<o.length;k++){if(!o[k]){free++;if(d[k]>=0)reach++;}}return [free,reach];};window.__dbg.startOn=startOn;window.__dbg.routeFrom=(x,y)=>routeFrom(x,y);window.__dbg.cur=()=>cur;window.__dbg.setMode=setMode;window.__dbg.walkTo=walkTo;
 // ---------- stairs / ramp ----------
@@ -311,9 +374,9 @@ document.getElementById('goUp').addEventListener('click',()=>changeFloor(1));doc
 function toast(m){const el=document.getElementById('toast');el.textContent=m;el.style.opacity=1;clearTimeout(el._t);el._t=setTimeout(()=>el.style.opacity=0,2600);}
 // ---------- input ----------
 const keys=window.__dbg.keys={};const NAV=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD','KeyE','KeyQ','PageUp','PageDown'];
-function onKey(e){if(e._s)return;e._s=1;if(e.target&&e.target.tagName==='SELECT')return;let c=e.code;if(!NAV.includes(c)){const km={w:'KeyW',a:'KeyA',s:'KeyS',d:'KeyD',e:'KeyE',q:'KeyQ'};c=km[(e.key||'').toLowerCase()]||c;}
+function onKey(e){if(e._s)return;e._s=1;if(e.target&&(e.target.tagName==='SELECT'||e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;let c=e.code;if(!NAV.includes(c)){const km={w:'KeyW',a:'KeyA',s:'KeyS',d:'KeyD',e:'KeyE',q:'KeyQ'};c=km[(e.key||'').toLowerCase()]||c;}
   if(!NAV.includes(c)){keys[c]=true;return;}e.preventDefault();
-  if(mode!=='walk'){startOn(cur);}
+  if(mode!=='walk'){if(here&&here.i===cur&&!overall)setMode('walk');else startOn(cur);}
   if(c==='KeyE'||c==='PageUp'){changeFloor(1);return;}if(c==='KeyQ'||c==='PageDown'){changeFloor(-1);return;}keys[c]=true;}
 addEventListener('keydown',onKey,true);document.addEventListener('keydown',onKey,true);
 addEventListener('keyup',e=>{keys[e.code]=false;const km={w:'KeyW',a:'KeyA',s:'KeyS',d:'KeyD'};const k=km[(e.key||'').toLowerCase()];if(k)keys[k]=false;});addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});
@@ -321,14 +384,11 @@ let drag=null;canvas.addEventListener('pointerdown',e=>{canvas.focus({preventScr
 canvas.addEventListener('pointermove',e=>{if(drag){player.yaw=drag.yaw-(e.clientX-drag.x)*0.005;pitch=Math.max(-1.1,Math.min(1.1,drag.p-(e.clientY-drag.y)*0.004));}});
 canvas.addEventListener('pointerup',()=>drag=null);canvas.addEventListener('pointercancel',()=>drag=null);
 document.querySelectorAll('#dpad button').forEach(b=>{const k=b.dataset.k;const on=e=>{e.preventDefault();keys[k]=true;b.classList.add('on');};const off=()=>{keys[k]=false;b.classList.remove('on');};b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointerleave',off);b.addEventListener('pointercancel',off);});
-document.querySelectorAll('#mode button').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.m==='walk')startOn(cur);else setMode(b.dataset.m);}));
+document.querySelectorAll('#mode button').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.m==='walk'){if(here&&here.i===cur&&!overall)setMode('walk');else startOn(cur);}else{if(b.dataset.m==='plan'&&overall){selectFloor(cur,focusTw||'T3',true);}setMode(b.dataset.m);}}));
 const sel=document.getElementById('floorSel');for(let i=N-1;i>=0;i--){const o=document.createElement('option');o.value=i;o.textContent=F[i].k+' · '+F[i].name.replace(/^Level \d+ ?/,'').replace(/^(Basement|Podium) \d/,'')+'';o.textContent=F[i].name;sel.appendChild(o);}
-sel.addEventListener('change',()=>{cur=+sel.value;if(mode==='walk')startOn(cur);else setMode(mode);sel.blur();});
+sel.addEventListener('change',()=>{const i=+sel.value;if(mode==='walk')startOn(i);else selectFloor(i,focusTw||'T3');sel.blur();});
 for(const id of ['ly-guide','ly-lbl','ly-noclip','ly-above'])document.getElementById(id).addEventListener('change',()=>{applyFloor();});
 document.getElementById('infoT').addEventListener('click',()=>{const el=document.getElementById('info');el.classList.toggle('min');document.getElementById('infoT').textContent=el.classList.contains('min')?'▸':'▾';});
-// floor picker
-const pg=document.getElementById('pickGrid');for(let i=N-1;i>=0;i--){const b=document.createElement('button');b.textContent=F[i].k;if(F[i].gf)b.className='gf';b.title=F[i].name;b.addEventListener('click',()=>{document.getElementById('pick').style.display='none';startOn(i);});pg.appendChild(b);}
-document.getElementById('pickSkip').addEventListener('click',()=>{document.getElementById('pick').style.display='none';setMode('orbit');});
 // ---------- minimap ----------
 const mc=document.getElementById('mapc'),mx=mc.getContext('2d');const ms=Math.min(mc.width/W,mc.height/H);
 function drawMap(){const f=F[cur];mx.fillStyle='#e9edf1';mx.fillRect(0,0,mc.width,mc.height);
@@ -346,7 +406,7 @@ function drawMap(){const f=F[cur];mx.fillStyle='#e9edf1';mx.fillRect(0,0,mc.widt
 // ---------- loop ----------
 const clock=new THREE.Clock();let rt=0,arrived=false;
 function step(dt){
-  if(mode!=='walk'){orbit.update();return;}
+  if(mode!=='walk'){stepFly();orbit.update();return;}
   const run=keys.ShiftLeft||keys.ShiftRight;const sp=(run?6:3.2)*dt;
   let fw=0,sd=0;if(keys.KeyW||keys.ArrowUp)fw+=1;if(keys.KeyS||keys.ArrowDown)fw-=1;if(keys.KeyD)sd+=1;if(keys.KeyA)sd-=1;
   if(keys.ArrowLeft||keys.turnL)player.yaw+=1.7*dt;if(keys.ArrowRight||keys.turnR)player.yaw-=1.7*dt;
@@ -370,15 +430,355 @@ function step(dt){
   if(anim){const t=Math.min(1,(performance.now()-anim.t0)/1200),k=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;eye=anim.from+(anim.to-anim.from)*k;
     if(t>=.5&&!anim.sw){anim.sw=true;cur=anim.f;const p=F[cur].gf?[anim.tgt.x,anim.tgt.y]:(()=>{const q=freeNear(anim.tgt.x,anim.tgt.y);return q;})();player.x=p[0];player.y=p[1];applyFloor();toast('Landing — '+(anim.sid||'stair')+' at '+F[cur].name+(F[cur].gf?' — follow the line out to the Assembly Point':' — follow the green line'));}
     if(t>=1)anim=null;}
-  rt+=dt;if(rt>0.35){rt=0;updateRoute();}
+  rt+=dt;if(rt>0.35){rt=0;if(here){here.i=cur;here.x=player.x;here.y=player.y;}updateRoute();}
   if(F[cur].gf&&Math.hypot(player.x-ASM.x,player.y-ASM.y)<6&&!arrived){arrived=true;toast('✔ You reached the ASSEMBLY POINT — stay with your supervisor for the roll call');}
   camera.position.set(player.x,eye,toZ(player.y));camera.rotation.set(pitch,player.yaw,0,'YXZ');
 }
 function loop(){const dt=Math.min(clock.getDelta(),0.05);step(dt);renderer.render(scene,camera);labelR.render(scene,camera);drawMap();requestAnimationFrame(loop);}
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);labelR.setSize(innerWidth,innerHeight);});
+// =====================================================================
+// v2: location picker, clickable floors, full evacuation chain, assistant, voice, offline
+// =====================================================================
+const $=id=>document.getElementById(id);
+const TW=D.towers||{T3:{floors:F.map(f=>f.k)},T4:{floors:F.map(f=>f.k)}};
+const towerAt=x=>x<80?'T4':'T3';
+const TWC={T3:[112,52],T4:[45,93]};          // tower centres on plan (model metres)
+const twFloors=tw=>F.map((f,i)=>i).filter(i=>TW[tw].floors.includes(F[i].k));
+const fShort=f=>f.gf?'GF':f.k;
+// ---------- camera fly ----------
+let fly=null;
+function flyTo(tx,ty,tz,px,py,pz,ms=900){fly={t0:performance.now(),ms,a:{t:orbit.target.clone(),p:camera.position.clone()},b:{t:new THREE.Vector3(tx,ty,tz),p:new THREE.Vector3(px,py,pz)}};}
+function stepFly(){if(!fly)return;const t=Math.min(1,(performance.now()-fly.t0)/fly.ms),k=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+  orbit.target.lerpVectors(fly.a.t,fly.b.t,k);camera.position.lerpVectors(fly.a.p,fly.b.p,k);if(t>=1)fly=null;}
+function viewOverall(){const top=F[N-1].ffl;flyTo(W/2,F[GFI].ffl+20,-H/2,W/2+150,top+70,-H/2+190);}
+function viewTower(tw){const [x,y]=TWC[tw];const top=F[twFloors(tw).slice(-1)[0]].ffl;flyTo(x,F[GFI].ffl+top/2*0.6,toZ(y),x+95,top*0.8+40,toZ(y)+120);}
+function viewFloor(i,tw,x,y){const f=F[i];let cx,cy;if(x!==undefined){cx=x;cy=y;}else if(tw&&!f.gf){[cx,cy]=TWC[tw];}else{cx=W/2;cy=H/2;}
+  if(mode==='plan')flyTo(cx,f.ffl,toZ(cy),cx,f.ffl+(x!==undefined?90:150),toZ(cy)+0.01,700);
+  else{const r=(x!==undefined)?45:(tw&&!f.gf&&f.k.startsWith('L')?70:130);flyTo(cx,f.ffl,toZ(cy),cx+r*0.6,f.ffl+r*0.75,toZ(cy)+r*0.85);}}
+// replace the old camera placement in setMode
+const _setMode=setMode;
+setMode=function(m){mode=m;document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));orbit.enabled=m!=='walk';
+  $('dpad').style.display=m==='walk'?'grid':'none';if(m!=='walk')$('stairui').style.display='none';
+  camera.fov=m==='walk'?72:(m==='plan'?40:55);camera.updateProjectionMatrix();
+  if(m==='walk'){overall=false;}
+  applyFloor();
+  if(m!=='walk'){if(overall)viewOverall();else viewFloor(cur,focusTw,here&&here.i===cur?player.x:undefined,here&&here.i===cur?player.y:undefined);}
+  if(m==='walk')setTimeout(()=>canvas.focus({preventScroll:true}),30);};
+window.__dbg.setMode=setMode;
+// ---------- floor hover / click in the 3D view ----------
+const hoverMat=new THREE.MeshStandardMaterial({color:0x19c37d,emissive:0x0c6b43,emissiveIntensity:.7,transparent:true,opacity:.95});
+const pr=new THREE.Raycaster(),pm=new THREE.Vector2();
+function floorAtScreen(cx,cy){if(mode==='walk')return null;const r=canvas.getBoundingClientRect();pm.set((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1);pr.setFromCamera(pm,camera);
+  const objs=[];FG.forEach(fg=>{if(fg.g.visible){objs.push(fg.floor);if(fg.conc)objs.push(fg.conc);}});
+  const h=pr.intersectObjects(objs,false)[0];if(!h)return null;const i=FG.findIndex(fg=>fg.floor===h.object||fg.conc===h.object);if(i<0)return null;
+  let tw=towerAt(h.point.x);if(!TW[tw].floors.includes(F[i].k))tw=tw==='T3'?'T4':'T3';return {i,tw,x:h.point.x,y:-h.point.z};}
+function setHover(i){if(i===hov)return;const old=hov;hov=i;for(const k of [old,i])if(k>=0&&FG[k])FG[k].floor.material=(k===cur&&FG[k].mat&&!overall)?FG[k].mat:(k===hov?hoverMat:slabMat);}
+let down=null;
+canvas.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,t:performance.now()};});
+canvas.addEventListener('pointermove',e=>{if(mode==='walk'||e.pointerType==='touch'){return;}if(down&&e.buttons)return;const h=floorAtScreen(e.clientX,e.clientY);const tip=$('tip');
+  if(h){setHover(h.i);tip.style.display='block';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY+10)+'px';tip.textContent=(F[h.i].k.startsWith('L')?h.tw+' · ':'')+F[h.i].name+' — click to open';canvas.style.cursor='pointer';}
+  else{setHover(-1);tip.style.display='none';canvas.style.cursor='';}});
+canvas.addEventListener('pointerleave',()=>{setHover(-1);$('tip').style.display='none';});
+canvas.addEventListener('pointerup',e=>{if(!down)return;const moved=Math.hypot(e.clientX-down.x,e.clientY-down.y);const dt=performance.now()-down.t;down=null;if(mode==='walk'||moved>6||dt>600)return;
+  const h=floorAtScreen(e.clientX,e.clientY);if(!h)return;
+  if(!overall&&h.i===cur&&mode!=='walk'){ // click inside the open floor = "I am here"
+    setHere(h.i,h.x,h.y,h.tw,'Point picked on the plan');return;}
+  selectFloor(h.i,h.tw);});
+function selectFloor(i,tw,quiet){cur=i;focusTw=tw||focusTw||'T3';if(!TW[focusTw].floors.includes(F[i].k))focusTw=focusTw==='T3'?'T4':'T3';overall=false;if(here&&here.i!==i)here=null;
+  if(mode==='walk')mode='orbit';setMode(mode);floorTexture(i);if(!quiet)toast((F[i].k.startsWith('L')?focusTw+' · ':'')+F[i].name+' — tap your spot on the floor, or pick it from “Where am I?”');return true;}
+function backToOverall(){overall=true;here=null;hereMark.visible=false;if(mode!=='orbit')mode='orbit';setMode('orbit');}
+// ---------- "You are here" ----------
+let overall=true,focusTw=null,here=null,hov=-1;
+const hereMark=new THREE.Group();{const pin=new THREE.Mesh(new THREE.ConeGeometry(0.7,2.2,16),new THREE.MeshBasicMaterial({color:0xe5484d}));pin.rotation.x=Math.PI;pin.position.y=1.6;hereMark.add(pin);
+  const ring=new THREE.Mesh(new THREE.RingGeometry(1.0,1.6,24),new THREE.MeshBasicMaterial({color:0xe5484d,side:THREE.DoubleSide,transparent:true,opacity:.8}));ring.rotation.x=-Math.PI/2;ring.position.y=0.06;hereMark.add(ring);
+  const lab=document.createElement('div');lab.className='lbl here';lab.textContent='📍 You are here';const lo=new CSS2DObject(lab);lo.position.y=3.4;hereMark.add(lo);hereMark.userData.lo=lo;}
+hereMark.visible=false;scene.add(hereMark);
+const selMark=new THREE.Group();{const pin=new THREE.Mesh(new THREE.ConeGeometry(0.6,1.9,16),new THREE.MeshBasicMaterial({color:0x4aa3ff}));pin.rotation.x=Math.PI;pin.position.y=1.4;selMark.add(pin);
+  const lab=document.createElement('div');lab.className='lbl ramp';const lo=new CSS2DObject(lab);lo.position.y=3.0;selMark.add(lo);selMark.userData.lo=lo;selMark.userData.el=lab;}
+selMark.visible=false;scene.add(selMark);let sel2=null;
+function showPlace(i,p,tw){selectFloor(i,tw,true);sel2={i,...p};selMark.userData.el.textContent='📌 '+p.n;selMark.position.set(p.x,F[i].ffl,toZ(p.y));selMark.visible=true;selMark.userData.lo.visible=true;viewFloor(i,tw,p.x,p.y);pulseSel();}
+function pulseSel(){const e=selMark.userData.el;e.classList.remove('pulse');void e.offsetWidth;e.classList.add('pulse');}
+function placeHereMark(){if(sel2&&(sel2.i!==cur||overall||mode==='walk')){selMark.visible=false;selMark.userData.lo.visible=false;}else if(sel2){selMark.visible=true;selMark.userData.lo.visible=true;}
+ const v=!!here&&here.i===cur&&!overall&&mode!=='walk';hereMark.visible=v;hereMark.userData.lo.visible=v;if(v)hereMark.position.set(player.x,F[cur].ffl,toZ(player.y));}
+function setHere(i,x,y,tw,place){cur=i;focusTw=tw||towerAt(x);overall=false;const p=freeNear(x,y,i);player.x=p[0];player.y=p[1];
+  const rt=routeFrom(p[0],p[1],i);if(rt&&rt.length>1){const q=rt[Math.min(2,rt.length-1)];player.yaw=Math.atan2(-(q[0]-p[0]),q[1]-p[1]);}
+  here={i,x:p[0],y:p[1],tw:focusTw,place:place||'Selected point'};floorTexture(i);
+  if(mode==='walk'){applyFloor();}else{setMode(mode);}
+  placeHereMark();
+  const ch=chainFrom(i,p[0],p[1]);const last=ch[ch.length-1];
+  toast('📍 '+place+' — '+(last&&last.end==='asm'?'green route to the Assembly Point shown':last&&last.end==='flag'?'route stops: HSE review':'route data incomplete — see the steps'));return true;}
+// ---------- full evacuation chain (this floor → stairs → ground floor → assembly point) ----------
+function chainFrom(i,x,y){const out=[];let g=0;
+  while(g++<40){const f=F[i];const pts=routeFrom(x,y,i);
+    if(!pts){out.push({i,pts:[[x,y]],end:'none'});break;}
+    if(f.gf){out.push({i,pts,end:'asm'});break;}
+    if(pts.flag){out.push({i,pts,end:'flag',flag:pts.flag});break;}
+    const e=pts[pts.length-1];let s=null,bd=1e9;for(const q of f.stairs){if(q.review||q.landOnly||!continues(i,q))continue;const dd=Math.hypot(q.x-e[0],q.y-e[1]);if(dd<bd){bd=dd;s=q;}}
+    if(!s){out.push({i,pts,end:'none'});break;}
+    const dir=i>GFI?-1:1,t=i+dir;if(t<0||t>=N){out.push({i,pts,end:'none'});break;}
+    let tgt=null,b2=15;for(const q of F[t].stairs){if(!!q.review!==!!s.review&&!F[t].gf)continue;const dd=Math.hypot(q.x-s.x,q.y-s.y)-(q.id&&q.id===s.id?5:0);if(dd<b2){b2=dd;tgt=q;}}
+    out.push({i,pts,end:'stair',s,t});const q=tgt||s;const p=F[t].gf?[q.x,q.y]:freeNear(q.x,q.y,t);i=t;x=p[0];y=p[1];}
+  return out;}
+const plen=pts=>pts.reduce((a,p,k)=>k?a+Math.hypot(p[0]-pts[k-1][0],p[1]-pts[k-1][1]):0,0);
+function chainSteps(ch){const L=[];let k=0;
+  while(k<ch.length){const c=ch[k],f=F[c.i],m=Math.round(plen(c.pts));
+    if(c.end==='stair'){let j=k;while(j+1<ch.length&&ch[j+1].end==='stair'&&ch[j+1].s.id===c.s.id&&plen(ch[j+1].pts)<8)j++;
+      const last=ch[j];L.push({t:`${f.name}: walk ${m} m to ${c.s.id||'the stair'}, then go ${c.i>GFI?'DOWN':'UP'} ${c.s.id||'the stair'} to ${F[last.t].name}`+(j>k?` (${j-k+1} floors)`:'')});k=j+1;continue;}
+    if(c.end==='asm'){L.push({t:`Ground floor: follow the green route ${m} m out to the ASSEMBLY POINT`});}
+    else if(c.end==='flag'){L.push({t:'⚑ '+c.flag.reason,fl:true});}
+    else L.push({t:`${f.name}: route data missing from this point — HSE review`,fl:true});k++;}
+  return L;}
+const chainGroup=new THREE.Group();scene.add(chainGroup);
+const arrowMat=new THREE.MeshBasicMaterial({color:0x0e8a55});
+function addArrows(grp,pts,y){let acc=0;for(let k=1;k<pts.length;k++){const [ax,ay]=pts[k-1],[bx,by]=pts[k];const L=Math.hypot(bx-ax,by-ay);if(L<0.01)continue;
+  for(let t=(5-acc%5);t<L;t+=5){const c=new THREE.Mesh(new THREE.ConeGeometry(0.32,0.9,3),arrowMat);c.position.set(ax+(bx-ax)*t/L,y,toZ(ay+(by-ay)*t/L));c.rotation.set(-Math.PI/2,0,Math.atan2(by-ay,bx-ax)-Math.PI/2,'XYZ');
+    // point the cone along the walking direction on the floor
+    c.rotation.set(0,0,0);c.lookAt(new THREE.Vector3(bx,y,toZ(by)));c.rotateX(Math.PI/2);grp.add(c);}acc+=L;}}
+let lastChain=null;
+function drawChain(){chainGroup.traverse(o=>{if(o.geometry&&o!==chainGroup)o.geometry.dispose();});chainGroup.clear();lastChain=null;
+  if(!here||overall||here.i!==cur){$('steps').innerHTML=here?'':'<span style="color:var(--muted)">Choose “Where am I?” to see your evacuation route.</span>';return;}
+  const ch=chainFrom(cur,player.x,player.y);lastChain=ch;chainGroup.visible=mode==='orbit';
+  const m=new THREE.MeshBasicMaterial({color:0x19c37d,transparent:true,opacity:.85});
+  if(mode!=='walk')for(const c of ch.slice(1)){const y0=F[c.i].ffl+0.1;const P=c.pts;
+    for(let k=1;k<P.length;k++){const [ax,ay]=P[k-1],[bx,by]=P[k];const L=Math.hypot(bx-ax,by-ay);if(L<0.01)continue;const b=new THREE.Mesh(new THREE.PlaneGeometry(L,0.6),m);b.rotation.x=-Math.PI/2;b.rotation.z=Math.atan2(by-ay,bx-ax);b.position.set((ax+bx)/2,y0,toZ((ay+by)/2));chainGroup.add(b);}
+    addArrows(chainGroup,P,y0+0.05);
+    if(c.end==='stair'){const s=c.s;const a=new THREE.ArrowHelper(new THREE.Vector3(0,c.i>GFI?-1:1,0),new THREE.Vector3(s.x,y0+2.4,toZ(s.y)),2.2,0x19c37d,0.8,0.6);chainGroup.add(a);}}
+  const st=chainSteps(ch);$('steps').innerHTML='<b>Evacuation route</b><ol>'+st.map(s=>`<li class="${s.fl?'fl':''}">${s.t}</li>`).join('')+'</ol><div style="color:var(--muted)">Stairs and openings used are the ones on the drawings listed below. Never use the lifts.</div>';}
+// ---------- breadcrumb ----------
+function crumb(){const c=$('crumb');const f=F[cur];
+  if(overall){c.innerHTML='<a data-s="0">Whole project</a><span class="sep">→</span><a data-s="1">choose tower / floor</a>';}
+  else{const tw=f.k.startsWith('L')||here?(focusTw||'T3'):(focusTw||'Site');c.innerHTML=`<a data-s="0">Project</a><span class="sep">→</span><a data-s="1">${tw}</a><span class="sep">→</span><a data-s="2">${f.name}</a><span class="sep">→</span><a data-s="3">${here&&here.i===cur?here.place:'choose place'}</a>`;}
+  c.querySelectorAll('a').forEach(a=>a.onclick=()=>{const s=+a.dataset.s;if(s===0)backToOverall();else openLoc(s);});
+  placeHereMark();}
+// ---------- location chooser ----------
+let locTw='T3',locF=null;
+function openLoc(step){locTw=focusTw||locTw;locF=overall?null:cur;$('loc').style.display='grid';drawLoc();if(step>=3)setTimeout(()=>$('locQ').focus(),50);}
+function closeLoc(){$('loc').style.display='none';}
+function savedFloors(){return OFFMETA&&OFFMETA.complete?OFFMETA.floors:[];}
+function drawLoc(){
+  $('locT').innerHTML=['T3','T4'].map(t=>`<button data-t="${t}" class="${t===locTw?'on':''}">Tower ${t.slice(1)} · ${t}</button>`).join('');
+  $('locT').querySelectorAll('button').forEach(b=>b.onclick=()=>{locTw=b.dataset.t;if(locF!==null&&!TW[locTw].floors.includes(F[locF].k))locF=null;drawLoc();});
+  const sv=savedFloors();
+  $('locF').innerHTML=twFloors(locTw).slice().reverse().map(i=>`<button data-i="${i}" class="${i===locF?'on':''}" title="${F[i].name}">${fShort(F[i])}${sv.includes(F[i].k)?'<i>✓</i>':''}</button>`).join('');
+  $('locF').querySelectorAll('button').forEach(b=>b.onclick=()=>{locF=+b.dataset.i;selectFloor(locF,locTw,true);drawLoc();});
+  $('locFw').textContent=(!navigator.onLine&&locF!==null&&!sv.includes(F[locF].k))?'This floor’s drawing is not saved on this phone for offline use — walls, stairs and the route still work from the saved model data.':'';
+  drawPlaces();}
+function placesOf(i,tw){const f=F[i];const out=[];
+  const st=f.stairs.filter(s=>!s.landOnly&&(f.k.startsWith('L')?towerAt(s.x)===tw:true));
+  const seen=new Set();for(const s of st){const id=s.id||'Stair';const key=id+'|'+Math.round(s.x/4)+'|'+Math.round(s.y/4);if(seen.has(key))continue;seen.add(key);out.push({n:id+(s.temp?' (access – temporary stair)':' (stair)'),x:s.x,y:s.y,kind:'stair'});}
+  for(const p of (f.places||[]))if(!f.k.startsWith('L')||p.tw===tw)out.push({n:p.n,x:p.x,y:p.y,kind:'room'});
+  if(f.gf)out.push({n:'Assembly Point',x:ASM.x,y:ASM.y,kind:'asm'});
+  return out;}
+function drawPlaces(){const P=$('locP');if(locF===null){P.innerHTML='';$('locPn').textContent='Pick a floor first.';return;}
+  const q=normTxt($('locQ').value);const all=placesOf(locF,locTw);const list=all.filter(p=>!q||placeScore(p.n,q)>0).sort((a,b)=>q?placeScore(b.n,q)-placeScore(a.n,q):0);
+  const f=F[locF];
+  P.innerHTML=`<button data-k="-1">📍 Somewhere on this floor (start in an open area of ${f.k.startsWith('L')?locTw:'the floor'})</button>`+list.map((p,k)=>`<button data-k="${all.indexOf(p)}">${p.kind==='stair'?'🟩':p.kind==='asm'?'🟢':'▫'} ${p.n}</button>`).join('');
+  $('locPn').textContent=(f.places&&f.places.length?'Room, corridor and lobby names are read from the BSBG floor plan for this level.':'This drawing has no room names — choose a stair/access or “Somewhere on this floor”.')+(q&&!list.length?' No match for that name on this floor.':'');
+  P.querySelectorAll('button').forEach(b=>b.onclick=()=>{const k=+b.dataset.k;closeLoc();if(k<0){startHere(locF,locTw);}else{const p=all[k];setHere(locF,p.x,p.y,locTw,p.n);}});}
+function startHere(i,tw){const f=F[i];let cx,cy;if(f.gf){cx=60;cy=60;}else if(f.k.startsWith('L')){[cx,cy]=TWC[tw];}else{[cx,cy]=TWC[tw];}
+  const o=occOf(i),d=distOf(i),i0=Math.floor(cx/CELL),j0=Math.floor(cy/CELL),R=5;let sp=null;
+  const clear=(k,l)=>{for(let b=-R;b<=R;b++)for(let a=-R;a<=R;a++){if(a*a+b*b>R*R)continue;const kk=k+a,ll=l+b;if(kk<0||ll<0||kk>=NX||ll>=NY||o[ll*NX+kk])return false;}return true;};
+  if(!f.gf)for(let r=0;r<400&&!sp;r++)for(let a=-r;a<=r&&!sp;a++)for(const [k,l] of [[i0+a,j0-r],[i0+a,j0+r],[i0-r,j0+a],[i0+r,j0+a]]){if(k<0||l<0||k>=NX||l>=NY)continue;const v=d[l*NX+k];if(v>=4&&clear(k,l)){sp=[(k+.5)*CELL,(l+.5)*CELL];break;}}
+  if(!sp)sp=[cx,cy];return setHere(i,sp[0],sp[1],tw,'Open area of '+(f.k.startsWith('L')?tw+' ':'')+f.name);}
+$('locX').onclick=closeLoc;$('locLook').onclick=()=>{closeLoc();backToOverall();};$('locQ').oninput=drawPlaces;
+$('btnLoc').onclick=()=>openLoc(1);$('btnOverall').onclick=backToOverall;
+// ---------- text normalisation + place matching ----------
+function normTxt(t){return (t||'').toLowerCase().replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[إأآا]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[ًٌٍَُِّْـ]/g,'').replace(/[^\p{L}\p{N}\s-]/gu,' ').replace(/\s+/g,' ').trim();}
+const SYN=[[/ممر(ات)?|كوريدور|طرقه|طرقة/g,'corridor'],[/لوبي|بهو|ردهه|صاله/g,'lobby'],[/اسانسير(ات)?|مصعد|مصاعد|اسانسيرات/g,'lift'],[/حمام(ات)?|تواليت|دوره مياه|دورات مياه/g,'toilets'],[/مكتب|مكاتب|اوفيس/g,'office'],[/مخزن|ستور|مستودع/g,'store'],[/كهربا|كهرباء|غرفه الكهربا/g,'electrical'],[/جانيتور|عامل النظافه|النظافه/g,'janitor'],[/مطبخ/g,'kitchen'],[/جيم|نادي/g,'gym'],[/سلم|سلالم|درج|السلم|السلالم/g,'stair'],[/فتحه|الفتحه/g,'to'],[/حريق|اطفاء/g,'firefighting'],[/موقف|جراج|باركنج/g,'parking'],[/امن|سكيوريتي/g,'security'],[/زون|منطقه/g,'zone'],[/مولد/g,'generator']];
+function toEnWords(q){let s=' '+q+' ';for(const [r,w] of SYN)s=s.replace(r,' '+w+' ');return s.replace(/\s+/g,' ').trim();}
+const STOP=new Set('where is whats what the to go at in on of a an floor level lvl show me i am im is we are please take open select find where my here this that tower zone route evacuation way out t3 t4 b1 b2 b3 gf ground podium basement رقم عند في الي الى على علي من روح وديني خدني اذهب افتح حدد اختار ورني وريني انا احنا الدور دور الطابق طابق برج البرج بتاع بتاعي ده دي هنا هناك بالكامل الموجوده مسار طريق الاخلاء اخلاء جنب قدام فين البوديوم بوديوم البيزمنت بيزمنت البدروم بدروم الارضي ارضي'.split(' '));
+let _ordw=null;const ORDW={has:w=>(_ordw||(_ordw=new Set(ORD.flatMap(([re])=>re.split('|')).flatMap(x=>x.split(' '))))).has(w)};
+function placeScore(name,q){const n=' '+normTxt(name)+' ';const toks=toEnWords(q).split(' ').filter(t=>t&&!STOP.has(t)&&!ORDW.has(t)&&!/^[tlbp]\d+$/.test(t));
+  if(!toks.length)return 0;let sc=(normTxt(name)===toks.join(' '))?5:0;for(const t of toks){if(/^\d+$/.test(t)){if(new RegExp('\\D0?'+t+'(\\D|$)').test(n))sc+=2;else return 0;}
+    else if(t.length===1){if(n.includes(' '+t+' '))sc+=3;else return 0;}
+    else if(n.includes(t))sc+=3;else if(t.length>3&&n.split(' ').some(w=>w.startsWith(t.slice(0,4))))sc+=1;else return 0;}return sc;}
+// ---------- assistant: local command parser (works offline) ----------
+const ORD=[['الثاني والعشرين|التاني والعشرين|اتنين وعشرين|اثنين وعشرين|twenty second|twenty two',22],['الحادي والعشرين|واحد وعشرين|twenty first|twenty one',21],['العشرين|عشرين|twentieth|twenty',20],['التاسع عشر|تسعتاشر|تسعطاشر|nineteenth|nineteen',19],['الثامن عشر|التامن عشر|تمنتاشر|تمنطاشر|eighteenth|eighteen',18],['السابع عشر|سبعتاشر|سبعطاشر|seventeenth|seventeen',17],['السادس عشر|ستاشر|سطاشر|sixteenth|sixteen',16],['الخامس عشر|خمستاشر|خمسطاشر|fifteenth|fifteen',15],['الرابع عشر|اربعتاشر|اربعطاشر|fourteenth|fourteen',14],['الثالث عشر|التالت عشر|تلتاشر|تلطاشر|thirteenth|thirteen',13],['الثاني عشر|التاني عشر|اتناشر|اطناشر|twelfth|twelve',12],['الحادي عشر|حداشر|حدعشر|eleventh|eleven',11],['العاشر|عشره|عاشر|tenth|ten',10],['التاسع|تسعه|تاسع|ninth|nine',9],['الثامن|التامن|تمانيه|ثمانيه|تامن|eighth|eight',8],['السابع|سبعه|سابع|seventh|seven',7],['السادس|سته|سادس|sixth|six',6],['الخامس|خمسه|خامس|fifth|five',5],['الرابع|اربعه|رابع|fourth|four',4],['الثالث|التالت|تلاته|ثلاثه|تالت|ثالث|third|three',3],['الثاني|التاني|اتنين|اثنين|تاني|second|two',2],['الاول|واحد|اول|first|one',1]];
+function numIn(q){const m=q.match(/(\d{1,2})/);if(m)return +m[1];for(const [re,n] of ORD)if(new RegExp('(^|\\s)('+re+')(\\s|$)').test(q))return n;return null;}
+function parseTower(q){if(/\bt ?3\b|تي ?3|برج ?3|البرج ?3|البرج التالت|البرج الثالث|برج تلاته|tower ?3|tower three/.test(q))return 'T3';if(/\bt ?4\b|تي ?4|برج ?4|البرج ?4|البرج الرابع|برج اربعه|tower ?4|tower four/.test(q))return 'T4';return null;}
+function parseFloor(q){const qq=q.replace(/\bt ?[34]\b|تي ?[34]|(ال)?برج ?(ال)?[^\s]*/g,' ');
+  if(/\b(gf|ground)\b|الارضي|ارضي|الدور الارضي/.test(qq))return GFI;
+  const n=numIn(qq);
+  if(/basement|بيزمنت|البيزمنت|بدروم|البدروم|قبو|\bb ?[123]\b/.test(qq)){const b=(qq.match(/\bb ?([123])\b/)||[])[1]||n;if(b>=1&&b<=3)return F.findIndex(f=>f.k==='B'+b);return 'ask-b';}
+  if(/podium|بوديوم|البوديوم|\bp ?[1-5]\b/.test(qq)){const b=(qq.match(/\bp ?([1-5])\b/)||[])[1]||n;if(b>=1&&b<=5)return F.findIndex(f=>f.k==='P'+b);return 'ask-p';}
+  const lm=qq.match(/\bl ?(\d{1,2})\b/);if(lm)return F.findIndex(f=>f.k==='L'+String(+lm[1]).padStart(2,'0'));
+  if(/الدور|دور|الطابق|طابق|level|floor|lvl/.test(qq)&&n){return F.findIndex(f=>f.k==='L'+String(n).padStart(2,'0'));}
+  return null;}
+const ctx={lastAsk:null};
+function cmd(textRaw){const q=normTxt(textRaw);const reply=[];let did=false;
+  if(!q)return {r:'…'};
+  // pending clarification (choose by number or name)
+  if(ctx.lastAsk){const a=ctx.lastAsk;const n=numIn(q);let pick=null;if(n&&a.opts[n-1])pick=a.opts[n-1];else pick=a.opts.find(o=>placeScore(o.label,q)>0);if(pick){ctx.lastAsk=null;return pick.run();}ctx.lastAsk=null;}
+  const tw=parseTower(q);let fl=parseFloor(q);
+  if(fl==='ask-b')return ask('Which basement? · أنهي بيزمنت؟',[1,2,3].map(b=>({label:'B'+b,run:()=>doFloor(F.findIndex(f=>f.k==='B'+b),tw)})));
+  if(fl==='ask-p')return ask('Which podium? · أنهي بوديوم؟',[1,2,3,4,5].map(b=>({label:'P'+b,run:()=>doFloor(F.findIndex(f=>f.k==='P'+b),tw)})));
+  if(fl===-1)return {r:'That floor is not in the project drawings (T3 has L01–L22, T4 has L01–L16). · الدور ده مش موجود في الرسومات.',err:1};
+  if(fl!==null&&tw&&!TW[tw].floors.includes(F[fl].k))return {r:`${tw} has no ${F[fl].name} in the drawings (T4 stops at L16). · البرج ${tw} مفيهوش الدور ده.`,err:1};
+  // 1) back to overall
+  if(/(ارجع|رجوع|رجعني|الرجوع).*(المشروع|كله|بالكامل|العام|الرئيسي)|عرض المشروع|المشروع كله|المشروع بالكامل|overall|whole project|back to (the )?(overall|project|start)|^back$|^home$/.test(q)){backToOverall();return {r:'✓ Showing the whole project. · ده المشروع بالكامل.'};}
+  // 2) assembly point
+  if(/نقطه التجمع|نقطة التجمع|التجمع|assembly|muster/.test(q)){selectFloor(GFI,tw||focusTw||'T3',true);setMode('orbit');flyTo(ASM.x,F[GFI].ffl,toZ(ASM.y),ASM.x+35,F[GFI].ffl+45,toZ(ASM.y)+50);pulseLabels('asm');return {r:'✓ This is the ASSEMBLY POINT (north of T4, ground floor). · دي نقطة التجمع.'};}
+  // 3) "I'm at …" + route
+  const iam=/(انا|احنا) (عند|في|جنب|قدام)|i ?am (at|in|near)|i'?m (at|in|near)|we are (at|in)/.test(q);
+  const wantRoute=/مسار|طريق|اخلاء|الاخلاء|اطلع ازاي|اخرج ازاي|route|evacuat|way out|escape|how do i get out/.test(q);
+  const stairN=(q.match(/(سلم|السلم|stair|staircase)( رقم| no\.?| number| #)? ?(\d{1,2})/)||[])[3]||((/(سلم|السلم|stair)/.test(q))?numIn(q):null);
+  if(iam||wantRoute&&!(/خروج|exits|مخارج/.test(q))){
+    let i=fl!==null?fl:(overall?null:cur);const t=tw||focusTw||'T3';
+    if(i===null)return ask('Which floor are you on? · إنت في أنهي دور؟',[GFI,F.findIndex(f=>f.k==='L05'),F.findIndex(f=>f.k==='L10')].map(k=>({label:F[k].name,run:()=>{doFloor(k,t);return {r:'Now tell me where on '+F[k].name+' (e.g. “I’m at Corridor 1”) or tap your spot.'};}})).concat([{label:'Open the picker',run:()=>{openLoc(1);return {r:'Choose your tower, floor and place.'};}}]));
+    if(stairN||/سلم|stair|فتحه|to ?-?\d/.test(q)){const cands=placesOf(i,t).filter(p=>p.kind==='stair'&&(!stairN||new RegExp('(^|\\D)0?'+stairN+'($|\\D)').test(p.n)));
+      if(!cands.length)return {r:`No stair ${stairN||''} on ${t} ${F[i].name} in the drawings. Stairs/accesses here: ${placesOf(i,t).filter(p=>p.kind==='stair').map(p=>p.n.split(' (')[0]).join(', ')||'none'}.`,err:1};
+      if(cands.length>1&&!cands.every(c=>c.n===cands[0].n))return ask('Which one? · أنهي واحد؟',cands.map(c=>({label:c.n,run:()=>{setHere(i,c.x,c.y,t,c.n);return {r:'✓ You are at '+c.n+' on '+F[i].name+'. The green route is shown.'};}})));
+      const c=cands[0];setHere(i,c.x,c.y,t,c.n);return {r:`✓ You are at ${c.n} — ${t} ${F[i].name}.\n`+stepsTxt()};}
+    const pl=bestPlaces(i,t,q);
+    if(pl.length>1&&pl[0].sc===pl[1].sc)return ask('Which place? · أنهي مكان؟',pl.slice(0,6).map(p=>({label:p.n,run:()=>{setHere(i,p.x,p.y,t,p.n);return {r:'✓ '+p.n+' — route shown.\n'+stepsTxt()};}})));
+    if(pl.length){const p=pl[0];setHere(i,p.x,p.y,t,p.n);return {r:`✓ You are at ${p.n} — ${t} ${F[i].name}.\n`+stepsTxt()};}
+    if(here&&here.i===i&&wantRoute){drawChain();return {r:'✓ Route from '+here.place+':\n'+stepsTxt()};}
+    if(fl!==null){startHere(i,t);return {r:`✓ ${t} ${F[i].name}: route from an open area shown. Tell me the exact place for a precise route.\n`+stepsTxt()};}
+    return {r:'I could not find that place on '+F[i].name+'. Try a name from the list: '+placesOf(i,t).slice(0,8).map(p=>p.n.split(' (')[0]).join(', ')+'…',err:1};}
+  // 4) exits / stairs on this floor
+  if(/مخارج|المخارج|مخرج|المخرج|مداخل|السلالم|سلالم|exits?|accesses|stairs/.test(q)){let i=fl!==null?fl:(overall?null:cur);const t=tw||focusTw||'T3';
+    if(i===null)return ask('Which floor? · أنهي دور؟',[GFI,F.findIndex(f=>f.k==='L05')].map(k=>({label:F[k].name,run:()=>cmd('exits '+F[k].k)})));
+    if(i!==cur||overall)selectFloor(i,t,true);pulseLabels('stair');const st=placesOf(i,t).filter(p=>p.kind==='stair').map(p=>p.n);
+    const extra=F[i].gf?'\nOutside: follow the green route to the ASSEMBLY POINT.':'';
+    return {r:`✓ ${F[i].k.startsWith('L')?t+' ':''}${F[i].name} — ways out on the drawings:\n• `+(st.join('\n• ')||'none found')+extra+'\nLifts are not a way out. · ممنوع الأسانسير.'};}
+  // 5) place (go to Zone A on 3rd floor)
+  if(fl!==null){const t=tw||(F[fl].k.startsWith('L')?(focusTw||'T3'):(focusTw||'T3'));
+    const pl=bestPlaces(fl,t,stripFloor(q));
+    const isZone=/(^|\s)zone(\s|$)/.test(toEnWords(q));
+    if(isZone){doFloor(fl,t);return ask(`The ${F[fl].name} drawing has no “Zone” names.`+(pl.length?' Did you mean:':' Places on this floor: '+placesOf(fl,t).slice(0,10).map(p=>p.n.split(' (')[0]).join(', ')),pl.slice(0,6).map(p=>({label:p.n,run:()=>{setHere(fl,p.x,p.y,t,p.n);return {r:'✓ '+p.n+' — '+t+' '+F[fl].name+'.\n'+stepsTxt()};}})));}
+    if(pl.length){if(pl.length>1&&pl[0].sc===pl[1].sc)return (doFloor(fl,t),ask('Which place? · أنهي مكان؟',pl.slice(0,6).map(p=>({label:p.n,run:()=>placeReply(fl,p,t)}))));
+      const p=pl[0];return placeReply(fl,p,t);}
+    return doFloor(fl,t);}
+  // 6) tower only
+  if(tw){overall=true;here=null;setMode('orbit');viewTower(tw);focusTw=tw;crumb();return {r:`✓ Showing Tower ${tw.slice(1)} (${tw}) — ${twFloors(tw).filter(i=>F[i].k.startsWith('L')).length} tower floors. Tap a floor or say e.g. “open level 5 in ${tw}”.`};}
+  // 7) place on the current floor
+  if(!overall){const t=focusTw||'T3';const pl=bestPlaces(cur,t,q);if(pl.length){if(pl.length>1&&pl[0].sc===pl[1].sc)return ask('Which place? · أنهي مكان؟',pl.slice(0,6).map(p=>({label:p.n,run:()=>placeReply(cur,p,t)})));return placeReply(cur,pl[0],t);}}
+  return null;}
+function stripFloor(q){return q.replace(/(level|floor|lvl|الدور|دور|الطابق|طابق)\s*(\d{1,2})/g,' ').replace(/\bl ?\d{1,2}\b/g,' ');}
+function placeReply(i,p,t){showPlace(i,p,t);return {r:`✓ ${p.n} — ${F[i].k.startsWith('L')?t+' ':''}${F[i].name} (📌 marked). Are you there?`,opts:[{label:'📍 I am here — show my route',run:()=>{setHere(i,p.x,p.y,t,p.n);return {r:'✓ You are at '+p.n+'.\n'+stepsTxt()};}},{label:'Walk me there',run:()=>{if(!(here&&here.i===i)){startHere(i,t);}goTo({x:p.x,y:p.y,n:p.n,kind:'place'});return {r:'Walking to '+p.n+' along the floor.'};}}]};}
+function doFloor(i,tw){selectFloor(i,tw||focusTw||'T3',true);return {r:`✓ Opened ${F[i].k.startsWith('L')?(focusTw)+' ':''}${F[i].name}. Tap your spot or tell me the place (e.g. “I’m at Corridor 1”).`};}
+function bestPlaces(i,tw,q){const all=placesOf(i,tw);return all.map(p=>({...p,sc:placeScore(p.n,q)})).filter(p=>p.sc>0).sort((a,b)=>b.sc-a.sc);}
+function stepsTxt(){if(!lastChain)return '';return chainSteps(lastChain).map((s,k)=>(k+1)+'. '+s.t).join('\n');}
+function ask(t,opts){ctx.lastAsk={opts};return {r:t,opts};}
+function pulseLabels(kind){const fg=FG[cur];if(!fg)return;fg.lb.children.forEach(o=>{if(o.isCSS2DObject&&o.element.classList.contains(kind)){o.element.classList.remove('pulse');void o.element.offsetWidth;o.element.classList.add('pulse');}});}
+// ---------- chat UI ----------
+let CFG={aiEndpoint:''};fetch('config.json',{cache:'no-store'}).then(r=>r.json()).then(c=>{CFG=c||CFG;chatMode();}).catch(()=>chatMode());
+function chatMode(){$('chatMode').textContent=navigator.onLine&&CFG.aiEndpoint?'· smart chat on':'· local commands'+(CFG.aiEndpoint?' (offline)':'');}
+const isAr=t=>/[؀-ۿ]/.test(t);
+function addMsg(t,who,err){const d=document.createElement('div');d.className='m '+who+(err?' err':'');d.textContent=t;if(isAr(t))d.dir='rtl';$('msgs').appendChild(d);$('msgs').scrollTop=1e9;return d;}
+function setSugg(opts){const s=$('sugg');s.innerHTML='';(opts||[]).forEach(o=>{const b=document.createElement('button');b.textContent=o.label;b.onclick=()=>{ctx.lastAsk=null;const r=o.run();showReply(r);};s.appendChild(b);});}
+const DEFAULT_SUGG=['ورّيني برج T3 بالكامل','افتح الدور الخامس في T4','أنا عند السلم رقم 2، ورّيني مسار الإخلاء','حدّد المخارج في الدور ده','ورّيني نقطة التجمع','ارجع لعرض المشروع بالكامل'];
+function defaultSugg(){setSugg(DEFAULT_SUGG.map(t=>({label:t,run:()=>{addMsg(t,'u');return cmd(t)||{r:'?'};}})));}
+function showReply(r){if(!r)return;addMsg(r.r,'a',r.err);if(r.opts)setSugg(r.opts);else defaultSugg();speak(r.r);}
+async function handle(text){if(!text.trim())return;addMsg(text,'u');$('chatIn').value='';
+  let r=null;try{r=cmd(text);}catch(e){console.error(e);r={r:'Error running the command: '+e.message,err:1};}
+  if(!r){if(navigator.onLine&&CFG.aiEndpoint){r=await aiCall(text);}else r={r:(CFG.aiEndpoint?'Smart chat needs internet. ':'Smart chat is not set up on this page. ')+'I understood none of the local commands. Try: “افتح T3 الدور الخامس”, “ورّيني نقطة التجمع”, “I’m at Corridor 1”, “exits on this floor”, or use the buttons.',err:1};}
+  showReply(r);}
+async function aiCall(text){const t0=addMsg('… thinking','a');
+  try{const ctxs={tower:focusTw,floor:overall?null:F[cur].k,here:here&&here.place,floors:F.map(f=>f.k),places:overall?[]:placesOf(cur,focusTw||'T3').map(p=>p.n)};
+    const res=await fetch(CFG.aiEndpoint,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({message:text,context:ctxs})});
+    const j=await res.json();t0.remove();
+    // the AI only proposes a command; it is executed here against the real data, and its result is what we report
+    const a=j.action||{};let r=null;
+    if(a.command)r=cmd(a.command);
+    if(r)return {r:(j.reply?j.reply+'\n':'')+r.r,opts:r.opts,err:r.err};
+    return {r:j.reply||'No action.',err:!j.reply};
+  }catch(e){t0.remove();return {r:'Smart chat failed ('+e.message+'). Local commands and buttons still work.',err:1};}}
+$('send').onclick=()=>handle($('chatIn').value);$('chatIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')handle($('chatIn').value);});
+$('chatIn').addEventListener('keyup',e=>e.stopPropagation());
+$('chatBtn').onclick=()=>{const c=$('chat');const on=c.style.display!=='flex';c.style.display=on?'flex':'none';$('chatBtn').style.display=on?'none':'grid';if(on&&!$('msgs').children.length){addMsg('اكتب أو اتكلم: «افتح T3 الدور الخامس»، «أنا عند Corridor 1»، «ورّيني نقطة التجمع». Commands for floors, places, exits and the route work without internet too.','a');defaultSugg();}chatMode();};
+$('chatX').onclick=()=>{$('chat').style.display='none';$('chatBtn').style.display='grid';};
+// ---------- voice ----------
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null,recOn=false;
+function micSt(t,c){const m=$('micSt');m.textContent='Mic: '+t;m.className=c||'';}
+if(!SR){micSt('not supported in this browser — type instead');$('mic').disabled=true;$('mic').style.opacity=.4;}
+$('mic').onclick=()=>{if(!SR)return;if(recOn){rec&&rec.stop();return;}
+  if(!navigator.onLine){micSt('voice recognition needs internet on most phones — type instead','proc');}
+  try{rec=new SR();rec.lang=$('micLang').value;rec.interimResults=true;rec.maxAlternatives=1;let fin='';
+    rec.onstart=()=>{recOn=true;$('mic').classList.add('on');micSt('Listening…','listen');};
+    rec.onresult=e=>{let t='';for(let k=e.resultIndex;k<e.results.length;k++){t+=e.results[k][0].transcript;if(e.results[k].isFinal)fin+=e.results[k][0].transcript;}$('chatIn').value=fin||t;};
+    rec.onerror=e=>{micSt(e.error==='not-allowed'?'permission denied — allow the microphone, or type':e.error==='network'?'needs internet — type instead':'error: '+e.error,'proc');};
+    rec.onend=()=>{recOn=false;$('mic').classList.remove('on');const t=$('chatIn').value.trim();if(t){micSt('Processing…','proc');handle(t).then(()=>micSt('Finished','done'));}else if(!/denied|internet|error/.test($('micSt').textContent))micSt('no speech heard');};
+    rec.start();}catch(e){micSt('could not start: '+e.message,'proc');}};
+function speak(t){if(!$('ttsOn').checked||!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/[✓•⚑📍🟩🟢▫]/g,''));u.lang=isAr(t)?'ar-EG':'en-US';const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.startsWith(isAr(t)?'ar':'en'));if(v)u.voice=v;speechSynthesis.speak(u);}
+$('ttsStop').onclick=()=>{if('speechSynthesis' in window)speechSynthesis.cancel();};$('ttsOn').onchange=()=>{if(!$('ttsOn').checked&&'speechSynthesis' in window)speechSynthesis.cancel();};
+// ---------- offline (service worker + Cache Storage, verified by SHA-256) ----------
+let OFFMETA=null,VER=null;const META_CACHE='uptown-meta';
+async function readMeta(){try{const c=await caches.open(META_CACHE);const r=await c.match('meta');OFFMETA=r?await r.json():null;}catch(e){OFFMETA=null;}return OFFMETA;}
+async function getVersion(){const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('version.json HTTP '+r.status);return r.json();}
+const fmtMB=b=>(b/1048576).toFixed(1)+' MB';const fmtD=d=>{try{return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}catch(e){return d;}};
+function scopeFloors(s){if(s==='all')return F.map(f=>f.k);if(s==='T3'||s==='T4')return twFloors(s).map(i=>F[i].k);return [...$('offF').querySelectorAll('button.on')].map(b=>b.dataset.k);}
+function filesFor(ver,floors){const m=new Map();for(const f of ver.core)m.set(f.p,f);for(const k of floors)for(const f of (ver.floors[k]||[]))m.set(f.p,f);return [...m.values()];}
+async function sha256(buf){const h=await crypto.subtle.digest('SHA-256',buf);return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join('');}
+const CT={html:'text/html; charset=utf-8',js:'text/javascript',json:'application/json',jpg:'image/jpeg',png:'image/png',webmanifest:'application/manifest+json'};
+let dlBusy=false;
+async function download(ver,floors,onp){if(dlBusy)throw new Error('a download is already running');dlBusy=true;const name='uptown-v-'+ver.version+'-'+Date.now();const list=filesFor(ver,floors);const total=list.reduce((a,f)=>a+f.size,0);let got=0;
+  try{const c=await caches.open(name);
+    for(const f of list){let res;try{res=await fetch(f.p+'?dl='+encodeURIComponent(ver.version),{cache:'no-store'});}catch(e){throw new Error(f.p+': '+(navigator.onLine?'download interrupted':'connection lost'));}if(!res.ok)throw new Error(f.p+': HTTP '+res.status);
+      const buf=await res.arrayBuffer();if(buf.byteLength!==f.size)throw new Error(f.p+': size mismatch');if(await sha256(buf)!==f.sha)throw new Error(f.p+': checksum mismatch');
+      const resp=new Response(buf,{headers:{'Content-Type':CT[f.p.split('.').pop()]||'application/octet-stream'}});await c.put(new Request(f.p),resp.clone());if(f.p==='index.html')await c.put(new Request('./'),resp);
+      got+=f.size;onp&&onp(got,total,f.p);}
+    for(const f of list)if(!(await c.match(f.p)))throw new Error('missing after download: '+f.p);
+    const m={version:ver.version,date:ver.date,cache:name,floors,complete:true,saved:new Date().toISOString(),bytes:total};
+    await (await caches.open(META_CACHE)).put('meta',new Response(JSON.stringify(m),{headers:{'Content-Type':'application/json'}}));
+    for(const k of await caches.keys())if(k.startsWith('uptown-v-')&&k!==name)await caches.delete(k);
+    OFFMETA=m;return m;
+  }catch(e){await caches.delete(name);throw e;}finally{dlBusy=false;}}
+async function deleteOffline(){for(const k of await caches.keys())if(k.startsWith('uptown-'))await caches.delete(k);OFFMETA=null;}
+function netPill(extra){const on=navigator.onLine;const m=OFFMETA;
+  $('net').innerHTML=`<span class="dot" style="background:${on?'#19c37d':'#e5484d'}"></span>${on?'Online':'Offline'} · ${m?'saved '+fmtD(m.date):(on?'⬇ Offline':'not saved')}`;
+  $('net').title=extra||'';}
+async function offStatus(msg){const m=OFFMETA;const on=navigator.onLine;
+  let s=`<b>${on?'● Online':'● Offline'}</b>`+(VER?` · latest published plan: <b>v${VER.version}</b> (${fmtD(VER.date)})`:'');
+  if(m)s+=`<br>Saved on this phone: <b>v${m.version}</b> (plan dated ${fmtD(m.date)}, downloaded ${fmtD(m.saved)}) — ${m.floors.length===N?'whole project':m.floors.length+' floors: '+m.floors.join(', ')}.`+(on?'':' <span style="color:#f5b50a">Offline: this is the saved copy — it may not be the latest version.</span>');
+  else s+=on?'<br>Nothing saved yet. Download once with internet to open the plan without a connection.':'<br><span style="color:#f5b50a">No offline copy on this phone/browser — connect to the internet once to download it.</span>';
+  if(msg)s+=`<br>${msg}`;$('offSt').innerHTML=s;netPill();}
+async function offSize(){const sc=$('offScope').querySelector('.on').dataset.s;$('offF').style.display=sc==='pick'?'grid':'none';
+  if(!VER){$('offSize').textContent=navigator.onLine?'Checking size…':'Needs internet to download.';return;}
+  const fl=scopeFloors(sc);const files=filesFor(VER,fl);$('offSize').textContent=`${fl.length} floors · ${files.length} files · ${fmtMB(files.reduce((a,f)=>a+f.size,0))} (app, 3D model, drawings, places and routes for those floors).`;$('offGo').disabled=!navigator.onLine||!fl.length;}
+function drawOffFloors(){const sv=savedFloors();$('offF').innerHTML=F.map((f,i)=>i).reverse().map(i=>`<button data-k="${F[i].k}" class="${sv.includes(F[i].k)?'on':''}">${fShort(F[i])}</button>`).join('');$('offF').querySelectorAll('button').forEach(b=>b.onclick=()=>{b.classList.toggle('on');offSize();});}
+$('offScope').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('offScope').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));offSize();});
+$('net').onclick=async()=>{$('off').style.display='grid';drawOffFloors();await readMeta();offStatus();offSize();if(navigator.onLine)try{VER=await getVersion();offStatus();offSize();}catch(e){offStatus('Could not reach the server: '+e.message);}};
+$('offX').onclick=()=>$('off').style.display='none';
+$('offGo').onclick=async()=>{const sc=$('offScope').querySelector('.on').dataset.s;const fl=scopeFloors(sc);if(!fl.length)return;
+  try{if(!VER)VER=await getVersion();$('offGo').disabled=true;$('offProg').textContent='Starting…';
+    const m=await download(VER,fl,(g,t,p)=>{$('prog').firstChild.style.width=(100*g/t).toFixed(0)+'%';$('offProg').textContent=`${fmtMB(g)} / ${fmtMB(t)} — ${p}`;});
+    $('offProg').textContent='✓ Ready offline — every file downloaded and verified (SHA-256).';offStatus('✓ Ready offline.');toast('✓ Plan saved for offline use');}
+  catch(e){$('offProg').textContent='✗ Download failed: '+e.message+' — nothing was replaced; '+(OFFMETA?'your saved copy v'+OFFMETA.version+' is kept.':'no offline copy.');offStatus();}
+  finally{$('offGo').disabled=false;drawLoc();}};
+$('offDel').onclick=async()=>{await deleteOffline();$('prog').firstChild.style.width='0';$('offProg').textContent='Offline copy deleted from this phone.';offStatus();drawOffFloors();};
+$('offUpd').onclick=()=>checkUpdate(true);
+async function checkUpdate(manual){await readMeta();if(!navigator.onLine){offStatus();return;}
+  try{VER=await getVersion();}catch(e){offStatus('Update check failed ('+e.message+') — keeping the saved copy.');return;}
+  if(!OFFMETA){offStatus(manual?'Nothing saved yet.':'');return;}
+  if(OFFMETA.version===VER.version){offStatus(manual?'✓ The saved copy is the latest version.':'');return;}
+  offStatus('Downloading the new version v'+VER.version+'…');
+  try{await download(VER,OFFMETA.floors.filter(k=>VER.floors[k]),(g,t)=>{$('prog').firstChild.style.width=(100*g/t).toFixed(0)+'%';});offStatus('✓ Updated to v'+VER.version+' (verified). The old copy was replaced only after the new one was complete.');toast('✓ Offline copy updated to v'+VER.version);}
+  catch(e){await readMeta();offStatus('✗ Update failed: '+e.message+' — keeping the saved copy v'+OFFMETA.version+'.');}}
+addEventListener('online',()=>{netPill();chatMode();checkUpdate(false);});addEventListener('offline',()=>{netPill();chatMode();offStatus();});
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW',e));}
+// texture missing while offline → say so instead of a blank floor
+const _ft=floorTexture;
+floorTexture=function(i){const f=F[i];const fg=FG[i];if(fg.mat||fg.texFail)return;const url=f.tex;
+  const use=t=>{fg.mat=new THREE.MeshBasicMaterial({map:t});if(cur===i&&!overall){fg.floor.material=fg.mat;}};
+  if(texCache[url])return use(texCache[url]);
+  loader.load(url,t=>{t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;texCache[url]=t;use(t);},undefined,()=>{fg.texFail=true;if(!navigator.onLine){toast('⚠ '+f.name+': drawing not saved for offline use — walls, stairs and the route still shown');setTimeout(()=>{fg.texFail=false;},15000);}else{setTimeout(()=>{fg.texFail=false;},5000);}});};
+Object.assign(window.__dbg,{cmd,selectFloor,setHere,backToOverall,chainFrom,chainSteps,openLoc,download,readMeta,getVersion,checkUpdate,deleteOffline,meta:()=>OFFMETA,here:()=>here,overall:()=>overall,steps:()=>$('steps').innerText,floorAtScreen,F});
+
+// ---------- layout: panels sit under the (wrapping) top bar; the info panel starts folded on phones ----------
+function layoutTop(){document.documentElement.style.setProperty('--tb',$('top').offsetHeight+'px');}
+addEventListener('resize',layoutTop);layoutTop();
+if(innerWidth<760){$('info').classList.add('min');$('infoT').textContent='▸';}
 // ---------- start ----------
 document.getElementById('loading').remove();
-const hk=(location.hash||'').slice(1).toUpperCase();const hi=F.findIndex(f=>f.k===hk);
-if(hi>=0){startOn(hi);}else{cur=GFI;setMode('orbit');document.getElementById('pick').style.display='grid';}
+// deep link from a QR: #T3/L05/Corridor%201 (tower/floor/place) or the old #L05
+{const parts=decodeURIComponent((location.hash||'').slice(1)).split('/').filter(Boolean);let tw=null,fk=null,pl=null;
+ for(const p of parts){const u=p.toUpperCase();if(u==='T3'||u==='T4')tw=u;else if(F.some(f=>f.k===u))fk=u;else pl=p;}
+ const fi=fk?F.findIndex(f=>f.k===fk):-1;cur=GFI;
+ if(fi>=0){const t=tw||'T3';const P=pl?placesOf(fi,t).find(x=>normTxt(x.n)===normTxt(pl)):null;
+   if(P){mode='orbit';setHere(fi,P.x,P.y,t,P.n);$('locQR').textContent='Opened from the QR code: '+P.n+' — change it below if you are somewhere else.';toast('📍 '+t+' → '+F[fi].name+' → '+P.n+' (from the QR) — tap the bar above to change');}
+   else{selectFloor(fi,t,true);setMode('orbit');}}
+ else{setMode('orbit');openLoc(1);}
+ readMeta().then(()=>{netPill();if(navigator.onLine)checkUpdate(false);else offStatus();drawLoc();});}
 loop();
 </script></body></html>
