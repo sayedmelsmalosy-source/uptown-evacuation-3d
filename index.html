@@ -1059,7 +1059,9 @@ function sentences(s){return s.split(/(?<=[.!?؟।۔\n])\s+|\n+/).map(x=>x.trim
 let VOICES=[];function loadVoices(){if(!('speechSynthesis' in window))return;VOICES=speechSynthesis.getVoices()||[];voiceUI();}
 const vFor=lg=>VOICES.filter(v=>v.lang&&v.lang.toLowerCase().replace('_','-').startsWith(lg));
 function pickVoice(lg){const vs=vFor(lg);if(!vs.length)return null;const want=AVO.vsel[lg];const w=want&&vs.find(v=>v.voiceURI===want);if(w)return w;
-  const score=v=>(v.lang.toLowerCase().replace('_','-')===TTSL[lg].toLowerCase()?4:0)+(/natural|neural|online|google|premium|enhanced/i.test(v.name)?3:0)+(v.localService?1:0);return vs.slice().sort((a,b)=>score(b)-score(a))[0];}
+  // prefer a male voice (the guide speaks as a male HSE engineer); female-named voices last
+  const male=/\b(male|man|maged|tarik|hamed|shakir|naayf|omar|salman|ahmed|basel|bassel|fahed|hamdan|rami|taim|zayd|asad|uzma?ir|salman|madhur|hemant|prabhat|ravi|kunal|aarav|bashkar|pradeep|midhun|valluvar|gagan|rehan)\b/i,fem=/\b(female|woman|laila|mariam|salma|zariyah|amina|hoda|sana|swara|kalpana|lekha|heera|nabanita|tanishaa|sobhana|pallavi|shruti|neerja|samantha|siri|zira|aria|jenny|sara|fatima|rana|layla|noura)\b/i;
+  const score=v=>(v.lang.toLowerCase().replace('_','-')===TTSL[lg].toLowerCase()?4:0)+(/natural|neural|online|google|premium|enhanced/i.test(v.name)?3:0)+(v.localService?1:0)+(male.test(v.name)?6:0)-(fem.test(v.name)?6:0);return vs.slice().sort((a,b)=>score(b)-score(a))[0];}
 function replyLang(text){return AVO.lang!=='auto'?AVO.lang:(text?detectLang(text):RL);}
 function avStop(){AVO.tok++;if('speechSynthesis' in window)speechSynthesis.cancel();$('vSt').textContent='';}
 // id: one id per reply, so the same reply is never read twice; ctx: a token that must still be current when speaking starts (place explanations)
