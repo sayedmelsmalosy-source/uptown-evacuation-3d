@@ -496,11 +496,11 @@ hereMark.visible=false;scene.add(hereMark);
 const selMark=new THREE.Group();{const pin=new THREE.Mesh(new THREE.ConeGeometry(0.6,1.9,16),new THREE.MeshBasicMaterial({color:0x4aa3ff}));pin.rotation.x=Math.PI;pin.position.y=1.4;selMark.add(pin);
   const lab=document.createElement('div');lab.className='lbl ramp';const lo=new CSS2DObject(lab);lo.position.y=3.0;selMark.add(lo);selMark.userData.lo=lo;selMark.userData.el=lab;}
 selMark.visible=false;scene.add(selMark);let sel2=null;
-function showPlace(i,p,tw){selectFloor(i,tw,true);sel2={i,...p};selMark.userData.el.textContent='📌 '+p.n;selMark.position.set(p.x,F[i].ffl,toZ(p.y));selMark.visible=true;selMark.userData.lo.visible=true;viewFloor(i,tw,p.x,p.y);pulseSel();}
+function showPlace(i,p,tw){closeLoc();selectFloor(i,tw,true);sel2={i,...p};selMark.userData.el.textContent='📌 '+p.n;selMark.position.set(p.x,F[i].ffl,toZ(p.y));selMark.visible=true;selMark.userData.lo.visible=true;viewFloor(i,tw,p.x,p.y);pulseSel();}
 function pulseSel(){const e=selMark.userData.el;e.classList.remove('pulse');void e.offsetWidth;e.classList.add('pulse');}
 function placeHereMark(){if(sel2&&(sel2.i!==cur||overall||mode==='walk')){selMark.visible=false;selMark.userData.lo.visible=false;}else if(sel2){selMark.visible=true;selMark.userData.lo.visible=true;}
  const v=!!here&&here.i===cur&&!overall&&mode!=='walk';hereMark.visible=v;hereMark.userData.lo.visible=v;if(v)hereMark.position.set(player.x,F[cur].ffl,toZ(player.y));}
-function setHere(i,x,y,tw,place){cur=i;focusTw=tw||towerAt(x);overall=false;const p=freeNear(x,y,i);player.x=p[0];player.y=p[1];
+function setHere(i,x,y,tw,place){closeLoc();cur=i;focusTw=tw||towerAt(x);overall=false;const p=freeNear(x,y,i);player.x=p[0];player.y=p[1];
   const rt=routeFrom(p[0],p[1],i);if(rt&&rt.length>1){const q=rt[Math.min(2,rt.length-1)];player.yaw=Math.atan2(-(q[0]-p[0]),q[1]-p[1]);}
   here={i,x:p[0],y:p[1],tw:focusTw,place:place||'Selected point'};floorTexture(i);
   if(mode==='walk'){applyFloor();}else{setMode(mode);}
@@ -656,7 +656,7 @@ function cmd(textRaw){const q=normTxt(textRaw);const reply=[];let did=false;
   return null;}
 function stripFloor(q){return q.replace(/(level|floor|lvl|الدور|دور|الطابق|طابق)\s*(\d{1,2})/g,' ').replace(/\bl ?\d{1,2}\b/g,' ');}
 function placeReply(i,p,t){showPlace(i,p,t);return {r:`✓ ${p.n} — ${F[i].k.startsWith('L')?t+' ':''}${F[i].name} (📌 marked). Are you there?`,opts:[{label:'📍 I am here — show my route',run:()=>{setHere(i,p.x,p.y,t,p.n);return {r:'✓ You are at '+p.n+'.\n'+stepsTxt()};}},{label:'Walk me there',run:()=>{if(!(here&&here.i===i)){startHere(i,t);}goTo({x:p.x,y:p.y,n:p.n,kind:'place'});return {r:'Walking to '+p.n+' along the floor.'};}}]};}
-function doFloor(i,tw){selectFloor(i,tw||focusTw||'T3',true);return {r:`✓ Opened ${F[i].k.startsWith('L')?(focusTw)+' ':''}${F[i].name}. Tap your spot or tell me the place (e.g. “I’m at Corridor 1”).`};}
+function doFloor(i,tw){closeLoc();selectFloor(i,tw||focusTw||'T3',true);return {r:`✓ Opened ${F[i].k.startsWith('L')?(focusTw)+' ':''}${F[i].name}. Tap your spot or tell me the place (e.g. “I’m at Corridor 1”).`};}
 function bestPlaces(i,tw,q){const all=placesOf(i,tw);return all.map(p=>({...p,sc:placeScore(p.n,q)})).filter(p=>p.sc>0).sort((a,b)=>b.sc-a.sc);}
 function stepsTxt(){if(!lastChain)return '';return chainSteps(lastChain).map((s,k)=>(k+1)+'. '+s.t).join('\n');}
 function ask(t,opts){ctx.lastAsk={opts};return {r:t,opts};}

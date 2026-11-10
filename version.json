@@ -1,11 +1,11 @@
 {
-"version": "2026.11.10-2251",
+"version": "2026.11.10-2257",
 "date": "2026-11-10",
 "core": [
 {
 "p": "index.html",
-"size": 100839,
-"sha": "6adb1017b5cfffd83a63ebcfbc463cbc728cb9c5f1951a05fc4dec4de99cc507"
+"size": 100872,
+"sha": "bf1853a7242fa3a3f251939748e77a0baf1a8a231263b481291c311283218eef"
 },
 {
 "p": "manifest.webmanifest",
