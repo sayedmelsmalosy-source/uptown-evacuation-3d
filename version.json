@@ -1,11 +1,11 @@
 {
-"version": "2026.11.10-2354",
-"date": "2026-11-10",
+"version": "2026.11.11-0126",
+"date": "2026-11-11",
 "core": [
 {
 "p": "index.html",
-"size": 158623,
-"sha": "af948f5b6721735c6f7ab57e54f558c4a54cd51c194f253e07f0157db2152e81"
+"size": 196007,
+"sha": "7dd1eb06af6f0898dd737ff0431b9defd4c1129c96d229f8fc30d251c30df0cb"
 },
 {
 "p": "manifest.webmanifest",
@@ -14,8 +14,8 @@
 },
 {
 "p": "config.json",
-"size": 43,
-"sha": "b862ad900e7f1dcd2b1e76e55d3f686f5f4d4511bf7d3ddb971c708236e525b3"
+"size": 47,
+"sha": "fa4e2989490ace08c5eed512c9b7a9edc68062f302594e73d6edee58ad8fd5eb"
 },
 {
 "p": "icons/icon-192.png",
@@ -33,9 +33,14 @@
 "sha": "e10d909e83ecaa2dd50f45392cd591a701c8698d5bd835c08ae2659b90ffd372"
 },
 {
-"p": "avatar/me.png",
-"size": 401267,
-"sha": "c4aa43fb8f7f733aa02ba6e628ff27c025ea9286c5c89621b6f158d851174cc0"
+"p": "avatar/worker.glb",
+"size": 2930032,
+"sha": "002f8d269de68e5dce3d25195caf390d1aa359bbfaae3fcf4c8dc78ec36c3ba5"
+},
+{
+"p": "avatar/presenter.png",
+"size": 642577,
+"sha": "20c3c3d54576a334c40330d4f3b6c3230bdfbe19e86963aa0f23277326589c38"
 },
 {
 "p": "vendor/three/three.module.js",
@@ -46,6 +51,11 @@
 "p": "vendor/three/addons/controls/OrbitControls.js",
 "size": 29868,
 "sha": "5a44a9e86a2a0fb11933eed69bc2cd33c76a496854c1aed6ed776efa87d7b064"
+},
+{
+"p": "vendor/three/addons/loaders/GLTFLoader.js",
+"size": 108522,
+"sha": "d073b438e6a07e1359741dd5d6c76c953420cc0d4fd84eb1bdde94315540e6a3"
 },
 {
 "p": "vendor/three/addons/renderers/CSS2DRenderer.js",

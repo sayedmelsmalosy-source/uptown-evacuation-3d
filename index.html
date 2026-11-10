@@ -68,6 +68,10 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 #subT{font-size:17px;font-weight:800;line-height:1.35}#subN{font-size:12px;color:#f5b50a}#sub .r{display:flex;gap:8px}#sub button{all:unset;cursor:pointer;padding:6px 14px;border-radius:9px;font-weight:800;font-size:14px;background:#15202f;border:1px solid var(--line)}#sub #subGo{background:var(--safe);color:#04150c}
 #langB{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:10px}#langB button{all:unset;cursor:pointer;text-align:center;padding:14px 8px;border-radius:12px;border:1px solid var(--line);background:#15202f;font-size:19px;font-weight:800}#langB button.on{border-color:var(--safe)}#langB button:hover{background:var(--safe);color:#04150c}
 #btnGuide{background:var(--safe);color:#04150c;font-weight:800}
+#chat .vbar button.on,#chat .vbar button.go{background:var(--safe);color:#04150c;border-color:var(--safe)}#chat .vbar select{max-width:130px}#chat .vbar input[type=range]{width:70px;vertical-align:middle}
+.ibox{display:flex;gap:16px;align-items:flex-end;max-width:760px}#introImg{height:min(70vh,560px);width:auto;flex:none;transform-origin:50% 100%}#introImg.talk{animation:breathe 3.2s ease-in-out infinite}@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.012) translateY(-1px)}}
+.icol{flex:1;display:flex;flex-direction:column;gap:12px;min-width:0}#introT{max-height:52vh;overflow:auto}#introT p{margin:0 0 8px;font-size:17px;line-height:1.45;color:#9fb0c3;transition:color .3s}#introT p.on{color:#fff;font-weight:800}
+@media (max-width:640px){.ibox{flex-direction:column;align-items:center}#introImg{height:38vh}#introT{max-height:30vh}}
 #chatBtn{right:12px;bottom:calc(12px + 200px);width:52px;height:52px;border-radius:50%;background:var(--safe);color:#04150c;font-size:24px;display:grid;place-items:center;cursor:pointer;border:0;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 #chat{right:12px;bottom:12px;width:min(380px,calc(100vw - 24px));height:min(520px,70vh);background:#101a27;border:1px solid var(--line);border-radius:14px;display:none;flex-direction:column;z-index:12}
 #chat .hd{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}#chat .hd b{font-size:15px}#chat .hd small{color:var(--muted);font-size:11px}#chat .hd .x{all:unset;cursor:pointer;margin-left:auto;color:var(--muted);font-size:18px;padding:2px 6px}
@@ -109,7 +113,9 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 <div id="crumb" class="ui"></div>
 <div id="tip" class="ui"></div>
 <div id="lang" class="sheet"><div class="box"><div class="hd"><b id="langH">Choose your language</b><button class="x" id="langX" aria-label="Close">✕</button></div><div class="note" id="langS"></div><div id="langB"></div></div></div>
-<div id="sub" class="ui"><div id="subT"></div><div id="subN"></div><div class="r"><button id="subGo" style="display:none"></button><button id="subX">■</button></div></div>
+<div id="sub" class="ui"><div id="subT"></div><div id="subN"></div><div class="r"><button id="subGo" style="display:none"></button><button id="gVoice"></button><button id="subX">■</button></div></div>
+<div id="intro" class="sheet"><div class="box ibox"><img id="introImg" src="avatar/presenter.png" alt=""><div class="icol"><div id="introT"></div><div class="row"><button class="bigbtn" id="introGo">→</button><button class="bigbtn ghost" id="introAgain">↻</button><button class="bigbtn ghost" id="introSkip">⏭ Skip</button></div></div></div></div>
+<div id="vt" class="sheet"><div class="box"><div class="hd"><b>Voice test · تجربة الأصوات</b><button class="x" id="vtX">✕</button></div><div class="note">Same sentence, different voices. The phone voices come from this phone's speech engine (they differ between phones). “My voice” is pre-recorded (Piper neural voice converted to the HSE engineer's voice) and plays offline.</div><textarea id="vtText" dir="auto" rows="3" style="width:100%;background:#0b1320;color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:8px"></textarea><div class="note">Read aloud as: <span id="vtSpoken"></span></div><div class="row"><select id="vtLang"><option value="ar">العربية</option><option value="en">English</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="bn">বাংলা</option><option value="ml">മലയാളം</option><option value="ta">தமிழ்</option></select><label>Speed <input type="range" id="vtRate" min="0.75" max="1.25" step="0.05" value="0.95"></label><button class="bigbtn" id="vtUse">Use this speed</button></div><div class="list" id="vtList"></div></div></div>
 <div id="loc" class="sheet"><div class="box">
   <div class="hd"><b>Where are you?</b><span class="ar">إنت فين؟</span><button class="x" id="locX" aria-label="Close">✕</button></div>
   <div class="note" id="locQR"></div>
@@ -135,7 +141,9 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
   <div class="hd"><b>Assistant · المساعد</b><small id="chatMode"></small><button class="x" id="chatX" aria-label="Close">✕</button></div>
   <div id="msgs"></div><div id="sugg"></div>
   <div class="bar"><button id="mic" title="Speak">🎤</button><input id="chatIn" placeholder="اكتب أمرك… / Type a command" autocomplete="off"><button id="send" title="Send">➤</button></div>
-  <div class="bar2"><span id="micSt">Mic: ready</span><select id="micLang"><option value="ar-EG">عربي (مصري)</option><option value="ar-SA">عربي</option><option value="ur-PK">اردو</option><option value="hi-IN">हिन्दी</option><option value="bn-IN">বাংলা</option><option value="ml-IN">മലയാളം</option><option value="ta-IN">தமிழ்</option><option value="en-US">English</option></select><label><input type="checkbox" id="ttsOn"> 🔊 Voice reply</label><button id="ttsStop">■ Stop reading</button></div>
+  <div class="bar2"><span id="micSt">Mic: ready</span><select id="micLang"><option value="ar-EG">عربي (مصري)</option><option value="ar-SA">عربي</option><option value="ur-PK">اردو</option><option value="hi-IN">हिन्दी</option><option value="bn-IN">বাংলা</option><option value="ml-IN">മലയാളം</option><option value="ta-IN">தமிழ்</option><option value="en-US">English</option></select></div>
+  <div class="bar2 vbar"><button id="vEnable">🔊</button><span id="vSt"></span><select id="vLang"><option value="auto">Auto</option><option value="ar">العربية</option><option value="en">English</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="bn">বাংলা</option><option value="ml">മലയാളം</option><option value="ta">தமிழ்</option></select><select id="vVoice"></select><label title="Speed">🐢<input type="range" id="vRate" min="0.75" max="1.25" step="0.05" value="0.95">🐇</label><button id="vStop" title="Stop">⏹</button><button id="vReplay" title="Replay">↻</button><button id="vMute" title="Mute">🔈</button><button id="vTest" title="Test voices">🎧</button></div>
+  <div class="bar2 vbar"><button id="vExplain" class="go">📍 Explain this place · اشرح المكان</button><label><input type="checkbox" id="vAuto"> Auto-explain new areas · شرح تلقائي</label></div>
 </div>
 
 
@@ -143,6 +151,7 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {CSS2DRenderer,CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 const D=await (await fetch('data/building.json?v=20261109g',{cache:'no-store'})).json();
@@ -171,7 +180,10 @@ const scafMat=new THREE.MeshStandardMaterial({color:0xf5b50a,roughness:.8});
 const holeMat=new THREE.MeshBasicMaterial({color:0x0b0f14});
 const doorMat=new THREE.MeshBasicMaterial({color:0x19c37d});
 const landMat=new THREE.MeshStandardMaterial({color:0x6fe0ad,roughness:.9});
-const destOf=i=>i>GFI?i-1:(i<GFI?i+1:null);
+// floor reached by a stair from floor i going d (-1 down / +1 up). Podium 1 is NOT connected to Podium 2 in either tower:
+// the Podium 2 stairs go straight down to the Ground floor, and Podium 1 has its own separate stairs to the Ground floor.
+function stepF(i,d){if(d<0&&F[i]&&F[i].k==='P2')return GFI;if(d>0&&F[i]&&F[i].k==='P1')return -1;const t=i+d;return t>=0&&t<N?t:-1;}
+const destOf=i=>i>GFI?stepF(i,-1):(i<GFI?stepF(i,1):null);
 function shapeOf(o,h){const s=new THREE.Shape(o.map(([x,y])=>new THREE.Vector2(x,y)));for(const r of (h||[]))s.holes.push(new THREE.Path(r.map(([x,y])=>new THREE.Vector2(x,y))));return s;}
 function polysOf(f){return f.polys==='B'?D.basePolys:f.polys;}
 function mkLabel(t,cls,x,y,z,go){const d=document.createElement('div');d.className='lbl '+cls+(go?' go':'');d.textContent=t;if(go){d.title='Tap to walk here';d.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();goTo(go);});}const o=new CSS2DObject(d);o.position.set(x,y,z);return o;}
@@ -242,7 +254,7 @@ function occOf(i){if(OCC[i])return OCC[i];const f=F[i];const cv=document.createE
   return OCC[i]=o;}
 function blocked(x,y){const f=F[cur];if(f.gf||document.getElementById('ly-noclip').checked)return false;if(f.ramp&&x>RAMP.x0&&x<RAMP.x1&&y>RAMP.y0&&y<RAMP.y1)return false;const i=Math.floor(x/CELL),j=Math.floor(y/CELL);if(i<0||j<0||i>=NX||j>=NY)return true;return occOf(cur)[j*NX+i]===1;}
 // a stair only guides people if it really continues towards the ground floor on the next level's drawing
-function continues(i,s){const dir=i>GFI?-1:(i<GFI?1:0);if(!dir)return true;const t=i+dir;if(t<0||t>=N)return false;if(F[t].gf)return true;
+function continues(i,s){const dir=i>GFI?-1:(i<GFI?1:0);if(!dir)return true;const t=stepF(i,dir);if(t<0||t>=N)return false;if(F[t].gf)return true;
   for(const q of F[t].stairs){if(!!q.review!==!!s.review)continue;if(Math.hypot(q.x-s.x,q.y-s.y)-(q.id&&q.id===s.id?5:0)<15)return true;}return false;}
 function distOf(i){if(DIST[i])return DIST[i];const o=occOf(i),d=new Int32Array(NX*NY).fill(-1),q=new Int32Array(NX*NY);let h=0,t=0;
   for(const s of F[i].stairs){if(s.review||s.landOnly||!continues(i,s))continue;const ci=Math.floor(s.x/CELL),cj=Math.floor(s.y/CELL);for(const R of (F[i].gf?[4,7,10]:[1.25,2.0,4,7,10])){let added=0;const r=Math.ceil(R/CELL);for(let j=cj-r;j<=cj+r;j++)for(let k=ci-r;k<=ci+r;k++){if(k<0||j<0||k>=NX||j>=NY||o[j*NX+k]||Math.hypot(k-ci,j-cj)>r)continue;if(d[j*NX+k]<0){d[j*NX+k]=0;q[t++]=j*NX+k;}added++;}if(added)break;}}
@@ -264,7 +276,7 @@ function netPath(x,y,tx,ty){const G=D.gfNet;if(!G)return [[x,y],[tx,ty]];
   const lca=A[ia],ib=inB.has(lca)?inB.get(lca):Bp.length-1;
   const chain=[...A.slice(0,ia+1),...Bp.slice(0,ib).reverse()].map(k=>G.pts[k]);
   const pts=[[x,y],...chain.filter((p,i)=>i%3===0||i===chain.length-1),[tx,ty]];return pts;}
-let auto=null;
+let auto=null;const WALK_V=1.45; // brisk evacuation walk, m/s
 function goTo(t){if(t.kind==='info'){toast(((t.o.status==='approved'||t.o.status==='access')?'✓ ':'⚠ ')+t.o.label+' — '+t.o.src);return;}
   if(mode!=='walk')startOn(cur);const f=F[cur];let pts;
   if(t.kind==='stair'&&Math.hypot(t.x-player.x,t.y-player.y)<4.5){arriveStair(t);return;}
@@ -272,7 +284,7 @@ function goTo(t){if(t.kind==='info'){toast(((t.o.status==='approved'||t.o.status
   else{pts=followField(fieldTo(cur,t.x,t.y),player.x,player.y);}
   if(!pts||pts.length<2){toast('You are already at '+t.n);return;}
   auto={pts,k:1,t};toast('Walking to '+t.n+' — press any arrow to stop');}
-window.__dbg.goTo=goTo;window.__dbg.auto=()=>auto;
+window.__dbg.goTo=goTo;window.__dbg.walkPath=(pts)=>{auto={pts,k:1,t:{kind:'test',n:'test'}};};window.__dbg.LM=()=>({...LM});window.__dbg.blocked=(x,y)=>blocked(x,y);window.__dbg.auto=()=>auto;
 function arriveStair(t){const d=cur>GFI?-1:(cur<GFI?1:0);if(!d){toast('At '+t.n);return;}
   if(t.review){toast('⚑ '+t.n+': '+(t.s&&t.s.reason||'opening not on an approved drawing')+' — use the ▼/▲ button only after HSE review');return;}
   setTimeout(()=>changeFloor(d),250);}
@@ -349,7 +361,7 @@ function setMode(m){mode=m;document.querySelectorAll('#mode button').forEach(b=>
     const cx=W/2,cz=-H/2;orbit.target.set(cx,f.ffl,cz);
     if(m==='plan')camera.position.set(cx,f.ffl+260,cz+0.01);else camera.position.set(cx+120,f.ffl+95,cz+150);}
   camera.updateProjectionMatrix();applyFloor();if(m==='walk')setTimeout(()=>canvas.focus({preventScroll:true}),30);}
-function walkTo(x,y,yaw){const p=freeNear(x,y);player.x=p[0];player.y=p[1];if(yaw!==undefined)player.yaw=yaw;setMode('walk');}
+function walkTo(x,y,yaw){const p=freeNear(x,y);player.x=p[0];player.y=p[1];if(yaw!==undefined)player.yaw=yaw;LM.by=player.yaw;LM.v=0;LM.w=0;LM.init=true;setMode('walk');}
 function startOn(i){cur=i;overall=false;const f=F[i];
   let cx=W/2,cy=H/2;if(f.foot&&f.foot.length){let a=0,sx=0,sy=0;for(const fp of f.foot)for(const [x,y] of fp.o){sx+=x;sy+=y;a++;}cx=sx/a;cy=sy/a;}
   if(f.gf){cx=60;cy=60;walkTo(cx,cy,0);}
@@ -370,7 +382,7 @@ const nearStair=()=>{const f=F[cur];let best=null,bd=f.gf?6:11;for(const s of f.
   if(best&&!f.gf&&bd>4.5){const d=distOf(cur);const i=Math.floor(player.x/CELL),j=Math.floor(player.y/CELL);const v=(i>=0&&j>=0&&i<NX&&j<NY)?d[j*NX+i]:-1;if(v<0||v>12)return null;}
   return best;};
 let anim=null;
-function changeFloor(d){const t=cur+d;if(t<0||t>=N||anim)return;const s=nearStair();if(!s)return;
+function changeFloor(d){const t=stepF(cur,d);if(t<0||t>=N||anim)return;const s=nearStair();if(!s)return;
   let tgt=null,bd=15;for(const q of F[t].stairs){if(!!q.review!==!!s.review&&!F[t].gf)continue;const dd=Math.hypot(q.x-s.x,q.y-s.y)-(q.id&&q.id===s.id?5:0);if(dd<bd){bd=dd;tgt=q;}}
   if(s.review&&d<0&&t>=0&&!(F[t].stairs.some(q=>q.review))&&!F[cur].openings.some(o=>Math.hypot(o.poly[0][0]-s.x,o.poly[0][1]-s.y)<4)){toast('⚑ '+s.id+' — no approved slab opening continues to '+F[t].name+' — HSE review');return;}
   if(!tgt&&!F[t].gf){toast('⚑ '+(s.id||'This stair')+' does not continue to '+F[t].name+' on the drawings — HSE review; use another stair');return;}
@@ -414,18 +426,32 @@ function drawMap(){const f=F[cur];mx.fillStyle='#e9edf1';mx.fillRect(0,0,mc.widt
 const clock=new THREE.Clock();let rt=0,arrived=false;
 function step(dt){
   if(mode!=='walk'){stepFly();orbit.update();return;}
-  const run=keys.ShiftLeft||keys.ShiftRight;const sp=(run?6:3.2)*dt;
+  const run=keys.ShiftLeft||keys.ShiftRight;
   let fw=0,sd=0;if(keys.KeyW||keys.ArrowUp)fw+=1;if(keys.KeyS||keys.ArrowDown)fw-=1;if(keys.KeyD)sd+=1;if(keys.KeyA)sd-=1;
   if(keys.ArrowLeft||keys.turnL)player.yaw+=1.7*dt;if(keys.ArrowRight||keys.turnR)player.yaw-=1.7*dt;
   if(auto&&(fw||sd||keys.ArrowLeft||keys.ArrowRight||keys.turnL||keys.turnR))auto=null;
-  if(auto){const sp2=(run?6:3.6)*dt;let rem=sp2;while(rem>0&&auto&&auto.k<auto.pts.length){const [tx2,ty2]=auto.pts[auto.k];const dx=tx2-player.x,dy=ty2-player.y,dd=Math.hypot(dx,dy);
-      if(dd>0.05){const want=Math.atan2(-dx,dy);let dyaw=want-player.yaw;while(dyaw>Math.PI)dyaw-=2*Math.PI;while(dyaw<-Math.PI)dyaw+=2*Math.PI;player.yaw+=dyaw*Math.min(1,dt*6);}
-      if(dd<=rem){player.x=tx2;player.y=ty2;rem-=dd;auto.k++;}else{player.x+=dx/dd*rem;player.y+=dy/dd*rem;rem=0;}}
-    if(auto&&auto.k>=auto.pts.length){const t=auto.t;auto=null;if(t.kind==='stair'){arriveStair(t);}else toast(t.kind==='asm'?'✔ You reached the ASSEMBLY POINT — stay with your supervisor for the roll call':'You reached '+t.n);}}
-  const fx=-Math.sin(player.yaw),fy=Math.cos(player.yaw),rx=Math.cos(player.yaw),ry=Math.sin(player.yaw);
+  // ---- locomotion: the body turns first (head, shoulders, hips and feet together), then walks forward along the route; speed ramps up and down ----
+  if(!LM.init){LM.by=player.yaw;LM.init=true;}
+  let want=null,vMax=0,stopD=1e9,tgt=null;
+  if(auto){const P=auto.pts;if(!auto.rem){auto.rem=new Float32Array(P.length);for(let k=P.length-2;k>=0;k--)auto.rem[k]=auto.rem[k+1]+Math.hypot(P[k+1][0]-P[k][0],P[k+1][1]-P[k][1]);}
+    while(auto.k<P.length-1&&Math.hypot(P[auto.k][0]-player.x,P[auto.k][1]-player.y)<0.9)auto.k++;
+    tgt=P[auto.k];const dx=tgt[0]-player.x,dy=tgt[1]-player.y,dd=Math.hypot(dx,dy);stopD=dd+auto.rem[auto.k];
+    if(auto.k>=P.length-1&&dd<0.3){const t=auto.t;auto=null;tgt=null;stopD=0;if(t.kind==='stair'){arriveStair(t);}else if(t.kind!=='test')toast(t.kind==='asm'?'✔ You reached the ASSEMBLY POINT — stay with your supervisor for the roll call':'You reached '+t.n);}
+    else{want=Math.atan2(-dx,dy);vMax=WALK_V;}}
+  else if(fw||sd){const f0x=-Math.sin(player.yaw),f0y=Math.cos(player.yaw),r0x=Math.cos(player.yaw),r0y=Math.sin(player.yaw);const mx=f0x*fw+r0x*sd,my=f0y*fw+r0y*sd;want=Math.atan2(-mx,my);vMax=run?3.4:1.6;}
+  const err=want===null?0:wrapA(want-LM.by);
+  const wMax=LM.v>0.4?2.0:2.5;const wT=want===null?0:Math.max(-wMax,Math.min(wMax,err*3.0));
+  LM.w+=Math.max(-7*dt,Math.min(7*dt,wT-LM.w));LM.by=wrapA(LM.by+LM.w*dt);
+  const face=want===null?0:Math.max(0,Math.min(1,(Math.cos(err)-0.5)/0.45));
+  let vT=vMax*face;if(stopD<1e8)vT=Math.min(vT,Math.sqrt(2*1.3*Math.max(0,stopD-0.1)));
+  LM.v+=Math.max(-2.4*dt,Math.min(1.3*dt,vT-LM.v));if(LM.v<0.02&&vT===0)LM.v=0;
+  if(LM.v>0){const hx=-Math.sin(LM.by),hy=Math.cos(LM.by),st=LM.v*dt;let nx=player.x+hx*st,ny=player.y+hy*st;
+    if(blocked(nx,ny)&&tgt){const dx=tgt[0]-player.x,dy=tgt[1]-player.y,dd=Math.hypot(dx,dy)||1;nx=player.x+dx/dd*st;ny=player.y+dy/dd*st;}
+    let mv=false;if(!blocked(nx,player.y)){player.x=nx;mv=true;}if(!blocked(player.x,ny)){player.y=ny;mv=true;}if(!mv)LM.v*=0.5;}
+  if(auto)player.yaw+=wrapA(LM.by-player.yaw)*Math.min(1,dt*2.0); // camera follows the body smoothly
+  LM.stair=anim?1:0;
+  const fx=-Math.sin(player.yaw),fy=Math.cos(player.yaw);
   const f=F[cur];const wasRamp=f.ramp&&player.x>RAMP.x0&&player.x<RAMP.x1&&player.y>RAMP.y0&&player.y<RAMP.y1;
-  const nx=player.x+(fx*fw+rx*sd)*sp,ny=player.y+(fy*fw+ry*sd)*sp;
-  if(!blocked(nx,player.y))player.x=nx;if(!blocked(player.x,ny))player.y=ny;
   let eye=f.ffl+EYE;
   if(f.ramp){const onX=player.x>RAMP.x0&&player.x<RAMP.x1;
     if(wasRamp&&onX&&player.y>=RAMP.y1){cur++;applyFloor();toast('Up the ramp to '+F[cur].name);}
@@ -433,7 +459,7 @@ function step(dt){
   const s=nearStair();const su=document.getElementById('stairui');
   if(s&&!anim){su.style.display='flex';document.getElementById('stairName').textContent=(s.id?s.id+' — ':'')+(s.review?'⚠ HSE review: opening not on an approved drawing':s.n);const up=document.getElementById('goUp'),dn=document.getElementById('goDown');
     up.disabled=cur>=N-1;dn.disabled=cur<=0;up.classList.toggle('rec',cur<GFI);dn.classList.toggle('rec',cur>GFI);
-    up.textContent=(cur+1===GFI?'▲ Up to Ground floor':'▲ Up to '+(F[cur+1]?F[cur+1].k:''));dn.textContent=(cur-1===GFI?'▼ Down to Ground floor':'▼ Down to '+(F[cur-1]?F[cur-1].k:''));if(s.review){up.classList.remove('rec');dn.classList.remove('rec');}}else su.style.display='none';
+    {const tu=stepF(cur,1),td=stepF(cur,-1);up.disabled=tu<0;dn.disabled=td<0;up.textContent=tu===GFI?'▲ Up to Ground floor':'▲ Up to '+(F[tu]?F[tu].k:'—');dn.textContent=td===GFI?'▼ Down to Ground floor':'▼ Down to '+(F[td]?F[td].k:'—');}if(s.review){up.classList.remove('rec');dn.classList.remove('rec');}}else su.style.display='none';
   if(anim){const t=Math.min(1,(performance.now()-anim.t0)/1200),k=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;eye=anim.from+(anim.to-anim.from)*k;
     if(t>=.5&&!anim.sw){anim.sw=true;cur=anim.f;const p=F[cur].gf?[anim.tgt.x,anim.tgt.y]:(()=>{const q=freeNear(anim.tgt.x,anim.tgt.y);return q;})();player.x=p[0];player.y=p[1];applyFloor();toast('Landing — '+(anim.sid||'stair')+' at '+F[cur].name+(F[cur].gf?' — follow the line out to the Assembly Point':' — follow the green line'));}
     if(t>=1)anim=null;}
@@ -444,8 +470,12 @@ function step(dt){
     const fl=eye-EYE,cy=Math.min(fl+1.75+0.9*(d/back),F[cur].ffl+(F[cur].h||4)-0.45);
     camera.position.set(player.x-fx*d,cy,toZ(player.y-fy*d));camera.rotation.set(pitch-0.15,player.yaw,0,'YXZ');}
   else{camera.position.set(player.x,eye,toZ(player.y));camera.rotation.set(pitch,player.yaw,0,'YXZ');}
+  const pv=window.__dbg.cam;if(pv&&AV.ready){if(LM.cy===undefined)LM.cy=LM.by;LM.cy+=wrapA(LM.by-LM.cy)*Math.min(1,dt*1.1);const fl=eye-EYE,hx=-Math.sin(LM.cy),hy=Math.cos(LM.cy),rxx=Math.cos(LM.cy),ryy=Math.sin(LM.cy);
+    const o=pv==='side'?[rxx*3.0+hx*0.3,ryy*3.0+hy*0.3]:pv==="back"?[-hx*3.1,-hy*3.1]:[hx*3.4,hy*3.4];camera.position.set(player.x+o[0],fl+1.45,toZ(player.y+o[1]));camera.lookAt(player.x,fl+0.95,toZ(player.y));}
 }
-function loop(){const dt=Math.min(clock.getDelta(),0.05);step(dt);guideTick(dt);updAvatar(dt);renderer.render(scene,camera);labelR.render(scene,camera);drawMap();requestAnimationFrame(loop);}
+function frame(dt){step(dt);guideTick(dt);autoExplainTick();updAvatar(dt);renderer.render(scene,camera);labelR.render(scene,camera);drawMap();}
+function loop(){const dt=Math.min(clock.getDelta(),0.05);if(!window.__dbg.manual)frame(dt);requestAnimationFrame(loop);}
+window.__dbg.frame=(n,dt)=>{for(let k=0;k<n;k++)frame(dt||1/30);};
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);labelR.setSize(innerWidth,innerHeight);});
 // =====================================================================
 // v2: location picker, clickable floors, full evacuation chain, assistant, voice, offline
@@ -526,7 +556,7 @@ function chainFrom(i,x,y){const out=[];let g=0;
     if(pts.flag){out.push({i,pts,end:'flag',flag:pts.flag});break;}
     const e=pts[pts.length-1];let s=null,bd=1e9;for(const q of f.stairs){if(q.review||q.landOnly||!continues(i,q))continue;const dd=Math.hypot(q.x-e[0],q.y-e[1]);if(dd<bd){bd=dd;s=q;}}
     if(!s){out.push({i,pts,end:'none'});break;}
-    const dir=i>GFI?-1:1,t=i+dir;if(t<0||t>=N){out.push({i,pts,end:'none'});break;}
+    const dir=i>GFI?-1:1,t=stepF(i,dir);if(t<0||t>=N){out.push({i,pts,end:'none'});break;}
     let tgt=null,b2=15;for(const q of F[t].stairs){if(!!q.review!==!!s.review&&!F[t].gf)continue;const dd=Math.hypot(q.x-s.x,q.y-s.y)-(q.id&&q.id===s.id?5:0);if(dd<b2){b2=dd;tgt=q;}}
     out.push({i,pts,end:'stair',s,t});const q=tgt||s;const p=F[t].gf?[q.x,q.y]:freeNear(q.x,q.y,t);i=t;x=p[0];y=p[1];}
   return out;}
@@ -750,8 +780,8 @@ $('mic').onclick=()=>{if(!SR)return;if(recOn){rec&&rec.stop();return;}
     rec.onerror=e=>{micSt(e.error==='not-allowed'?'permission denied — allow the microphone, or type':e.error==='network'?'needs internet — type instead':'error: '+e.error,'proc');};
     rec.onend=()=>{recOn=false;$('mic').classList.remove('on');const t=$('chatIn').value.trim();if(t){micSt('Processing…','proc');handle(t).then(()=>micSt('Finished','done'));}else if(!/denied|internet|error/.test($('micSt').textContent))micSt('no speech heard');};
     rec.start();}catch(e){micSt('could not start: '+e.message,'proc');}};
-function speak(t){if(!$('ttsOn').checked||!('speechSynthesis' in window))return;speechSynthesis.cancel();const lg=detectLang(t);const u=new SpeechSynthesisUtterance(t.replace(/[✓•⚑📍📌🟩🟢▫]/g,''));u.lang=TTSL[lg];const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.toLowerCase().startsWith(lg));if(v)u.voice=v;else if(lg!=='en')micSt('no '+TTSL[lg]+' voice installed on this device — reply shown as text','proc');speechSynthesis.speak(u);}
-$('ttsStop').onclick=()=>{if('speechSynthesis' in window)speechSynthesis.cancel();};$('ttsOn').onchange=()=>{if(!$('ttsOn').checked&&'speechSynthesis' in window)speechSynthesis.cancel();};
+let speak=function(t){};
+
 // ---------- offline (service worker + Cache Storage, verified by SHA-256) ----------
 let OFFMETA=null,VER=null;const META_CACHE='uptown-meta';
 async function readMeta(){try{const c=await caches.open(META_CACHE);const r=await c.match('meta');OFFMETA=r?await r.json():null;}catch(e){OFFMETA=null;}return OFFMETA;}
@@ -822,28 +852,71 @@ floorTexture=function(i){const f=F[i];const fg=FG[i];if(fg.mat||fg.texFail)retur
 Object.assign(window.__dbg,{cmd,selectFloor,setHere,backToOverall,chainFrom,chainSteps,openLoc,download,readMeta,getVersion,checkUpdate,deleteOffline,meta:()=>OFFMETA,here:()=>here,overall:()=>overall,steps:()=>$('steps').innerText,floorAtScreen,F});
 
 // ---------- avatar: the user's own cut-out photo walks the route instead of an arrow ----------
-const AV={grp:new THREE.Group(),ready:false,on:false,phase:0,last:null,eye:0};AV.grp.visible=false;scene.add(AV.grp);
-function loadAvatar(url){new THREE.TextureLoader().load(url,t=>{t.colorSpace=THREE.SRGBColorSpace;const img=t.image,asp=img.width/img.height,Hh=1.78,Ww=Hh*asp,HIP=0.44;
-  const mat=new THREE.MeshBasicMaterial({map:t,transparent:true,alphaTest:0.4,side:THREE.DoubleSide});
-  const part=(u0,u1,v0,v1,w,h)=>{const g=new THREE.PlaneGeometry(w,h);const uv=g.attributes.uv;for(let k=0;k<uv.count;k++)uv.setXY(k,u0+(u1-u0)*uv.getX(k),v0+(v1-v0)*uv.getY(k));return new THREE.Mesh(g,mat);};
-  const body=part(0,1,HIP-0.02,1,Ww,Hh*(1-HIP+0.02));body.position.y=Hh*(HIP-0.02)+Hh*(1-HIP+0.02)/2;
-  const legL=new THREE.Group(),legR=new THREE.Group();const lL=part(0,0.5,0,HIP,Ww/2,Hh*HIP);lL.position.set(-Ww/4,-Hh*HIP/2,0);legL.add(lL);legL.position.set(0,Hh*HIP,-0.002);
-  const lR=part(0.5,1,0,HIP,Ww/2,Hh*HIP);lR.position.set(Ww/4,-Hh*HIP/2,0);legR.add(lR);legR.position.set(0,Hh*HIP,-0.004);
-  const inner=new THREE.Group();inner.add(body,legL,legR);AV.grp.add(inner);
-  const sh=new THREE.Mesh(new THREE.CircleGeometry(0.42,24),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.28,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=0.03;AV.grp.add(sh);
-  Object.assign(AV,{inner,legL,legR,mat,ready:true,on:true});$('ly-me-row').style.display='flex';$('ly-me').checked=true;},undefined,()=>console.warn('avatar not found'));}
+// ---------- 3D worker character: skinned body, idle/walk/run blended by real speed, feet locked to stride ----------
+const AV={grp:new THREE.Group(),ready:false,on:false,eye:0,act:{},w:{idle:1,walk:0,run:0},vWalk:1.3,vRun:3.6,mats:[],inner:null};AV.grp.visible=false;scene.add(AV.grp);
+function wrapA(a){while(a>Math.PI)a-=2*Math.PI;while(a<-Math.PI)a+=2*Math.PI;return a;}
+// measure how fast the foot moves backwards while it is planted, so the clip can be played at exactly the walking speed (no foot sliding)
+function strideSpeed(root,clip,sc){const mx=new THREE.AnimationMixer(root);const a=mx.clipAction(clip);a.play();let foot=null,toe=null;root.traverse(o=>{if(o.isBone&&/LeftFoot$/.test(o.name))foot=o;if(o.isBone&&/LeftToeBase$/.test(o.name))toe=o;});
+  const N=120,T=clip.duration,P=[],v=new THREE.Vector3();for(let k=0;k<=N;k++){mx.setTime(T*k/N);root.updateMatrixWorld(true);(toe||foot).getWorldPosition(v);P.push([v.y,v.z]);}
+  a.stop();mx.uncacheRoot(root);const ymin=Math.min(...P.map(p=>p[0]));const sp=[];
+  for(let k=1;k<=N;k++){if(P[k][0]<ymin+0.03&&P[k-1][0]<ymin+0.03)sp.push(-(P[k][1]-P[k-1][1])/(T/N));}
+  sp.sort((a,b)=>a-b);const m=sp.length?sp[Math.floor(sp.length/2)]:0;return m>0.2&&m<8?m:null;}
+function loadWorker(src){const ld=new GLTFLoader();const ok=g=>{const root=g.scene;
+    // clothes like the presenter photo: red hat + vest (added below), grey-green shirt, brown trousers, beige safety shoes; colour each vertex by the bone that moves it
+    const OUT=n=>/Hand/.test(n)?0xa8785c:/(Head|Neck)/.test(n)?0x9c6d52:/(Foot|Toe)/.test(n)?0xb3a17f:/(UpLeg|Leg|Hips)/.test(n)?0x5b4630:0x707a6c;
+    root.traverse(o=>{if(o.isMesh||o.isSkinnedMesh){o.frustumCulled=false;const m=o.material=o.material.clone();m.roughness=0.8;m.metalness=0;AV.mats.push(m);
+      const gq=o.geometry,si=gq.attributes.skinIndex,sw=gq.attributes.skinWeight;if(o.isSkinnedMesh&&si&&sw){const bones=o.skeleton.bones,n=si.count,col=new Float32Array(n*3),c=new THREE.Color();const cache={};
+        for(let k=0;k<n;k++){let bi=si.getX(k),bw=sw.getX(k);for(const [ii,ww] of [[si.getY(k),sw.getY(k)],[si.getZ(k),sw.getZ(k)],[si.getW(k),sw.getW(k)]])if(ww>bw){bw=ww;bi=ii;}
+          const nm=bones[bi]?bones[bi].name:'';if(cache[nm]===undefined)cache[nm]=OUT(nm);c.setHex(cache[nm]);if(/Joints/i.test(m.name))c.multiplyScalar(0.8);col[k*3]=c.r;col[k*3+1]=c.g;col[k*3+2]=c.b;}
+        gq.setAttribute('color',new THREE.BufferAttribute(col,3));m.vertexColors=true;m.color.set(0xffffff);}else m.color.set(0x707a6c);}});
+    root.updateMatrixWorld(true);const bb=new THREE.Box3().setFromObject(root);const sc=1.76/(bb.max.y-bb.min.y);root.scale.setScalar(sc);root.position.y=-bb.min.y*sc;
+    const inner=new THREE.Group();inner.add(root);AV.grp.add(inner);root.updateMatrixWorld(true);
+    let head=null,chest=null;root.traverse(o=>{if(o.isBone&&/Head$/.test(o.name)&&!/Top/.test(o.name))head=o;if(o.isBone&&/Spine2$/.test(o.name))chest=o;});
+    // PPE: white hard hat on the head bone, hi-vis vest on the chest bone - they move with the body
+    let top=null;root.traverse(o=>{if(o.isBone&&/HeadTop_End$/.test(o.name))top=o;});
+    if(head){const hp=new THREE.Vector3();head.getWorldPosition(hp);const tp=new THREE.Vector3();if(top)top.getWorldPosition(tp);else tp.set(hp.x,hp.y+0.2,hp.z);const hat=new THREE.Group();
+      const hm=new THREE.MeshStandardMaterial({color:0xd32424,roughness:.35});const dome=new THREE.Mesh(new THREE.SphereGeometry(0.15,24,12,0,Math.PI*2,0,Math.PI/2),hm);dome.scale.set(1,0.92,1.12);
+      const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.172,0.172,0.012,28),hm);brim.scale.set(1,1,1.15);brim.position.set(0,0.004,0.02);hat.add(dome,brim);
+      hat.position.set(tp.x,tp.y-0.115,tp.z+0.005);AV.mats.push(hm);inner.attach(hat);head.attach(hat);}
+    if(chest){const cp=new THREE.Vector3();chest.getWorldPosition(cp);const vm=new THREE.MeshStandardMaterial({color:0xc42020,roughness:.7,side:THREE.DoubleSide});const sm=new THREE.MeshStandardMaterial({color:0xe9eef2,roughness:.3,emissive:0x333333});
+      const vest=new THREE.Group();const shell=new THREE.Mesh(new THREE.CylinderGeometry(0.175,0.16,0.44,28,1,true),vm);shell.scale.set(1,1,0.72);vest.add(shell);
+      for(const yy of [-0.08,0.06]){const st=new THREE.Mesh(new THREE.CylinderGeometry(0.178,0.172,0.035,28,1,true),sm);st.scale.set(1,1,0.73);st.position.y=yy;vest.add(st);}
+      vest.position.set(cp.x,cp.y-0.13,cp.z+0.01);AV.mats.push(vm,sm);inner.attach(vest);chest.attach(vest);}
+    const C=n=>g.animations.find(c=>c.name===n);
+    AV.vWalk=strideSpeed(root,C('walk'),sc)||1.3;AV.vRun=strideSpeed(root,C('run'),sc)||3.6;
+    AV.mixer=new THREE.AnimationMixer(root);for(const n of ['idle','walk','run']){const a=AV.mixer.clipAction(C(n));a.play();a.setEffectiveWeight(n==='idle'?1:0);AV.act[n]=a;}
+    AV.act.run.time=0;AV.act.walk.time=0;
+    const sh=new THREE.Mesh(new THREE.CircleGeometry(0.38,28),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.25,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=0.02;AV.grp.add(sh);
+    Object.assign(AV,{inner,root,ready:true,on:true});$('ly-me-row').style.display='flex';$('ly-me').checked=true;window.__dbg.vWalk=AV.vWalk;window.__dbg.vRun=AV.vRun;};
+  const err=e=>console.warn('worker model not loaded',e);
+  if(src instanceof ArrayBuffer)ld.parse(src,'',ok,err);else ld.load(src,ok,undefined,err);}
 $('ly-me').addEventListener('change',()=>{AV.on=$('ly-me').checked;});
+// LM = locomotion state shared with step(): v speed (m/s), by body heading, w turn rate, stepT turning-on-the-spot stepping
+const LM={v:0,by:0,w:0,init:false,stair:0};
 function updAvatar(dt){const show=AV.ready&&AV.on&&!overall&&(mode==='walk'||(here&&here.i===cur));AV.grp.visible=show;
-  if(show){hereMark.children.forEach(o=>{if(!o.isCSS2DObject)o.visible=false;});}else hereMark.children.forEach(o=>{if(!o.isCSS2DObject)o.visible=true;});
-  if(!show){AV.last=null;return;}
-  const mv=AV.last?Math.hypot(player.x-AV.last[0],player.y-AV.last[1]):0;AV.last=[player.x,player.y];const sp=Math.min(4,mv/Math.max(dt,1e-3));const k=Math.min(1,sp/2);
-  if(sp>0.15)AV.phase+=dt*(2.2+sp*2.2);else AV.phase*=0.85;
-  const sw=Math.sin(AV.phase)*k;AV.legL.rotation.z=0.3*sw;AV.legR.rotation.z=0.3*sw*-1;AV.inner.position.y=Math.abs(Math.sin(AV.phase))*0.06*k;AV.inner.rotation.z=sw*0.035;
-  const fy=mode==='walk'?AV.eye-EYE:F[cur].ffl;AV.grp.position.set(player.x,fy,toZ(player.y));
-  AV.grp.rotation.y=Math.atan2(camera.position.x-AV.grp.position.x,camera.position.z-AV.grp.position.z);
-  AV.grp.scale.setScalar(mode==='walk'?1:Math.max(3,camera.position.distanceTo(AV.grp.position)/12));
-  const top=mode!=='walk';if(AV.mat&&AV.mat.depthTest===top){AV.mat.depthTest=!top;AV.mat.needsUpdate=true;}AV.grp.traverse(o=>{o.renderOrder=top?20:0;});}
-{const mp=new URLSearchParams(location.search).get('me');if(window.__AVATAR)loadAvatar(window.__AVATAR);else if(mp&&/^[\w\/.-]+\.png$/.test(mp))loadAvatar(mp);else fetch('config.json',{cache:'no-store'}).then(r=>r.json()).then(c=>{if(c&&c.avatar)loadAvatar(c.avatar);}).catch(()=>{});}
+  hereMark.children.forEach(o=>{if(!o.isCSS2DObject)o.visible=!show;});
+  if(!show)return;const walk=mode==='walk';
+  // speed that the legs should show: travel speed, or a slow step cadence when turning on the spot / stepping on the stair
+  const turnStep=walk?Math.min(1,Math.abs(LM.w)/1.6):0;const v=walk?LM.v:0;
+  const legV=Math.max(v,turnStep*0.42*AV.vWalk,LM.stair*0.55*AV.vWalk);
+  const runK=Math.max(0,Math.min(1,(legV-AV.vWalk*1.35)/(AV.vRun*0.8-AV.vWalk*1.35)));
+  const moveK=Math.max(0,Math.min(1,legV/(0.28*AV.vWalk)));
+  const tw={idle:1-moveK,walk:moveK*(1-runK),run:moveK*runK};
+  for(const n in tw){AV.w[n]+=(tw[n]-AV.w[n])*Math.min(1,dt*7);AV.act[n].setEffectiveWeight(AV.w[n]);}
+  // play rate locked to speed: stride speed of the clip x rate = ground speed -> planted feet do not slide
+  AV.act.walk.setEffectiveTimeScale(Math.max(0.45,Math.min(1.6,legV/AV.vWalk)));AV.act.run.setEffectiveTimeScale(Math.max(0.6,Math.min(1.4,legV/AV.vRun)));
+  // keep walk and run in step with each other so blending does not cross the legs
+  if(AV.w.run>0.02&&AV.w.walk>0.02){const ph=AV.act.walk.time/AV.act.walk.getClip().duration;AV.act.run.time=ph*AV.act.run.getClip().duration;}
+  AV.mixer.update(dt);
+  const fy=walk?AV.eye-EYE:F[cur].ffl;AV.grp.position.set(player.x,fy,toZ(player.y));
+  AV.grp.rotation.y=(walk?LM.by:player.yaw)+Math.PI;
+  // lean slightly into turns and forward when accelerating (small, so it never looks exaggerated)
+  AV.inner.rotation.z=walk?Math.max(-0.07,Math.min(0.07,-LM.w*v*0.03)):0;
+  AV.grp.scale.setScalar(walk?1:Math.max(3,camera.position.distanceTo(AV.grp.position)/12));
+  const top=!walk;for(const m of AV.mats){if(m.depthTest===top){m.depthTest=!top;m.needsUpdate=true;}}AV.grp.traverse(o=>{o.renderOrder=top?20:0;});}
+{if(window.__WORKER){const b=atob(window.__WORKER);const u=new Uint8Array(b.length);for(let k=0;k<b.length;k++)u[k]=b.charCodeAt(k);loadWorker(u.buffer);}
+ else fetch('config.json',{cache:'no-store'}).then(r=>r.json()).then(c=>{if(c&&c.worker)loadWorker(c.worker);}).catch(()=>{});}
+
 window.__dbg.AV=AV;
 // ---------- layout: panels sit under the (wrapping) top bar; the info panel starts folded on phones ----------
 function layoutTop(){document.documentElement.style.setProperty('--tb',$('top').offsetHeight+'px');}
@@ -859,6 +932,7 @@ hi:{pick:'अपनी भाषा चुनें',pickSub:'फिर बत�
 bn:{pick:'আপনার ভাষা বেছে নিন',pickSub:'তারপর বলুন আপনি কোথায় আছেন। গাইড নিজে থেকেই শুরু হয়ে আপনাকে অ্যাসেম্বলি পয়েন্টে নিয়ে যাবে।',start:'জরুরি বহির্গমন শুরু হয়েছে। শান্ত থাকুন এবং আমার পিছনে আসুন। কখনও লিফট ব্যবহার করবেন না।',walkDown:'{f}। {s} পর্যন্ত {m} মিটার হাঁটুন, তারপর নিচে {f2}-এ নামুন।',walkUp:'{f}। {s} পর্যন্ত {m} মিটার হাঁটুন, তারপর উপরে {f2}-এ উঠুন।',down:'{f}। {s} দিয়ে নিচে {f2}-এ নামুন।',up:'{f}। {s} দিয়ে উপরে {f2}-এ উঠুন।',floor:'{f}।',gf:'গ্রাউন্ড ফ্লোর। বাইরে যান এবং সবুজ পথ ধরে {m} মিটার হেঁটে অ্যাসেম্বলি পয়েন্টে পৌঁছান।',done:'আপনি অ্যাসেম্বলি পয়েন্টে পৌঁছে গেছেন। হাজিরা না হওয়া পর্যন্ত আপনার সুপারভাইজারের সাথে থাকুন।',review:'এখানে পথটির HSE পর্যালোচনা দরকার। থামুন এবং সুপারভাইজারকে জিজ্ঞাসা করুন।',lv:'লেভেল {n}',pd:'পোডিয়াম {n}',bs:'বেসমেন্ট {n}',g:'গ্রাউন্ড ফ্লোর',op:'অস্থায়ী ওপেনিং {n}',st:'সিঁড়ি {n}',btn:'আমাকে নিয়ে চলুন',stop:'থামুন',resume:'গাইড চালু রাখুন',paused:'গাইড থেমে আছে — আপনি নিজে চলছেন।',again:'আবার শুরু করুন',noVoice:'এই ফোনে {l} কণ্ঠ নেই — লেখাটি পড়ুন।'},
 ml:{pick:'നിങ്ങളുടെ ഭാഷ തിരഞ്ഞെടുക്കുക',pickSub:'പിന്നെ നിങ്ങൾ എവിടെയാണെന്ന് തിരഞ്ഞെടുക്കുക. ഗൈഡ് സ്വയം തുടങ്ങി നിങ്ങളെ അസംബ്ലി പോയിന്റിലേക്ക് കൊണ്ടുപോകും.',start:'ഒഴിപ്പിക്കൽ ആരംഭിച്ചു. ശാന്തരായിരിക്കുക, എന്നെ പിന്തുടരുക. ഒരിക്കലും ലിഫ്റ്റ് ഉപയോഗിക്കരുത്.',walkDown:'{f}. {s} വരെ {m} മീറ്റർ നടക്കുക, എന്നിട്ട് താഴെ {f2} ലേക്ക് ഇറങ്ങുക.',walkUp:'{f}. {s} വരെ {m} മീറ്റർ നടക്കുക, എന്നിട്ട് മുകളിൽ {f2} ലേക്ക് കയറുക.',down:'{f}. {s} വഴി താഴെ {f2} ലേക്ക് ഇറങ്ങുക.',up:'{f}. {s} വഴി മുകളിൽ {f2} ലേക്ക് കയറുക.',floor:'{f}.',gf:'ഗ്രൗണ്ട് ഫ്ലോർ. പുറത്തിറങ്ങി പച്ച വഴിയിലൂടെ {m} മീറ്റർ നടന്ന് അസംബ്ലി പോയിന്റിൽ എത്തുക.',done:'നിങ്ങൾ അസംബ്ലി പോയിന്റിൽ എത്തി. ഹാജർ എടുക്കുന്നത് വരെ സൂപ്പർവൈസറുടെ കൂടെ നിൽക്കുക.',review:'ഇവിടെ വഴിക്ക് HSE പരിശോധന ആവശ്യമാണ്. നിൽക്കുക, സൂപ്പർവൈസറോട് ചോദിക്കുക.',lv:'ലെവൽ {n}',pd:'പോഡിയം {n}',bs:'ബേസ്മെന്റ് {n}',g:'ഗ്രൗണ്ട് ഫ്ലോർ',op:'താൽക്കാലിക ഓപ്പണിംഗ് {n}',st:'കോണി {n}',btn:'എന്നെ കൊണ്ടുപോകൂ',stop:'നിർത്തുക',resume:'ഗൈഡ് തുടരുക',paused:'ഗൈഡ് നിർത്തി — നിങ്ങൾ സ്വയം നീങ്ങുന്നു.',again:'വീണ്ടും തുടങ്ങുക',noVoice:'ഈ ഫോണിൽ {l} ശബ്ദം ഇല്ല — എഴുത്ത് വായിക്കുക.'},
 ta:{pick:'உங்கள் மொழியைத் தேர்ந்தெடுக்கவும்',pickSub:'பிறகு நீங்கள் எங்கே இருக்கிறீர்கள் என்று தேர்வு செய்யுங்கள். வழிகாட்டி தானாகத் தொடங்கி உங்களைக் கூடும் இடத்திற்கு அழைத்துச் செல்லும்.',start:'வெளியேற்றம் தொடங்கியது. அமைதியாக இருங்கள், என்னைப் பின்தொடருங்கள். ஒருபோதும் லிஃப்ட் பயன்படுத்த வேண்டாம்.',walkDown:'{f}. {s} வரை {m} மீட்டர் நடக்கவும், பிறகு கீழே {f2} க்கு இறங்கவும்.',walkUp:'{f}. {s} வரை {m} மீட்டர் நடக்கவும், பிறகு மேலே {f2} க்கு ஏறவும்.',down:'{f}. {s} வழியாக கீழே {f2} க்கு இறங்கவும்.',up:'{f}. {s} வழியாக மேலே {f2} க்கு ஏறவும்.',floor:'{f}.',gf:'தரைத்தளம். வெளியே சென்று பச்சை பாதையில் {m} மீட்டர் நடந்து கூடும் இடத்தை அடையுங்கள்.',done:'நீங்கள் கூடும் இடத்தை அடைந்துவிட்டீர்கள். வருகைப் பதிவு முடியும் வரை உங்கள் மேற்பார்வையாளருடன் இருங்கள்.',review:'இங்கே பாதைக்கு HSE ஆய்வு தேவை. நின்று உங்கள் மேற்பார்வையாளரிடம் கேளுங்கள்.',lv:'லெவல் {n}',pd:'போடியம் {n}',bs:'பேஸ்மென்ட் {n}',g:'தரைத்தளம்',op:'தற்காலிக திறப்பு {n}',st:'படிக்கட்டு {n}',btn:'என்னை அழைத்துச் செல்லுங்கள்',stop:'நிறுத்து',resume:'வழிகாட்டியைத் தொடரவும்',paused:'வழிகாட்டி நிறுத்தப்பட்டது — நீங்களே நகர்கிறீர்கள்.',again:'மீண்டும் தொடங்கு',noVoice:'இந்த ஃபோனில் {l} குரல் இல்லை — எழுத்தைப் படியுங்கள்.'}};
+Object.assign(GT.en,{voiceEnable:'Turn on voice explanation',voiceOn:'Voice on',myVoice:'HSE engineer voice',phoneVoice:'Phone voice'});Object.assign(GT.ar,{voiceEnable:'تفعيل الشرح الصوتي',voiceOn:'الصوت شغّال',myVoice:'صوت مهندس السلامة',phoneVoice:'صوت الموبايل'});Object.assign(GT.ur,{voiceEnable:'آواز سے وضاحت چالو کریں',voiceOn:'آواز چالو',myVoice:'HSE انجینئر کی آواز',phoneVoice:'فون کی آواز'});Object.assign(GT.hi,{voiceEnable:'आवाज़ में समझाना चालू करें',voiceOn:'आवाज़ चालू',myVoice:'HSE इंजीनियर की आवाज़',phoneVoice:'फ़ोन की आवाज़'});Object.assign(GT.bn,{voiceEnable:'ভয়েস ব্যাখ্যা চালু করুন',voiceOn:'ভয়েস চালু',myVoice:'HSE ইঞ্জিনিয়ারের কণ্ঠ',phoneVoice:'ফোনের কণ্ঠ'});Object.assign(GT.ml,{voiceEnable:'ശബ്ദ വിശദീകരണം ഓണാക്കുക',voiceOn:'ശബ്ദം ഓൺ',myVoice:'HSE എഞ്ചിനീയറുടെ ശബ്ദം',phoneVoice:'ഫോൺ ശബ്ദം'});Object.assign(GT.ta,{voiceEnable:'குரல் விளக்கத்தை இயக்கு',voiceOn:'குரல் இயக்கத்தில்',myVoice:'HSE பொறியாளர் குரல்',phoneVoice:'ஃபோன் குரல்'});
 const GV={on:false,pending:false,lang:'en',lastF:-1,runId:null,act:null,wait:0,kind:''};
 try{const s=localStorage.getItem('uptown-lang');if(s&&GT[s])GV.lang=s;}catch(e){}
 const gT=(k,a,lg)=>(GT[lg||GV.lang][k]||GT.en[k]).replace(/\{(\w+)\}/g,(m,x)=>a&&a[x]!==undefined?a[x]:m);
@@ -878,14 +952,14 @@ function openLang(then){const P=$('langB');P.innerHTML=GLANG.map(([k,n])=>`<butt
     b.onclick=()=>{GV.lang=b.dataset.l;RL=GV.lang;try{localStorage.setItem('uptown-lang',GV.lang);}catch(e){}
       const ml={ar:'ar-EG',ur:'ur-PK',hi:'hi-IN',bn:'bn-IN',ml:'ml-IN',ta:'ta-IN',en:'en-US'}[GV.lang];$('micLang').value=ml;$('btnGuide').textContent='🔊 '+gT('btn');
       if('speechSynthesis' in window){try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}} // unlock speech on phones (needs a tap)
-      $('lang').style.display='none';if(then==='go')startGuide();else{GV.pending=true;openLoc(1);}};});}
+      $('lang').style.display='none';if(then==='go')startGuide();else openIntro(()=>{GV.pending=true;openLoc(1);});};});}
 $('langX').onclick=()=>{$('lang').style.display='none';};
 function startGuide(){GV.pending=false;closeLoc();if(!here){openLang();return;}
   if(cur!==here.i){cur=here.i;}player.x=here.x;player.y=here.y;overall=false;if(mode!=='walk')setMode('walk');auto=null;
   GV.on=true;GV.lastF=-1;GV.saidF=-1;GV.runId=null;GV.act=null;GV.wait=2.6;arrived=false;$('subN').textContent='';$('subGo').style.display='none';$('subX').style.display='';
-  const l=gT('start');gSay(l,l);}
-function stopGuide(paused){GV.on=false;GV.act=null;auto=null;if('speechSynthesis' in window)speechSynthesis.cancel();
-  if(paused){$('subT').textContent=gT('paused');$('subGo').textContent='▶ '+gT('resume');$('subGo').style.display='';}else $('sub').style.display='none';}
+  const l=gT('start');gSay(l,l,'say','start');}
+function stopGuide(paused){GV.on=false;GV.act=null;auto=null;if('speechSynthesis' in window)speechSynthesis.cancel();if(typeof clipStop==='function')clipStop();
+  $('sub').style.display='none';}
 $('subX').onclick=()=>stopGuide(true);$('subGo').onclick=()=>{if(F[cur].gf&&Math.hypot(player.x-ASM.x,player.y-ASM.y)<6){here={i:cur,x:player.x,y:player.y,tw:focusTw,place:'here'};}
   GV.on=true;GV.lastF=-1;GV.runId=null;GV.wait=0.4;$('subGo').style.display='none';};
 $('btnGuide').onclick=()=>{if(here&&!overall)openLang('go');else openLang();};$('btnGuide').textContent='🔊 '+gT('btn');
@@ -893,20 +967,151 @@ function guideTick(dt){if(!GV.on)return;
   if(keys.KeyW||keys.KeyS||keys.KeyA||keys.KeyD||keys.ArrowUp||keys.ArrowDown||keys.ArrowLeft||keys.ArrowRight||keys.turnL||keys.turnR){stopGuide(true);return;}
   if(GV.wait>0){GV.wait-=dt;return;}if(anim||auto)return;
   const f=F[cur];
-  if(f.gf&&Math.hypot(player.x-ASM.x,player.y-ASM.y)<6){const l=gT('done');gSay('✔ '+l,l);GV.on=false;$('subX').style.display='none';$('subGo').textContent='↻ '+gT('again');$('subGo').style.display='';
+  if(f.gf&&Math.hypot(player.x-ASM.x,player.y-ASM.y)<6){const l=gT('done');gSay('✔ '+l,l,'say','done');GV.on=false;$('subX').style.display='none';$('subGo').textContent='↻ '+gT('again');$('subGo').style.display='';
     $('subGo').onclick=()=>{$('subGo').onclick=null;openLoc(1);GV.pending=true;};return;}
   if(GV.act){const a=GV.act;GV.act=null;goTo(a);GV.wait=0.7;return;}
   if(GV.lastF===cur){GV.lastF=-1;return;} // stood still on the same floor: work the route out again
   GV.lastF=cur;const ch=chainFrom(cur,player.x,player.y);const c=ch[0];const fn=gFloor(cur);
-  if(!c||c.end==='none'||c.end==='flag'){const l=gT('review');gSay('⚑ '+l,l);GV.on=false;return;}
+  if(!c||c.end==='none'||c.end==='flag'){const l=gT('review');gSay('⚑ '+l,l,'say','review');GV.on=false;return;}
   const m=Math.round(plen(c.pts));
-  if(c.end==='asm'){const [a,b]=gLine('gf',{m});gSay(a,b);GV.act={kind:'asm',x:ASM.x,y:ASM.y,n:'the Assembly Point'};GV.wait=0.6;return;}
+  if(c.end==='asm'){const [a,b]=gLine('gf',{m});gSay(a,b,'say','gf',{m});GV.act={kind:'asm',x:ASM.x,y:ASM.y,n:'the Assembly Point'};GV.wait=0.6;return;}
   let j=0;while(j+1<ch.length&&ch[j+1].end==='stair'&&ch[j+1].s.id===c.s.id&&plen(ch[j+1].pts)<8)j++;
   const dn=cur>GFI,f2=gFloor(ch[j].t);
-  if(c.s.id!==GV.runId||m>=8){GV.runId=c.s.id;const key=m>4.5?(dn?'walkDown':'walkUp'):(dn?'down':'up');const [a,b]=gLine(key,{f:fn,m,f2,sObj:c.s});gSay(a,b);GV.wait=m>4.5?0.8:1.6;}
-  else{if(GV.saidF!==cur)gSay(fn,fn,'floor');GV.wait=0.15;}GV.saidF=cur;
+  if(c.s.id!==GV.runId||m>=8){GV.runId=c.s.id;const key=m>4.5?(dn?'walkDown':'walkUp'):(dn?'down':'up');const [a,b]=gLine(key,{f:fn,m,f2,sObj:c.s});gSay(a,b,'say',key,{m,sObj:c.s,f2k:F[ch[j].t].k});GV.wait=m>4.5?0.8:1.6;}
+  else{if(GV.saidF!==cur)gSay(fn,fn,'floor','floor',{});GV.wait=0.15;}GV.saidF=cur;
   GV.act=Object.assign({},c.s,{kind:'stair',n:c.s.id||'the stair'});}
+window.__dbg.chainTxt=(k,tw)=>{const i=F.findIndex(f=>f.k===k);const P=placesOf(i,tw||"T3");return P.slice(0,40).map(p=>{try{return p.n+" => "+chainSteps(chainFrom(i,p.x,p.y)).map(s=>s.t).join(" | ");}catch(e){return p.n+" ERR "+e.message;}});};
 window.__dbg.guide=()=>({on:GV.on,lang:GV.lang,cur,k:F[cur].k,sub:$('subT').textContent});window.__dbg.startGuide=startGuide;
+
+// =====================================================================
+// Voice: (1) the guide and intro in Elsayed's own recorded voice (pre-made clips, work offline on any static host),
+//        (2) spoken assistant replies with the phone's speech engine (window.speechSynthesis), cleaned for speaking,
+//        (3) "Explain this place" from the model data, optionally automatic when entering a new area.
+// =====================================================================
+const LS={get:(k,d)=>{try{const v=localStorage.getItem('uptown-'+k);return v===null?d:JSON.parse(v);}catch(e){return d;}},set:(k,v)=>{try{localStorage.setItem('uptown-'+k,JSON.stringify(v));}catch(e){}}};
+// ---- (1) recorded clips ----
+const VCL={idx:null,q:[],a:null,kind:'',tok:0};
+fetch('voice/index.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{VCL.idx=j;voiceUI();}).catch(()=>{});
+if(window.__VOICE){VCL.idx=window.__VOICE.idx;}
+GV.voice=LS.get('voice','me');
+const hasClips=(lg,keys)=>!!(VCL.idx&&VCL.idx[lg]&&keys.every(k=>VCL.idx[lg].includes(k)));
+const clipURL=(lg,k)=>window.__VOICE?window.__VOICE.data[lg+'/'+k]:'voice/'+lg+'/'+encodeURIComponent(k)+'.mp3';
+function clipStop(){VCL.tok++;VCL.q=[];if(VCL.a){try{VCL.a.pause();}catch(e){}VCL.a=null;}VCL.kind='';}
+function clipBusy(){return !!VCL.a;}
+function clipPlay(lg,keys,kind,onEach){const tok=++VCL.tok;VCL.q=keys.slice();VCL.kind=kind||'say';let i=0;
+  const next=()=>{if(tok!==VCL.tok)return;if(!VCL.q.length){VCL.a=null;VCL.kind='';return;}const k=VCL.q.shift();const a=new Audio(clipURL(lg,k));VCL.a=a;if(onEach)onEach(i++);
+    a.onended=()=>setTimeout(next,170);a.onerror=()=>setTimeout(next,10);a.play().catch(()=>{VCL.a=null;});};
+  if(VCL.a){try{VCL.a.pause();}catch(e){}}next();}
+const sKey=id=>'S_'+(id||'Stair').replace(/\//g,'_');
+function mKey(m,lg){m=Math.max(1,Math.round(m));if(lg==='bn'||lg==='ta')return 'M_'+Math.min(300,Math.max(10,Math.round(m/10)*10));return 'M_'+(m<=10?m:Math.min(300,Math.round(m/5)*5));}
+// guide sentence -> clip keys; null = no clip version, use the phone voice
+function guideKeys(key,a){const f=F[cur].k;switch(key){
+  case 'start':case 'done':case 'review':return [key];
+  case 'gf':return ['gf',mKey(a.m,GV.lang)];
+  case 'floor':return ['F_'+f];
+  case 'walkDown':case 'walkUp':return ['F_'+f,'W'+sKey(a.sObj.id),mKey(a.m,GV.lang),(key==='walkDown'?'D_':'U_')+a.f2k];
+  case 'down':case 'up':return ['F_'+f,'X'+sKey(a.sObj.id),(key==='down'?'D_':'U_')+a.f2k];}return null;}
+// gSay wrapper used by the guide: Elsayed's clips when available, phone voice otherwise
+const _gSay=gSay;
+gSay=function(show,spoken,kind,key,args){const keys=key?guideKeys(key,args||{}):null;
+  if(GV.voice==='me'&&keys&&hasClips(GV.lang,keys)){const b=$('sub');b.style.display='flex';$('subT').textContent=show;$('subT').dir=/^(ar|ur)$/.test(GV.lang)?'rtl':'ltr';$('subN').textContent='';
+    if(kind==='floor'){if(clipBusy()&&VCL.kind!=='floor')return;}if('speechSynthesis' in window)speechSynthesis.cancel();clipPlay(GV.lang,keys,kind||'say');GV.kind=kind||'say';return;}
+  clipStop();return _gSay(show,spoken,kind);};
+// ---- intro with the presenter photo ----
+const INTRO_SHOW={...{"en": ["Hello. I am the HSE engineer on this project.", "If you hear the fire alarm, stop work, and stay calm.", "Do not use the lifts.", "Follow the green route to the nearest stair or opening, and walk down to the ground floor.", "Then go to the assembly point, north of Tower 4.", "Stay with your supervisor for the roll call.", "Now, choose where you are, and I will walk you out."], "ar": ["أهلاً بيك. أنا مهندس السلامة في المشروع ده.", "لو سمعت إنذار الحريق، وقّف الشغل، وخليك هادي.", "ممنوع تستخدم الأسانسير.", "امشي على الخط الأخضر لأقرب سلم أو فتحة، وانزل للدور الأرضي.", "وبعدين روح نقطة التجمع، شمال برج 4.", "خليك مع المشرف بتاعك لحد ما يتعمل التمام.", "دلوقتي، اختار إنت فين، وأنا همشّيك لبرّه."], "hi": ["नमस्ते। मैं इस प्रोजेक्ट का HSE इंजीनियर हूं।", "अगर फायर अलार्म सुनें, तो काम रोकें, और शांत रहें।", "लिफ्ट का इस्तेमाल न करें।", "हरे रास्ते पर नज़दीकी सीढ़ी या ओपनिंग तक जाएं, और ग्राउंड फ्लोर तक नीचे उतरें।", "फिर टावर 4 के उत्तर में असेंबली पॉइंट पर जाएं।", "हाज़िरी तक अपने सुपरवाइज़र के साथ रहें।", "अब बताइए आप कहां हैं, मैं आपको बाहर ले चलूंगा।"], "bn": ["হ্যালো। আমি এই প্রকল্পের HSE ইঞ্জিনিয়ার।", "ফায়ার অ্যালার্ম শুনলে, কাজ থামান, এবং শান্ত থাকুন।", "লিফট ব্যবহার করবেন না।", "সবুজ পথ ধরে কাছের সিঁড়ি বা ওপেনিং-এ যান, এবং গ্রাউন্ড ফ্লোরে নেমে আসুন।", "তারপর টাওয়ার ৪-এর উত্তরে অ্যাসেম্বলি পয়েন্টে যান।", "হাজিরা পর্যন্ত আপনার সুপারভাইজারের সাথে থাকুন।", "এখন বলুন আপনি কোথায় আছেন, আমি আপনাকে বাইরে নিয়ে যাব।"], "ml": ["നമസ്കാരം. ഞാൻ ഈ പ്രോജക്റ്റിലെ HSE എഞ്ചിനീയറാണ്.", "ഫയർ അലാറം കേട്ടാൽ, ജോലി നിർത്തി, ശാന്തരായിരിക്കുക.", "ലിഫ്റ്റ് ഉപയോഗിക്കരുത്.", "പച്ച വഴിയിലൂടെ അടുത്തുള്ള കോണിയിലേക്കോ ഓപ്പണിംഗിലേക്കോ പോയി, ഗ്രൗണ്ട് ഫ്ലോറിലേക്ക് ഇറങ്ങുക.", "പിന്നെ ടവർ 4-ന്റെ വടക്കുള്ള അസംബ്ലി പോയിന്റിലേക്ക് പോകുക.", "ഹാജർ എടുക്കുന്നത് വരെ സൂപ്പർവൈസറുടെ കൂടെ നിൽക്കുക.", "ഇനി നിങ്ങൾ എവിടെയാണെന്ന് തിരഞ്ഞെടുക്കുക, ഞാൻ നിങ്ങളെ പുറത്തേക്ക് കൊണ്ടുപോകാം."], "ta": ["வணக்கம். நான் இந்த திட்டத்தின் HSE பொறியாளர்.", "தீ எச்சரிக்கை ஒலி கேட்டால், வேலையை நிறுத்தி, அமைதியாக இருங்கள்.", "லிஃப்ட் பயன்படுத்த வேண்டாம்.", "பச்சை பாதையில் அருகிலுள்ள படிக்கட்டு அல்லது திறப்புக்குச் சென்று, தரைத்தளத்திற்கு இறங்குங்கள்.", "பிறகு டவர் 4-க்கு வடக்கே உள்ள கூடும் இடத்திற்குச் செல்லுங்கள்.", "வருகைப் பதிவு முடியும் வரை உங்கள் மேற்பார்வையாளருடன் இருங்கள்.", "இப்போது நீங்கள் எங்கே இருக்கிறீர்கள் என்று தேர்வு செய்யுங்கள், நான் உங்களை வெளியே அழைத்துச் செல்கிறேன்."]},ur:['السلام علیکم۔ میں اس پروجیکٹ کا HSE انجینئر ہوں۔','اگر فائر الارم سنیں، تو کام روک دیں، اور پرسکون رہیں۔','لفٹ استعمال نہ کریں۔','سبز راستے پر قریبی سیڑھی یا اوپننگ تک جائیں، اور گراؤنڈ فلور تک نیچے اتریں۔','پھر ٹاور 4 کے شمال میں اسمبلی پوائنٹ پر جائیں۔','حاضری تک اپنے سپروائزر کے ساتھ رہیں۔','اب بتائیں آپ کہاں ہیں، میں آپ کو باہر لے چلوں گا۔']};
+let IN={tok:0,then:null};
+function introLines(lg){return INTRO_SHOW[lg]||(window.__INTRO&&window.__INTRO[lg])||(VCL.idx&&VCL.idx._intro&&VCL.idx._intro[lg])||[];}
+function openIntro(then){IN.then=then;const lg=GV.lang,lines=introLines(lg);if(!lines.length){then&&then();return;}
+  $('introT').innerHTML=lines.map((t,k)=>`<p data-k="${k}">${t.replace(/</g,'&lt;')}</p>`).join('');$('introT').dir=/^(ar|ur)$/.test(lg)?'rtl':'ltr';
+  $('introGo').textContent='→ '+gT('pickSub').split(/[.،۔।]/)[0];$('intro').style.display='grid';playIntro();}
+function hiLine(k){$('introT').querySelectorAll('p').forEach(p=>p.classList.toggle('on',+p.dataset.k===k));const p=$('introT').querySelector(`p[data-k="${k}"]`);if(p)p.scrollIntoView({block:'nearest'});}
+function playIntro(){const lg=GV.lang,lines=introLines(lg),keys=lines.map((_,k)=>'I_'+k);const tok=++IN.tok;$('introImg').classList.add('talk');
+  if(GV.voice==='me'&&hasClips(lg,keys)){clipPlay(lg,keys,'intro',k=>hiLine(k));const w=setInterval(()=>{if(tok!==IN.tok||!clipBusy()){clearInterval(w);$('introImg').classList.remove('talk');}},300);return;}
+  if(!('speechSynthesis' in window)){$('introImg').classList.remove('talk');return;}speechSynthesis.cancel();
+  lines.forEach((t,k)=>{const u=new SpeechSynthesisUtterance(spokenText(t,lg));u.lang=TTSL[lg];const v=pickVoice(lg);if(v)u.voice=v;u.rate=AVO.rate;u.onstart=()=>{if(tok===IN.tok)hiLine(k);};if(k===lines.length-1)u.onend=()=>$('introImg').classList.remove('talk');speechSynthesis.speak(u);});}
+function closeIntro(){IN.tok++;clipStop();if('speechSynthesis' in window)speechSynthesis.cancel();$('intro').style.display='none';$('introImg').classList.remove('talk');const t=IN.then;IN.then=null;t&&t();}
+$('introSkip').onclick=closeIntro;$('introGo').onclick=closeIntro;$('introAgain').onclick=playIntro;
+// ---- (2) speaking assistant replies with the phone voice ----
+const AVO={on:LS.get('avOn',false),mute:LS.get('avMute',false),rate:LS.get('avRate',0.95),lang:LS.get('avLang','auto'),vsel:LS.get('avVoice',{}),tok:0,last:null,seen:new Set(),warned:{}};
+const TWW={en:'Tower',ar:'برج',ur:'ٹاور',hi:'टावर',bn:'টাওয়ার',ml:'ടവർ',ta:'டவர்'},MW={en:'metres',ar:'متر',ur:'میٹر',hi:'मीटर',bn:'মিটার',ml:'മീറ്റർ',ta:'மீட்டர்'},HSEW={en:'H S E',ar:'إتش إس إي',ur:'ایچ ایس ای',hi:'एच एस ई',bn:'এইচ এস ই',ml:'എച്ച് എസ് ഇ',ta:'எச் எஸ் இ'};
+// what is shown stays as it is; this only changes what is read aloud
+function spokenText(t,lg){let s=String(t||'');
+  s=s.replace(/(^|\n)\s*\d+[.)]\s+/g,'$1').replace(/\n/g,'.\n').replace(/\bPodium ([1-5])\b/g,(m,n)=>gT('pd',{n},lg).replace(/[.।]$/,'')).replace(/\bBasement ([1-3])\b/g,(m,n)=>gT('bs',{n},lg).replace(/[.।]$/,'')).replace(/\bGround floor\b/gi,gT('g',0,lg).replace(/[.।]$/,''));
+  s=s.replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/https?:\/\/\S+/g,'').replace(/[*_`#>|~]+/g,' ');
+  s=s.replace(/\bT4-TO-(\d)\b|\bTO-(\d)\b/g,(m,a,b)=>gT('op',{n:a||b},lg)).replace(/\bT([34])\b/g,(m,n)=>TWW[lg]+' '+n).replace(/\bLevel 0?(\d{1,2})\b/g,(m,n)=>gT('lv',{n},lg)).replace(/\bSTAIR-0?(\d+)(?:\/0?(\d+))?\b/gi,(m,a,b)=>gT('st',{n:b?a+' '+b:a},lg)).replace(/\bEXT-(\d)\b/g,(m,n)=>(lg==='en'?'exit ':lg==='ar'?'المخرج ':'EXIT ')+n);
+  s=s.replace(/\bL0?(\d{1,2})\b/g,(m,n)=>gT('lv',{n},lg)).replace(/\bP([1-5])\b/g,(m,n)=>gT('pd',{n},lg)).replace(/\bB([1-3])\b/g,(m,n)=>gT('bs',{n},lg)).replace(/\bGF\b/g,gT('g',0,lg));
+  s=s.replace(/(\d+(?:\.\d+)?)\s?m\b/g,(m,n)=>n+' '+MW[lg]).replace(/\bHSE\b/g,HSEW[lg]).replace(/\bFFL\b/g,lg==='ar'?'منسوب الأرضية':'floor level');
+  s=s.replace(/[→⇒]/g,', ').replace(/[✓✔•⚑📍📌🟩🟢▫⚠▲▼⌂🔊💬·…]/gu,' ').replace(/\(([^)]*)\)/g,(m,x)=>(/^(ar|ur)$/.test(lg)?'، ':', ')+x+(/^(ar|ur)$/.test(lg)?'، ':', ')).replace(/\s+([,.،])/g,'$1').replace(/[,،]\s*([.!?؟।۔])/g,'$1').replace(/[,،]\s*$/,'').replace(/[,،]{2,}/g,'،').replace(/\s{2,}/g,' ').trim();
+  return s;}
+function sentences(s){return s.split(/(?<=[.!?؟।۔\n])\s+|\n+/).map(x=>x.trim()).filter(x=>x&&/[\p{L}\p{N}]/u.test(x));}
+let VOICES=[];function loadVoices(){if(!('speechSynthesis' in window))return;VOICES=speechSynthesis.getVoices()||[];voiceUI();}
+const vFor=lg=>VOICES.filter(v=>v.lang&&v.lang.toLowerCase().replace('_','-').startsWith(lg));
+function pickVoice(lg){const vs=vFor(lg);if(!vs.length)return null;const want=AVO.vsel[lg];const w=want&&vs.find(v=>v.voiceURI===want);if(w)return w;
+  const score=v=>(v.lang.toLowerCase().replace('_','-')===TTSL[lg].toLowerCase()?4:0)+(/natural|neural|online|google|premium|enhanced/i.test(v.name)?3:0)+(v.localService?1:0);return vs.slice().sort((a,b)=>score(b)-score(a))[0];}
+function replyLang(text){return AVO.lang!=='auto'?AVO.lang:(text?detectLang(text):RL);}
+function avStop(){AVO.tok++;if('speechSynthesis' in window)speechSynthesis.cancel();$('vSt').textContent='';}
+// id: one id per reply, so the same reply is never read twice; ctx: a token that must still be current when speaking starts (place explanations)
+function speakReply(text,id,ctxOk){if(!AVO.on||AVO.mute||!('speechSynthesis' in window))return;if(id){if(AVO.seen.has(id))return;AVO.seen.add(id);}
+  if(ctxOk&&!ctxOk())return;const lg=replyLang(text);const v=pickVoice(lg);
+  if(!v&&!AVO.warned[lg]){AVO.warned[lg]=1;addMsg('⚠ '+gT('noVoice',{l:(GLANG.find(x=>x[0]===lg)||['',lg])[1]},lg)+' (Settings → Text-to-speech)','a',1);}
+  avStop();const tok=AVO.tok;AVO.last={text,lg};const parts=sentences(spokenText(text,lg));if(!parts.length)return;clipStop();
+  $('vSt').textContent='🔊';parts.forEach((p,k)=>{const u=new SpeechSynthesisUtterance(p);u.lang=TTSL[lg];if(v)u.voice=v;u.rate=AVO.rate;u.pitch=1;
+    u.onstart=()=>{if(tok!==AVO.tok||(ctxOk&&!ctxOk())){speechSynthesis.cancel();}};if(k===parts.length-1)u.onend=()=>{if(tok===AVO.tok)$('vSt').textContent='';};speechSynthesis.speak(u);});}
+speak=function(t){speakReply(t,'r'+(++AVO.rid||(AVO.rid=1)));};
+function voiceUI(){const sel=$('vVoice');if(!sel)return;const lg=replyLang('');const vs=vFor(lg);const cur=pickVoice(lg);
+  sel.innerHTML=vs.length?vs.map(v=>`<option value="${v.voiceURI}" ${cur&&v.voiceURI===cur.voiceURI?'selected':''}>${v.name} (${v.lang})</option>`).join(''):`<option value="">— no ${lg} voice on this phone —</option>`;
+  $('vEnable').textContent=AVO.on?'🔊 '+gT('voiceOn'):'🔊 '+gT('voiceEnable');$('vEnable').classList.toggle('on',AVO.on);$('vMute').textContent=AVO.mute?'🔇':'🔈';$('vRate').value=AVO.rate;$('vLang').value=AVO.lang;
+  if($('gVoice'))$('gVoice').textContent=GV.voice==='me'?'🎙 '+gT('myVoice'):'📱 '+gT('phoneVoice');}
+$('vEnable').onclick=()=>{AVO.on=!AVO.on;LS.set('avOn',AVO.on);if(AVO.on){try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}}else avStop();voiceUI();};
+$('vMute').onclick=()=>{AVO.mute=!AVO.mute;LS.set('avMute',AVO.mute);if(AVO.mute)avStop();voiceUI();};
+$('vStop').onclick=()=>avStop();$('vReplay').onclick=()=>{if(AVO.last){const m=AVO.mute;AVO.mute=false;const on=AVO.on;AVO.on=true;speakReply(AVO.last.text);AVO.mute=m;AVO.on=on;}};
+$('vRate').oninput=()=>{AVO.rate=+$('vRate').value;LS.set('avRate',AVO.rate);};
+$('vLang').onchange=()=>{AVO.lang=$('vLang').value;LS.set('avLang',AVO.lang);voiceUI();};
+$('vVoice').onchange=()=>{const lg=replyLang('');AVO.vsel[lg]=$('vVoice').value;LS.set('avVoice',AVO.vsel);};
+$('gVoice').onclick=()=>{GV.voice=GV.voice==='me'?'phone':'me';LS.set('voice',GV.voice);clipStop();voiceUI();};
+// ---- (3) explain the place where the character is, from the model data only ----
+const EXT={en:{here:'You are on {f}{t}, at {p}.',noName:'You are on {f}{t}. The drawing has no room name at this exact spot.',near:'Nearby on the drawing: {l}.',exit:'Nearest way out: {s}, about {m} metres along the route.',route:'Your evacuation route:',noData:'This drawing has no room names, so I can only describe the floor and the route.'},
+ ar:{here:'إنت في {f}{t}، عند {p}.',noName:'إنت في {f}{t}. الرسم مفيهوش اسم أوضة في النقطة دي بالظبط.',near:'جنبك على الرسم: {l}.',exit:'أقرب طريق خروج: {s}، حوالي {m} متر على المسار.',route:'مسار الإخلاء بتاعك:',noData:'رسم الدور ده مفيهوش أسماء أماكن، فهوصفلك الدور والمسار بس.'},
+ ur:{here:'آپ {f}{t} پر {p} کے پاس ہیں۔',noName:'آپ {f}{t} پر ہیں۔ ڈرائنگ میں اس جگہ کا نام نہیں ہے۔',near:'قریب: {l}۔',exit:'قریبی راستہ: {s}، راستے پر تقریباً {m} میٹر۔',route:'آپ کا انخلا کا راستہ:',noData:'اس ڈرائنگ میں جگہوں کے نام نہیں ہیں۔'},
+ hi:{here:'आप {f}{t} पर {p} के पास हैं।',noName:'आप {f}{t} पर हैं। ड्रॉइंग में इस जगह का नाम नहीं है।',near:'पास में: {l}।',exit:'नज़दीकी रास्ता: {s}, रास्ते पर लगभग {m} मीटर।',route:'आपका निकासी रास्ता:',noData:'इस ड्रॉइंग में जगहों के नाम नहीं हैं।'},
+ bn:{here:'আপনি {f}{t}-এ {p}-এর কাছে আছেন।',noName:'আপনি {f}{t}-এ আছেন। ড্রয়িংয়ে এই জায়গার নাম নেই।',near:'কাছেই: {l}।',exit:'কাছের পথ: {s}, পথ ধরে প্রায় {m} মিটার।',route:'আপনার বহির্গমন পথ:',noData:'এই ড্রয়িংয়ে জায়গার নাম নেই।'},
+ ml:{here:'നിങ്ങൾ {f}{t} ൽ {p} ന് സമീപമാണ്.',noName:'നിങ്ങൾ {f}{t} ലാണ്. ഡ്രോയിംഗിൽ ഈ സ്ഥലത്തിന് പേരില്ല.',near:'സമീപം: {l}.',exit:'അടുത്ത വഴി: {s}, വഴിയിലൂടെ ഏകദേശം {m} മീറ്റർ.',route:'നിങ്ങളുടെ ഒഴിപ്പിക്കൽ വഴി:',noData:'ഈ ഡ്രോയിംഗിൽ സ്ഥലങ്ങളുടെ പേരുകളില്ല.'},
+ ta:{here:'நீங்கள் {f}{t} இல் {p} அருகில் இருக்கிறீர்கள்.',noName:'நீங்கள் {f}{t} இல் இருக்கிறீர்கள். வரைபடத்தில் இந்த இடத்தின் பெயர் இல்லை.',near:'அருகில்: {l}.',exit:'அருகிலுள்ள வழி: {s}, பாதையில் சுமார் {m} மீட்டர்.',route:'உங்கள் வெளியேற்ற பாதை:',noData:'இந்த வரைபடத்தில் இடங்களின் பெயர்கள் இல்லை.'}};
+const eT=(k,a,lg)=>((EXT[lg]||EXT.en)[k]||EXT.en[k]).replace(/\{(\w+)\}/g,(m,x)=>a&&a[x]!==undefined?a[x]:m);
+function wherePos(){if(mode==='walk'&&!overall)return {i:cur,x:player.x,y:player.y,tw:focusTw||towerAt(player.x)};if(here)return {i:here.i,x:here.x,y:here.y,tw:here.tw||focusTw};return null;}
+function placeFacts(pos){const f=F[pos.i];const rooms=(f.places||[]).filter(p=>!f.k.startsWith('L')||p.tw===pos.tw).map(p=>({n:p.n,d:Math.hypot(p.x-pos.x,p.y-pos.y)})).sort((a,b)=>a.d-b.d);
+  const at=rooms.length&&rooms[0].d<6?rooms[0]:null;const near=rooms.filter(r=>r!==at&&r.d<15).slice(0,3);
+  const ch=chainFrom(pos.i,pos.x,pos.y);const c=ch[0];const exit=c&&c.end==='stair'?{s:c.s.id,m:Math.round(plen(c.pts))}:c&&c.end==='asm'?{s:'ASSEMBLY POINT',m:Math.round(plen(c.pts))}:null;
+  return {floor:f.k,floorName:f.name,tower:f.k.startsWith('L')?pos.tw:null,at:at&&at.n,near:near.map(r=>r.n),exit,route:chainStepsL(ch),hasNames:rooms.length>0,assembly:'ASSEMBLY POINT, ground floor'};}
+function areaKey(pos){const f=F[pos.i];const rooms=(f.places||[]).filter(p=>!f.k.startsWith('L')||p.tw===pos.tw);let b=null,bd=6;for(const p of rooms){const d=Math.hypot(p.x-pos.x,p.y-pos.y);if(d<bd){bd=d;b=p;}}return b?pos.i+'|'+b.n:null;}
+const EXQ={tok:0};
+async function explainPlace(auto){const pos=wherePos();const lg=RL;if(!pos){const r={r:L('whichFloor'),opts:[{label:L('pickerBtn'),run:()=>{openLoc(1);return {r:L('openPicker')};}}]};showReply(r);return;}
+  const tok=++EXQ.tok,key=areaKey(pos)||(pos.i+'|-');const still=()=>tok===EXQ.tok&&(!auto||AE.cur===key);
+  const F0=placeFacts(pos);const fn=gFloorL(pos.i,lg),tw=F0.tower?' · '+F0.tower:'';
+  let txt=(F0.at?eT('here',{f:fn,t:tw,p:F0.at},lg):eT('noName',{f:fn,t:tw},lg));
+  if(F0.near.length)txt+=' '+eT('near',{l:F0.near.join('، '.trim()===''?', ':', ')},lg);if(!F0.hasNames)txt+=' '+eT('noData',0,lg);
+  if(F0.exit)txt+=' '+eT('exit',{s:F0.exit.s,m:F0.exit.m},lg);txt+='\n'+eT('route',0,lg)+'\n'+F0.route.map((s,k)=>(k+1)+'. '+s).join('\n');
+  if(navigator.onLine&&CFG.aiEndpoint&&!auto){const t0=addMsg('…','a');
+    try{const res=await fetch(CFG.aiEndpoint,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({message:'Explain this place to the worker in '+lg+' using ONLY these facts. Do not add exits or routes.',context:{place:F0},mode:'explain'})});
+      const j=await res.json();t0.remove();if(!still())return;if(j&&j.reply){addMsg(j.reply+'\n'+eT('route',0,lg)+'\n'+F0.route.join('\n'),'a');speakReply(j.reply+'. '+F0.route.join('. '),'x'+tok,still);return;}}catch(e){t0.remove();}}
+  if(!still())return;addMsg((auto?'📍 ':'')+txt,'a');speakReply(txt,'x'+tok,still);}
+function gFloorL(i,lg){const o=GV.lang;GV.lang=GT[lg]?lg:'en';const r=gFloor(i);GV.lang=o;return r;}
+$('vExplain').onclick=()=>{AVO.on||(AVO.on=true,LS.set('avOn',true),voiceUI());explainPlace(false);};
+// automatic explanation when the character stays in a new area (ignores quick pass-through, never repeats while staying)
+const AE={on:LS.get('autoExp',false),cur:null,t0:0,done:null,last:0};$('vAuto').checked=AE.on;$('vAuto').onchange=()=>{AE.on=$('vAuto').checked;LS.set('autoExp',AE.on);};
+function autoExplainTick(){if(!AE.on||GV.on||overall)return;const now=performance.now();if(now-AE.last<400)return;AE.last=now;const pos=wherePos();if(!pos)return;const k=areaKey(pos);
+  if(k!==AE.cur){if(AE.cur&&AE.done===AE.cur){avStop();EXQ.tok++;}AE.cur=k;AE.t0=now;return;}
+  if(k&&k!==AE.done&&now-AE.t0>2500){AE.done=k;explainPlace(true);}}
+window.__dbg.places=()=>placesOf(cur,focusTw||"T3");window.__dbg.explain=explainPlace;window.__dbg.spoken=spokenText;window.__dbg.AVO=AVO;window.__dbg.AE=AE;window.__dbg.facts=()=>{const p=wherePos();return p&&placeFacts(p);};
+// ---- voice test screen: same sentence, different engines/voices, before switching ----
+function openVT(){const lg=replyLang('');$('vtLang').value=lg;$('vtText').value=gT('start',0,lg)+' '+gLine('walkDown',{f:gFloorL(cur,lg),m:15,f2:gT('pd',{n:5},lg),sObj:{id:'TO-1',temp:true}})[1];drawVT();$('vt').style.display='grid';}
+function drawVT(){const lg=$('vtLang').value;$('vtSpoken').textContent=spokenText($('vtText').value,lg);const vs=vFor(lg);
+  $('vtList').innerHTML=(hasClips(lg,['start'])?`<button data-me="1">🎙 ${gT('myVoice',0,lg)} — Piper + voice conversion (recorded, offline)</button>`:'')+(vs.length?vs.map((v,k)=>`<button data-k="${k}">▶ ${v.name} · ${v.lang}${v.localService?' · offline':' · online'}</button>`).join(''):`<div class="warnb">No ${lg} voice installed on this phone — the reply stays written. Android: Settings → Text-to-speech → install the language. iPhone: Settings → Accessibility → Spoken Content → Voices.</div>`);
+  $('vtList').querySelectorAll('button').forEach(b=>b.onclick=()=>{avStop();clipStop();if(b.dataset.me){clipPlay(lg,['start','WS_TO-1','M_15','D_P5'].filter(k=>hasClips(lg,[k])),'test');return;}
+    const v=vs[+b.dataset.k];sentences(spokenText($('vtText').value,lg)).forEach(p=>{const u=new SpeechSynthesisUtterance(p);u.voice=v;u.lang=v.lang;u.rate=+$('vtRate').value;speechSynthesis.speak(u);});});}
+$('vTest').onclick=openVT;$('vtX').onclick=()=>{avStop();clipStop();$('vt').style.display='none';};$('vtLang').onchange=drawVT;$('vtText').oninput=drawVT;
+$('vtUse').onclick=()=>{AVO.rate=+$('vtRate').value;LS.set('avRate',AVO.rate);voiceUI();$('vt').style.display='none';};
+if('speechSynthesis' in window){loadVoices();speechSynthesis.addEventListener('voiceschanged',loadVoices);}
 
 // ---------- start ----------
 document.getElementById('loading').remove();
