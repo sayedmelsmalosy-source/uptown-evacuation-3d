@@ -1114,7 +1114,7 @@ const AE={on:LS.get('autoExp',false),cur:null,t0:0,done:null,last:0};$('vAuto').
 function autoExplainTick(){if(!AE.on||GV.on||overall)return;const now=performance.now();if(now-AE.last<400)return;AE.last=now;const pos=wherePos();if(!pos)return;const k=areaKey(pos);
   if(k!==AE.cur){if(AE.cur&&AE.done===AE.cur){avStop();EXQ.tok++;}AE.cur=k;AE.t0=now;return;}
   if(k&&k!==AE.done&&now-AE.t0>2500){AE.done=k;explainPlace(true);}}
-window.__dbg.SU=SkelU;window.__dbg.T=THREE;window.__dbg.GL=GLTFLoader;window.__dbg.AVo=AV;window.__dbg.places=()=>placesOf(cur,focusTw||"T3");window.__dbg.explain=explainPlace;window.__dbg.spoken=spokenText;window.__dbg.AVO=AVO;window.__dbg.AE=AE;window.__dbg.facts=()=>{const p=wherePos();return p&&placeFacts(p);};
+window.__dbg.look=(x,y,z,tx,ty,tz)=>{camera.position.set(x,y,z);orbit.target.set(tx,ty,tz);orbit.update();};window.__dbg.SU=SkelU;window.__dbg.T=THREE;window.__dbg.GL=GLTFLoader;window.__dbg.AVo=AV;window.__dbg.places=()=>placesOf(cur,focusTw||"T3");window.__dbg.explain=explainPlace;window.__dbg.spoken=spokenText;window.__dbg.AVO=AVO;window.__dbg.AE=AE;window.__dbg.facts=()=>{const p=wherePos();return p&&placeFacts(p);};
 // ---- voice test screen: same sentence, different engines/voices, before switching ----
 function openVT(){const lg=replyLang('');$('vtLang').value=lg;$('vtText').value=gT('start',0,lg)+' '+gLine('walkDown',{f:gFloorL(cur,lg),m:15,f2:gT('pd',{n:5},lg),sObj:{id:'TO-1',temp:true}})[1];drawVT();$('vt').style.display='grid';}
 function drawVT(){const lg=$('vtLang').value;$('vtSpoken').textContent=spokenText($('vtText').value,lg);const vs=vFor(lg);

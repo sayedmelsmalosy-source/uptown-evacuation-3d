@@ -1,11 +1,11 @@
 {
-"version": "2026.11.11-0147",
+"version": "2026.11.11-0157",
 "date": "2026-11-11",
 "core": [
 {
 "p": "index.html",
-"size": 197622,
-"sha": "335c4255472a80b876b178b2ea2e6990e9fbc2a526d183de6437e008378937aa"
+"size": 197730,
+"sha": "a41e82f68a7cb2b9cccc2afcb0919fab428eabc65b77073fbcbbd0454d7ef7bc"
 },
 {
 "p": "manifest.webmanifest",
@@ -29,8 +29,8 @@
 },
 {
 "p": "data/building.json",
-"size": 1435176,
-"sha": "c8b3a1d19714e09a38667cba1158fa4893471d7052dbfc0ba468fcd63e633995"
+"size": 1434639,
+"sha": "17334bebcff0d8c67e5b4e915046269d73a7598518478fdb12a68700d704c818"
 },
 {
 "p": "vendor/three/three.module.js",
