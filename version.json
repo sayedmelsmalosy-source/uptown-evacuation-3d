@@ -1,5 +1,5 @@
 {
-"version": "2026.11.11-0226",
+"version": "2026.11.11-0243",
 "date": "2026-11-11",
 "core": [
 {
@@ -29,8 +29,8 @@
 },
 {
 "p": "data/building.json",
-"size": 1434639,
-"sha": "17334bebcff0d8c67e5b4e915046269d73a7598518478fdb12a68700d704c818"
+"size": 1433725,
+"sha": "f95ac1ff6e1059592a67feca0508bf4b9aaede0fd79ee7777c2f1fbcf5151dc7"
 },
 {
 "p": "vendor/three/three.module.js",
