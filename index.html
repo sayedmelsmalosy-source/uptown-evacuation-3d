@@ -114,7 +114,7 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 <div id="tip" class="ui"></div>
 <div id="lang" class="sheet"><div class="box"><div class="hd"><b id="langH">Choose your language</b><button class="x" id="langX" aria-label="Close">✕</button></div><div class="note" id="langS"></div><div id="langB"></div></div></div>
 <div id="sub" class="ui"><div id="subT"></div><div id="subN"></div><div class="r"><button id="subGo" style="display:none"></button><button id="gVoice"></button><button id="subX">■</button></div></div>
-<div id="intro" class="sheet"><div class="box ibox"><img id="introImg" src="avatar/presenter.png" alt=""><div class="icol"><div id="introT"></div><div class="row"><button class="bigbtn" id="introGo">→</button><button class="bigbtn ghost" id="introAgain">↻</button><button class="bigbtn ghost" id="introSkip">⏭ Skip</button></div></div></div></div>
+<div id="intro" class="sheet"><div class="box ibox"><span id="introImg" hidden></span><div class="icol"><div id="introT"></div><div class="row"><button class="bigbtn" id="introGo">→</button><button class="bigbtn ghost" id="introAgain">↻</button><button class="bigbtn ghost" id="introSkip">⏭ Skip</button></div></div></div></div>
 <div id="vt" class="sheet"><div class="box"><div class="hd"><b>Voice test · تجربة الأصوات</b><button class="x" id="vtX">✕</button></div><div class="note">Same sentence, different voices. The phone voices come from this phone's speech engine (they differ between phones). “My voice” is pre-recorded (Piper neural voice converted to the HSE engineer's voice) and plays offline.</div><textarea id="vtText" dir="auto" rows="3" style="width:100%;background:#0b1320;color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:8px"></textarea><div class="note">Read aloud as: <span id="vtSpoken"></span></div><div class="row"><select id="vtLang"><option value="ar">العربية</option><option value="en">English</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="bn">বাংলা</option><option value="ml">മലയാളം</option><option value="ta">தமிழ்</option></select><label>Speed <input type="range" id="vtRate" min="0.75" max="1.25" step="0.05" value="0.95"></label><button class="bigbtn" id="vtUse">Use this speed</button></div><div class="list" id="vtList"></div></div></div>
 <div id="loc" class="sheet"><div class="box">
   <div class="hd"><b>Where are you?</b><span class="ar">إنت فين؟</span><button class="x" id="locX" aria-label="Close">✕</button></div>
@@ -152,6 +152,7 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import * as SkelU from 'three/addons/utils/SkeletonUtils.js';
 import {CSS2DRenderer,CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 const D=await (await fetch('data/building.json?v=20261109g',{cache:'no-store'})).json();
@@ -883,6 +884,17 @@ function loadWorker(src){const ld=new GLTFLoader();const ok=g=>{const root=g.sce
       for(const yy of [-0.08,0.06]){const st=new THREE.Mesh(new THREE.CylinderGeometry(0.178,0.172,0.035,28,1,true),sm);st.scale.set(1,1,0.73);st.position.y=yy;vest.add(st);}
       vest.position.set(cp.x,cp.y-0.13,cp.z+0.01);AV.mats.push(vm,sm);inner.attach(vest);chest.attach(vest);}
     const C=n=>g.animations.find(c=>c.name===n);
+    // a firmer, male walk: much less hip sway / pelvis roll and shoulder wiggle, arms swinging alongside the body, slightly wider stance
+    const firm=(clip,K)=>{const q=new THREE.Quaternion(),m=new THREE.Quaternion(),off={};
+      for(const t of clip.tracks){const [bn,pr]=t.name.split('.');const v=t.values;
+        if(pr==='quaternion'){const keep=/Hips$/.test(bn)?K.hip:/Spine2?1?$/.test(bn)?K.spine:/(Shoulder)$/.test(bn)?K.sh:/(Arm)$/.test(bn)&&!/Fore/.test(bn)?K.arm:1;if(keep>=1&&!/UpLeg$/.test(bn))continue;
+          // mean orientation of the bone over the clip
+          let ax=0,ay=0,az=0,aw=0;const n=v.length/4;for(let k=0;k<v.length;k+=4){const sg=(v[k+3]*v[3]+v[k]*v[0]+v[k+1]*v[1]+v[k+2]*v[2])<0?-1:1;ax+=sg*v[k];ay+=sg*v[k+1];az+=sg*v[k+2];aw+=sg*v[k+3];}m.set(ax,ay,az,aw).normalize();
+          const ab=/UpLeg$/.test(bn)&&K.wide?new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),(/Left/.test(bn)?1:-1)*K.wide):null;
+          for(let k=0;k<v.length;k+=4){q.fromArray(v,k);if(keep<1)q.slerpQuaternions(m,q,keep);if(ab)q.premultiply(ab);q.toArray(v,k);}}
+        else if(pr==='position'&&/Hips$/.test(bn)){let mx=0;const n=v.length/3;for(let k=0;k<v.length;k+=3)mx+=v[k];mx/=n;for(let k=0;k<v.length;k+=3)v[k]=mx+(v[k]-mx)*K.sway;}}
+      return clip;};
+    firm(C('walk'),{hip:0.35,spine:0.55,sh:0.5,arm:0.8,sway:0.3,wide:0.075});firm(C('run'),{hip:0.5,spine:0.7,sh:0.7,arm:1,sway:0.5});firm(C('idle'),{hip:0.6,spine:0.8,sh:1,arm:1,sway:0.6});
     AV.vWalk=strideSpeed(root,C('walk'),sc)||1.3;AV.vRun=strideSpeed(root,C('run'),sc)||3.6;
     AV.mixer=new THREE.AnimationMixer(root);for(const n of ['idle','walk','run']){const a=AV.mixer.clipAction(C(n));a.play();a.setEffectiveWeight(n==='idle'?1:0);AV.act[n]=a;}
     AV.act.run.time=0;AV.act.walk.time=0;
@@ -1102,7 +1114,7 @@ const AE={on:LS.get('autoExp',false),cur:null,t0:0,done:null,last:0};$('vAuto').
 function autoExplainTick(){if(!AE.on||GV.on||overall)return;const now=performance.now();if(now-AE.last<400)return;AE.last=now;const pos=wherePos();if(!pos)return;const k=areaKey(pos);
   if(k!==AE.cur){if(AE.cur&&AE.done===AE.cur){avStop();EXQ.tok++;}AE.cur=k;AE.t0=now;return;}
   if(k&&k!==AE.done&&now-AE.t0>2500){AE.done=k;explainPlace(true);}}
-window.__dbg.places=()=>placesOf(cur,focusTw||"T3");window.__dbg.explain=explainPlace;window.__dbg.spoken=spokenText;window.__dbg.AVO=AVO;window.__dbg.AE=AE;window.__dbg.facts=()=>{const p=wherePos();return p&&placeFacts(p);};
+window.__dbg.SU=SkelU;window.__dbg.T=THREE;window.__dbg.GL=GLTFLoader;window.__dbg.AVo=AV;window.__dbg.places=()=>placesOf(cur,focusTw||"T3");window.__dbg.explain=explainPlace;window.__dbg.spoken=spokenText;window.__dbg.AVO=AVO;window.__dbg.AE=AE;window.__dbg.facts=()=>{const p=wherePos();return p&&placeFacts(p);};
 // ---- voice test screen: same sentence, different engines/voices, before switching ----
 function openVT(){const lg=replyLang('');$('vtLang').value=lg;$('vtText').value=gT('start',0,lg)+' '+gLine('walkDown',{f:gFloorL(cur,lg),m:15,f2:gT('pd',{n:5},lg),sObj:{id:'TO-1',temp:true}})[1];drawVT();$('vt').style.display='grid';}
 function drawVT(){const lg=$('vtLang').value;$('vtSpoken').textContent=spokenText($('vtText').value,lg);const vs=vFor(lg);

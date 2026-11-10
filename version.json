@@ -1,11 +1,11 @@
 {
-"version": "2026.11.11-0126",
+"version": "2026.11.11-0147",
 "date": "2026-11-11",
 "core": [
 {
 "p": "index.html",
-"size": 196007,
-"sha": "7dd1eb06af6f0898dd737ff0431b9defd4c1129c96d229f8fc30d251c30df0cb"
+"size": 197622,
+"sha": "335c4255472a80b876b178b2ea2e6990e9fbc2a526d183de6437e008378937aa"
 },
 {
 "p": "manifest.webmanifest",
@@ -14,8 +14,8 @@
 },
 {
 "p": "config.json",
-"size": 47,
-"sha": "fa4e2989490ace08c5eed512c9b7a9edc68062f302594e73d6edee58ad8fd5eb"
+"size": 18,
+"sha": "31a413608c2cdcfe942ed5ea102f024f72ed486a2ed410e3ec440c7b6c089b9c"
 },
 {
 "p": "icons/icon-192.png",
@@ -29,18 +29,8 @@
 },
 {
 "p": "data/building.json",
-"size": 1438149,
-"sha": "e10d909e83ecaa2dd50f45392cd591a701c8698d5bd835c08ae2659b90ffd372"
-},
-{
-"p": "avatar/worker.glb",
-"size": 2930032,
-"sha": "002f8d269de68e5dce3d25195caf390d1aa359bbfaae3fcf4c8dc78ec36c3ba5"
-},
-{
-"p": "avatar/presenter.png",
-"size": 642577,
-"sha": "20c3c3d54576a334c40330d4f3b6c3230bdfbe19e86963aa0f23277326589c38"
+"size": 1435176,
+"sha": "c8b3a1d19714e09a38667cba1158fa4893471d7052dbfc0ba468fcd63e633995"
 },
 {
 "p": "vendor/three/three.module.js",
@@ -66,6 +56,11 @@
 "p": "vendor/three/addons/utils/BufferGeometryUtils.js",
 "size": 31906,
 "sha": "9be041e96308775d00e2695cc607645b9a9b64fd7c0e759dd8f7c00a8d92becb"
+},
+{
+"p": "vendor/three/addons/utils/SkeletonUtils.js",
+"size": 8007,
+"sha": "83748c5072a5ce96e9d68d8efda908a1f1a06c0b5fd2618edc3e54a361a8fd5b"
 }
 ],
 "floors": {

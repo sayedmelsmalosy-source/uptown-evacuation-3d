@@ -2,7 +2,7 @@
 import json,hashlib,os,sys,datetime
 os.chdir(os.path.join(os.path.dirname(__file__),'..'))
 def ent(p):b=open(p,'rb').read();return {'p':p,'size':len(b),'sha':hashlib.sha256(b).hexdigest()}
-core=['index.html','manifest.webmanifest','config.json','icons/icon-192.png','icons/icon-512.png','data/building.json','avatar/worker.glb','avatar/presenter.png']
+core=['index.html','manifest.webmanifest','config.json','icons/icon-192.png','icons/icon-512.png','data/building.json']
 for r,_,fs in [*os.walk('vendor'),*os.walk('voice')]:
     for f in fs:core.append(os.path.join(r,f).replace('\\','/'))
 B=json.load(open('data/building.json'))
