@@ -128,7 +128,7 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
   <div class="hd"><b>Assistant · المساعد</b><small id="chatMode"></small><button class="x" id="chatX" aria-label="Close">✕</button></div>
   <div id="msgs"></div><div id="sugg"></div>
   <div class="bar"><button id="mic" title="Speak">🎤</button><input id="chatIn" placeholder="اكتب أمرك… / Type a command" autocomplete="off"><button id="send" title="Send">➤</button></div>
-  <div class="bar2"><span id="micSt">Mic: ready</span><select id="micLang"><option value="ar-EG">عربي (مصري)</option><option value="ar-SA">عربي</option><option value="en-US">English</option></select><label><input type="checkbox" id="ttsOn"> 🔊 Voice reply</label><button id="ttsStop">■ Stop reading</button></div>
+  <div class="bar2"><span id="micSt">Mic: ready</span><select id="micLang"><option value="ar-EG">عربي (مصري)</option><option value="ar-SA">عربي</option><option value="ur-PK">اردو</option><option value="hi-IN">हिन्दी</option><option value="bn-IN">বাংলা</option><option value="ml-IN">മലയാളം</option><option value="ta-IN">தமிழ்</option><option value="en-US">English</option></select><label><input type="checkbox" id="ttsOn"> 🔊 Voice reply</label><button id="ttsStop">■ Stop reading</button></div>
 </div>
 
 
@@ -604,75 +604,114 @@ function parseFloor(q){const qq=q.replace(/\bt ?[34]\b|تي ?[34]|(ال)?برج 
   const lm=qq.match(/\bl ?(\d{1,2})\b/);if(lm)return F.findIndex(f=>f.k==='L'+String(+lm[1]).padStart(2,'0'));
   if(/الدور|دور|الطابق|طابق|level|floor|lvl/.test(qq)&&n){return F.findIndex(f=>f.k==='L'+String(n).padStart(2,'0'));}
   return null;}
+// ---------- languages for the assistant: English, Arabic, Urdu, Hindi, Bengali, Malayalam, Tamil ----------
+const I18N={
+en:{opened:'Opened {f}. Tap your spot or tell me the place (e.g. “I am at Corridor 1”).',overall:'Showing the whole project.',tower:'Showing Tower {t} — {n} tower floors. Tap a floor or say “open level 5 in {t}”.',asm:'This is the ASSEMBLY POINT (north of T4, ground floor).',here:'You are at {p} — {f}.',exitsH:'{f} — ways out on the drawings:',noLift:'Do not use the lifts.',outside:'Outside: follow the green route to the ASSEMBLY POINT.',whichFloor:'Which floor are you on?',whichPlace:'Which place?',whichB:'Which basement?',whichP:'Which podium?',noFloor:'That floor is not in the drawings (T3: L01–L22, T4: L01–L16).',noFloorTw:'{t} has no {f} in the drawings.',noZone:'The {f} drawing has no “Zone” names.',didYou:'Did you mean:',placesHere:'Places on this floor:',notFound:'I could not find that place on {f}.',noStair:'No stair {n} on {f} in the drawings. Stairs here: {l}',marked:'{p} — {f} (📌 marked). Are you there?',btnHere:'📍 I am here — show my route',btnWalk:'Walk me there',walking:'Walking to {p}.',openArea:'{f}: route from an open area. Tell me the exact place for a precise route.',unknown:'I did not understand. Try: “open T3 floor 5”, “assembly point”, “I am at Corridor 1”, “exits”.',aiOff:'Smart chat is not set up on this page.',aiNeedNet:'Smart chat needs internet.',stWalk:'{f}: walk {m} m to {s}, then go {d} {s} to {f2}',stFloors:'({k} floors)',down:'DOWN',up:'UP',stAsm:'Ground floor: follow the green route {m} m to the ASSEMBLY POINT',stMiss:'{f}: route data missing from here — HSE review',tellPlace:'Now tell me where on {f}, or tap your spot.',openPicker:'Choose your tower, floor and place.',pickerBtn:'Open the picker',routeFrom:'Route from {p}:',none:'none'},
+ar:{opened:'اتفتح {f}. دوس على مكانك أو قولّي إنت فين (مثلاً «أنا عند Corridor 1»).',overall:'ده المشروع بالكامل.',tower:'ده البرج {t} — {n} دور. دوس على دور أو قول «افتح الدور 5 في {t}».',asm:'دي نقطة التجمع (شمال T4، الدور الأرضي).',here:'إنت عند {p} — {f}.',exitsH:'{f} — المخارج حسب الرسومات:',noLift:'ممنوع استخدام الأسانسير.',outside:'بره المبنى: امشي على الخط الأخضر لنقطة التجمع.',whichFloor:'إنت في أنهي دور؟',whichPlace:'أنهي مكان؟',whichB:'أنهي بيزمنت؟',whichP:'أنهي بوديوم؟',noFloor:'الدور ده مش موجود في الرسومات (T3: L01–L22، T4: L01–L16).',noFloorTw:'البرج {t} مفيهوش {f} في الرسومات.',noZone:'رسمة {f} مفيهاش أسماء «Zone».',didYou:'تقصد:',placesHere:'الأماكن في الدور ده:',notFound:'مش لاقي المكان ده في {f}.',noStair:'مفيش سلم {n} في {f} حسب الرسومات. السلالم هنا: {l}',marked:'{p} — {f} (📌 متعلّم). إنت هناك؟',btnHere:'📍 أنا هنا — ورّيني طريقي',btnWalk:'مشّيني لحد هناك',walking:'ماشيين لحد {p}.',openArea:'{f}: الطريق من مكان مفتوح. قولّي المكان بالظبط عشان الطريق يبقى أدق.',unknown:'مفهمتش. جرّب: «افتح T3 الدور الخامس»، «نقطة التجمع»، «أنا عند Corridor 1»، «المخارج».',aiOff:'الشات الذكي مش متفعّل على الصفحة دي.',aiNeedNet:'الشات الذكي محتاج إنترنت.',stWalk:'{f}: امشي {m} متر لحد {s}، وبعدين {d} بـ {s} لحد {f2}',stFloors:'({k} أدوار)',down:'انزل',up:'اطلع',stAsm:'الدور الأرضي: امشي على الخط الأخضر {m} متر لحد نقطة التجمع',stMiss:'{f}: بيانات الطريق ناقصة من هنا — مراجعة HSE',tellPlace:'قولّي إنت فين في {f}، أو دوس على مكانك.',openPicker:'اختار البرج والدور والمكان.',pickerBtn:'افتح الاختيار',routeFrom:'الطريق من {p}:',none:'مفيش'},
+ur:{opened:'{f} کھول دیا گیا۔ اپنی جگہ پر ٹیپ کریں یا جگہ کا نام بتائیں (مثلاً «میں Corridor 1 پر ہوں»)۔',overall:'یہ پورا پروجیکٹ ہے۔',tower:'یہ ٹاور {t} ہے — {n} منزلیں۔ کسی منزل پر ٹیپ کریں یا کہیں «{t} کی پانچویں منزل کھولو»۔',asm:'یہ اسمبلی پوائنٹ ہے (T4 کے شمال میں، گراؤنڈ فلور)۔',here:'آپ {p} پر ہیں — {f}۔',exitsH:'{f} — ڈرائنگ کے مطابق باہر نکلنے کے راستے:',noLift:'لفٹ استعمال نہ کریں۔',outside:'باہر: سبز راستے پر چل کر اسمبلی پوائنٹ جائیں۔',whichFloor:'آپ کس منزل پر ہیں؟',whichPlace:'کون سی جگہ؟',whichB:'کون سا بیسمنٹ؟',whichP:'کون سا پوڈیم؟',noFloor:'یہ منزل ڈرائنگ میں نہیں ہے (T3: L01–L22، T4: L01–L16)۔',noFloorTw:'ڈرائنگ کے مطابق ٹاور {t} میں {f} نہیں ہے۔',noZone:'{f} کی ڈرائنگ میں «Zone» کے نام نہیں ہیں۔',didYou:'کیا آپ کا مطلب ہے:',placesHere:'اس منزل کی جگہیں:',notFound:'{f} میں یہ جگہ نہیں ملی۔',noStair:'ڈرائنگ کے مطابق {f} میں سیڑھی {n} نہیں ہے۔ یہاں کی سیڑھیاں: {l}',marked:'{p} — {f} (📌 نشان لگا دیا)۔ کیا آپ وہاں ہیں؟',btnHere:'📍 میں یہاں ہوں — میرا راستہ دکھائیں',btnWalk:'مجھے وہاں لے چلیں',walking:'{p} کی طرف چل رہے ہیں۔',openArea:'{f}: کھلی جگہ سے راستہ دکھایا گیا۔ درست راستے کے لیے اپنی جگہ کا نام بتائیں۔',unknown:'سمجھ نہیں آیا۔ کوشش کریں: «T3 پانچویں منزل کھولو»، «اسمبلی پوائنٹ»، «میں Corridor 1 پر ہوں»، «باہر نکلنے کے راستے»۔',aiOff:'اس صفحے پر اسمارٹ چیٹ سیٹ نہیں ہے۔',aiNeedNet:'اسمارٹ چیٹ کے لیے انٹرنیٹ چاہیے۔',stWalk:'{f}: {m} میٹر چل کر {s} تک جائیں، پھر {s} سے {d} {f2} تک جائیں',stFloors:'({k} منزلیں)',down:'نیچے',up:'اوپر',stAsm:'گراؤنڈ فلور: سبز راستے پر {m} میٹر چل کر اسمبلی پوائنٹ جائیں',stMiss:'{f}: یہاں سے راستے کا ڈیٹا موجود نہیں — HSE جائزہ',tellPlace:'اب بتائیں کہ آپ {f} میں کہاں ہیں، یا اپنی جگہ پر ٹیپ کریں۔',openPicker:'اپنا ٹاور، منزل اور جگہ منتخب کریں۔',pickerBtn:'انتخاب کھولیں',routeFrom:'{p} سے راستہ:',none:'کوئی نہیں'},
+hi:{opened:'{f} खोल दिया। अपनी जगह पर टैप करें या जगह का नाम बताएं (जैसे «मैं Corridor 1 पर हूँ»)।',overall:'यह पूरा प्रोजेक्ट है।',tower:'यह टावर {t} है — {n} मंज़िलें। किसी मंज़िल पर टैप करें या कहें «{t} की पाँचवीं मंज़िल खोलो»।',asm:'यह असेंबली पॉइंट है (T4 के उत्तर में, ग्राउंड फ्लोर)।',here:'आप {p} पर हैं — {f}।',exitsH:'{f} — ड्रॉइंग के अनुसार बाहर निकलने के रास्ते:',noLift:'लिफ्ट का इस्तेमाल न करें।',outside:'बाहर: हरे रास्ते पर चलकर असेंबली पॉइंट जाएं।',whichFloor:'आप किस मंज़िल पर हैं?',whichPlace:'कौन सी जगह?',whichB:'कौन सा बेसमेंट?',whichP:'कौन सा पोडियम?',noFloor:'यह मंज़िल ड्रॉइंग में नहीं है (T3: L01–L22, T4: L01–L16)।',noFloorTw:'ड्रॉइंग के अनुसार टावर {t} में {f} नहीं है।',noZone:'{f} की ड्रॉइंग में «Zone» के नाम नहीं हैं।',didYou:'क्या आपका मतलब है:',placesHere:'इस मंज़िल की जगहें:',notFound:'{f} में यह जगह नहीं मिली।',noStair:'ड्रॉइंग के अनुसार {f} में सीढ़ी {n} नहीं है। यहाँ की सीढ़ियाँ: {l}',marked:'{p} — {f} (📌 निशान लगाया)। क्या आप वहाँ हैं?',btnHere:'📍 मैं यहाँ हूँ — मेरा रास्ता दिखाओ',btnWalk:'मुझे वहाँ ले चलो',walking:'{p} की ओर चल रहे हैं।',openArea:'{f}: खुली जगह से रास्ता दिखाया। सही रास्ते के लिए अपनी जगह का नाम बताएं।',unknown:'समझ नहीं आया। कोशिश करें: «T3 पाँचवीं मंज़िल खोलो», «असेंबली पॉइंट», «मैं Corridor 1 पर हूँ», «बाहर निकलने के रास्ते»।',aiOff:'इस पेज पर स्मार्ट चैट सेट नहीं है।',aiNeedNet:'स्मार्ट चैट के लिए इंटरनेट चाहिए।',stWalk:'{f}: {m} मीटर चलकर {s} तक जाएं, फिर {s} से {d} {f2} तक जाएं',stFloors:'({k} मंज़िलें)',down:'नीचे',up:'ऊपर',stAsm:'ग्राउंड फ्लोर: हरे रास्ते पर {m} मीटर चलकर असेंबली पॉइंट जाएं',stMiss:'{f}: यहाँ से रास्ते का डेटा नहीं है — HSE समीक्षा',tellPlace:'अब बताएं कि आप {f} में कहाँ हैं, या अपनी जगह पर टैप करें।',openPicker:'अपना टावर, मंज़िल और जगह चुनें।',pickerBtn:'चुनाव खोलें',routeFrom:'{p} से रास्ता:',none:'कोई नहीं'},
+bn:{opened:'{f} খোলা হয়েছে। আপনার জায়গায় ট্যাপ করুন বা জায়গার নাম বলুন (যেমন «আমি Corridor 1-এ আছি»)।',overall:'এটি পুরো প্রজেক্ট।',tower:'এটি টাওয়ার {t} — {n}টি তলা। একটি তলায় ট্যাপ করুন বা বলুন «{t} পাঁচ তলা খোলো»।',asm:'এটি অ্যাসেম্বলি পয়েন্ট (T4-এর উত্তরে, গ্রাউন্ড ফ্লোর)।',here:'আপনি {p}-এ আছেন — {f}।',exitsH:'{f} — ড্রয়িং অনুযায়ী বের হওয়ার পথ:',noLift:'লিফট ব্যবহার করবেন না।',outside:'বাইরে: সবুজ পথ ধরে অ্যাসেম্বলি পয়েন্টে যান।',whichFloor:'আপনি কোন তলায় আছেন?',whichPlace:'কোন জায়গা?',whichB:'কোন বেসমেন্ট?',whichP:'কোন পোডিয়াম?',noFloor:'এই তলা ড্রয়িংয়ে নেই (T3: L01–L22, T4: L01–L16)।',noFloorTw:'ড্রয়িং অনুযায়ী টাওয়ার {t}-এ {f} নেই।',noZone:'{f}-এর ড্রয়িংয়ে «Zone» নাম নেই।',didYou:'আপনি কি বোঝাতে চাইছেন:',placesHere:'এই তলার জায়গা:',notFound:'{f}-এ এই জায়গা পাওয়া যায়নি।',noStair:'ড্রয়িং অনুযায়ী {f}-এ সিঁড়ি {n} নেই। এখানকার সিঁড়ি: {l}',marked:'{p} — {f} (📌 চিহ্নিত)। আপনি কি সেখানে আছেন?',btnHere:'📍 আমি এখানে — আমার পথ দেখাও',btnWalk:'আমাকে সেখানে নিয়ে চলো',walking:'{p}-এর দিকে যাচ্ছি।',openArea:'{f}: খোলা জায়গা থেকে পথ দেখানো হয়েছে। সঠিক পথের জন্য জায়গার নাম বলুন।',unknown:'বুঝতে পারিনি। চেষ্টা করুন: «T3 পাঁচ তলা খোলো», «অ্যাসেম্বলি পয়েন্ট», «আমি Corridor 1-এ আছি», «বের হওয়ার পথ»।',aiOff:'এই পেজে স্মার্ট চ্যাট চালু নেই।',aiNeedNet:'স্মার্ট চ্যাটের জন্য ইন্টারনেট দরকার।',stWalk:'{f}: {m} মিটার হেঁটে {s} পর্যন্ত যান, তারপর {s} দিয়ে {d} {f2}-এ যান',stFloors:'({k}টি তলা)',down:'নিচে',up:'উপরে',stAsm:'গ্রাউন্ড ফ্লোর: সবুজ পথ ধরে {m} মিটার হেঁটে অ্যাসেম্বলি পয়েন্টে যান',stMiss:'{f}: এখান থেকে পথের তথ্য নেই — HSE পর্যালোচনা',tellPlace:'এখন বলুন আপনি {f}-এ কোথায়, বা আপনার জায়গায় ট্যাপ করুন।',openPicker:'আপনার টাওয়ার, তলা ও জায়গা বেছে নিন।',pickerBtn:'বাছাই খুলুন',routeFrom:'{p} থেকে পথ:',none:'নেই'},
+ml:{opened:'{f} തുറന്നു. നിങ്ങളുടെ സ്ഥലത്ത് ടാപ്പ് ചെയ്യുക അല്ലെങ്കിൽ സ്ഥലത്തിന്റെ പേര് പറയുക (ഉദാ. «ഞാൻ Corridor 1-ൽ ആണ്»).',overall:'ഇതാണ് മുഴുവൻ പ്രോജക്റ്റ്.',tower:'ഇത് ടവർ {t} ആണ് — {n} നിലകൾ. ഒരു നിലയിൽ ടാപ്പ് ചെയ്യുക അല്ലെങ്കിൽ «{t} അഞ്ചാം നില തുറക്കുക» എന്ന് പറയുക.',asm:'ഇതാണ് അസംബ്ലി പോയിന്റ് (T4-ന്റെ വടക്ക്, ഗ്രൗണ്ട് ഫ്ലോർ).',here:'നിങ്ങൾ {p}-ൽ ആണ് — {f}.',exitsH:'{f} — ഡ്രോയിംഗ് പ്രകാരം പുറത്തേക്കുള്ള വഴികൾ:',noLift:'ലിഫ്റ്റ് ഉപയോഗിക്കരുത്.',outside:'പുറത്ത്: പച്ച വഴിയിലൂടെ അസംബ്ലി പോയിന്റിലേക്ക് പോകുക.',whichFloor:'നിങ്ങൾ ഏത് നിലയിലാണ്?',whichPlace:'ഏത് സ്ഥലം?',whichB:'ഏത് ബേസ്മെന്റ്?',whichP:'ഏത് പോഡിയം?',noFloor:'ഈ നില ഡ്രോയിംഗിൽ ഇല്ല (T3: L01–L22, T4: L01–L16).',noFloorTw:'ഡ്രോയിംഗ് പ്രകാരം ടവർ {t}-ൽ {f} ഇല്ല.',noZone:'{f} ഡ്രോയിംഗിൽ «Zone» പേരുകൾ ഇല്ല.',didYou:'നിങ്ങൾ ഉദ്ദേശിച്ചത്:',placesHere:'ഈ നിലയിലെ സ്ഥലങ്ങൾ:',notFound:'{f}-ൽ ഈ സ്ഥലം കണ്ടെത്തിയില്ല.',noStair:'ഡ്രോയിംഗ് പ്രകാരം {f}-ൽ പടി {n} ഇല്ല. ഇവിടത്തെ പടികൾ: {l}',marked:'{p} — {f} (📌 അടയാളപ്പെടുത്തി). നിങ്ങൾ അവിടെയാണോ?',btnHere:'📍 ഞാൻ ഇവിടെയാണ് — എന്റെ വഴി കാണിക്കുക',btnWalk:'എന്നെ അവിടേക്ക് കൊണ്ടുപോകുക',walking:'{p}-ലേക്ക് നടക്കുന്നു.',openArea:'{f}: തുറന്ന സ്ഥലത്തുനിന്നുള്ള വഴി കാണിച്ചു. കൃത്യമായ വഴിക്ക് സ്ഥലത്തിന്റെ പേര് പറയുക.',unknown:'മനസ്സിലായില്ല. ശ്രമിക്കുക: «T3 അഞ്ചാം നില തുറക്കുക», «അസംബ്ലി പോയിന്റ്», «ഞാൻ Corridor 1-ൽ ആണ്», «പുറത്തേക്കുള്ള വഴികൾ».',aiOff:'ഈ പേജിൽ സ്മാർട്ട് ചാറ്റ് സജ്ജമാക്കിയിട്ടില്ല.',aiNeedNet:'സ്മാർട്ട് ചാറ്റിന് ഇന്റർനെറ്റ് വേണം.',stWalk:'{f}: {m} മീറ്റർ നടന്ന് {s} വരെ പോകുക, തുടർന്ന് {s} വഴി {d} {f2} വരെ പോകുക',stFloors:'({k} നിലകൾ)',down:'താഴേക്ക്',up:'മുകളിലേക്ക്',stAsm:'ഗ്രൗണ്ട് ഫ്ലോർ: പച്ച വഴിയിലൂടെ {m} മീറ്റർ നടന്ന് അസംബ്ലി പോയിന്റിലേക്ക് പോകുക',stMiss:'{f}: ഇവിടെനിന്നുള്ള വഴിയുടെ വിവരം ഇല്ല — HSE പരിശോധന',tellPlace:'{f}-ൽ നിങ്ങൾ എവിടെയാണെന്ന് പറയുക, അല്ലെങ്കിൽ നിങ്ങളുടെ സ്ഥലത്ത് ടാപ്പ് ചെയ്യുക.',openPicker:'നിങ്ങളുടെ ടവർ, നില, സ്ഥലം തിരഞ്ഞെടുക്കുക.',pickerBtn:'തിരഞ്ഞെടുപ്പ് തുറക്കുക',routeFrom:'{p}-ൽ നിന്നുള്ള വഴി:',none:'ഇല്ല'},
+ta:{opened:'{f} திறக்கப்பட்டது. உங்கள் இடத்தில் தட்டவும் அல்லது இடத்தின் பெயரைச் சொல்லவும் (எ.கா. «நான் Corridor 1-இல் இருக்கிறேன்»).',overall:'இது முழு திட்டம்.',tower:'இது டவர் {t} — {n} தளங்கள். ஒரு தளத்தைத் தட்டவும் அல்லது «{t} ஐந்தாவது தளம் திற» என்று சொல்லவும்.',asm:'இதுதான் அசெம்பிளி பாயிண்ட் (T4-க்கு வடக்கே, தரைத் தளம்).',here:'நீங்கள் {p}-இல் இருக்கிறீர்கள் — {f}.',exitsH:'{f} — வரைபடத்தின்படி வெளியேறும் வழிகள்:',noLift:'லிஃப்டைப் பயன்படுத்த வேண்டாம்.',outside:'வெளியே: பச்சை வழியில் அசெம்பிளி பாயிண்டுக்குச் செல்லவும்.',whichFloor:'நீங்கள் எந்தத் தளத்தில் இருக்கிறீர்கள்?',whichPlace:'எந்த இடம்?',whichB:'எந்த பேஸ்மென்ட்?',whichP:'எந்த போடியம்?',noFloor:'இந்தத் தளம் வரைபடத்தில் இல்லை (T3: L01–L22, T4: L01–L16).',noFloorTw:'வரைபடத்தின்படி டவர் {t}-இல் {f} இல்லை.',noZone:'{f} வரைபடத்தில் «Zone» பெயர்கள் இல்லை.',didYou:'நீங்கள் குறிப்பிடுவது:',placesHere:'இந்தத் தளத்தில் உள்ள இடங்கள்:',notFound:'{f}-இல் இந்த இடம் கிடைக்கவில்லை.',noStair:'வரைபடத்தின்படி {f}-இல் படிக்கட்டு {n} இல்லை. இங்குள்ள படிக்கட்டுகள்: {l}',marked:'{p} — {f} (📌 குறிக்கப்பட்டது). நீங்கள் அங்கே இருக்கிறீர்களா?',btnHere:'📍 நான் இங்கே இருக்கிறேன் — என் வழியைக் காட்டு',btnWalk:'என்னை அங்கே அழைத்துச் செல்',walking:'{p}-க்கு நடக்கிறோம்.',openArea:'{f}: திறந்த இடத்திலிருந்து வழி காட்டப்பட்டது. சரியான வழிக்கு இடத்தின் பெயரைச் சொல்லவும்.',unknown:'புரியவில்லை. முயற்சிக்கவும்: «T3 ஐந்தாவது தளம் திற», «அசெம்பிளி பாயிண்ட்», «நான் Corridor 1-இல் இருக்கிறேன்», «வெளியேறும் வழிகள்».',aiOff:'இந்தப் பக்கத்தில் ஸ்மார்ட் சாட் அமைக்கப்படவில்லை.',aiNeedNet:'ஸ்மார்ட் சாட்டுக்கு இணையம் தேவை.',stWalk:'{f}: {m} மீட்டர் நடந்து {s} வரை செல்லவும், பிறகு {s} வழியாக {d} {f2} வரை செல்லவும்',stFloors:'({k} தளங்கள்)',down:'கீழே',up:'மேலே',stAsm:'தரைத் தளம்: பச்சை வழியில் {m} மீட்டர் நடந்து அசெம்பிளி பாயிண்டுக்குச் செல்லவும்',stMiss:'{f}: இங்கிருந்து வழித் தகவல் இல்லை — HSE ஆய்வு',tellPlace:'{f}-இல் நீங்கள் எங்கே இருக்கிறீர்கள் என்று சொல்லவும், அல்லது உங்கள் இடத்தில் தட்டவும்.',openPicker:'உங்கள் டவர், தளம், இடத்தைத் தேர்ந்தெடுக்கவும்.',pickerBtn:'தேர்வைத் திற',routeFrom:'{p}-இலிருந்து வழி:',none:'இல்லை'}};
+let RL='en';
+function L(k,a){const t=(I18N[RL]&&I18N[RL][k])||I18N.en[k]||k;return t.replace(/\{(\w+)\}/g,(m,x)=>a&&a[x]!==undefined?a[x]:m);}
+function detectLang(t){if(/[ऀ-ॿ]/.test(t))return 'hi';if(/[ঀ-৿]/.test(t))return 'bn';if(/[ഀ-ൿ]/.test(t))return 'ml';if(/[஀-௿]/.test(t))return 'ta';
+  if(/[؀-ۿ]/.test(t))return /[ٹڈڑںےۓۃہھگکیپچژ۰-۹]/.test(t)&&!/[ةىأإ]/.test(t)?'ur':'ar';return 'en';}
+// turn Urdu / Hindi / Bengali / Malayalam / Tamil words into the commands the parser already knows
+const NUMW={ur:[['بائیسویں|بائیس',22],['اکیسویں|اکیس',21],['بیسویں|بیس',20],['انیسویں|انیس',19],['اٹھارویں|اٹھارہ',18],['سترہویں|سترہ',17],['سولہویں|سولہ',16],['پندرہویں|پندرہ',15],['چودہویں|چودہ',14],['تیرہویں|تیرہ',13],['بارہویں|بارہ',12],['گیارہویں|گیارہ',11],['دسویں|دس',10],['نویں|نو',9],['آٹھویں|آٹھ',8],['ساتویں|سات',7],['چھٹی|چھٹا|چھ',6],['پانچویں|پانچ',5],['چوتھی|چوتھا|چار',4],['تیسری|تیسرا|تین',3],['دوسری|دوسرا|دو',2],['پہلی|پہلا|ایک',1]],
+ hi:[['बाईसवीं|बाईसवाँ|बाईस',22],['इक्कीसवीं|इक्कीस',21],['बीसवीं|बीस',20],['उन्नीसवीं|उन्नीस',19],['अठारहवीं|अठारह',18],['सत्रहवीं|सत्रह',17],['सोलहवीं|सोलह',16],['पंद्रहवीं|पंद्रह',15],['चौदहवीं|चौदह',14],['तेरहवीं|तेरह',13],['बारहवीं|बारह',12],['ग्यारहवीं|ग्यारह',11],['दसवीं|दसवाँ|दस',10],['नौवीं|नौवाँ|नौ',9],['आठवीं|आठवाँ|आठ',8],['सातवीं|सातवाँ|सात',7],['छठी|छठा|छह|छः',6],['पाँचवीं|पांचवीं|पाँचवाँ|पाँच|पांच',5],['चौथी|चौथा|चार',4],['तीसरी|तीसरा|तीन',3],['दूसरी|दूसरा|दो',2],['पहली|पहला|एक',1]],
+ bn:[['দশম|দশ',10],['নবম|নয়',9],['অষ্টম|আট',8],['সপ্তম|সাত',7],['ষষ্ঠ|ছয়',6],['পঞ্চম|পাঁচ',5],['চতুর্থ|চার',4],['তৃতীয়|তিন',3],['দ্বিতীয়|দুই',2],['প্রথম|এক',1]],
+ ml:[['പത്താം|പത്ത്',10],['ഒമ്പതാം|ഒമ്പത്',9],['എട്ടാം|എട്ട്',8],['ഏഴാം|ഏഴ്',7],['ആറാം|ആറ്',6],['അഞ്ചാം|അഞ്ച്',5],['നാലാം|നാല്',4],['മൂന്നാം|മൂന്ന്',3],['രണ്ടാം|രണ്ട്',2],['ഒന്നാം|ഒന്ന്',1]],
+ ta:[['பத்தாவது|பத்து',10],['ஒன்பதாவது|ஒன்பது',9],['எட்டாவது|எட்டு',8],['ஏழாவது|ஏழு',7],['ஆறாவது|ஆறு',6],['ஐந்தாவது|ஐந்து',5],['நான்காவது|நான்கு',4],['மூன்றாவது|மூன்று',3],['இரண்டாவது|இரண்டு',2],['முதல்|ஒன்று',1]]};
+const KW=[ // order matters: longer phrases first
+ ['اسمبلی پوائنٹ|جمع ہونے کی جگہ|اکٹھے ہونے کی جگہ|असेंबली पॉइंट|असेंबली प्वाइंट|इकट्ठा होने की जगह|অ্যাসেম্বলি পয়েন্ট|সমাবেশ স্থল|অ্যাসেম্বলি|അസംബ്ലി പോയിന്റ്|അസംബ്ലി|அசெம்பிளி பாயிண்ட்|கூடும் இடம்|அசெம்பிளி','assembly'],
+ ['باہر نکلنے کے راستے|نکلنے کے راستے|ایگزٹ|बाहर निकलने के रास्ते|निकलने के रास्ते|निकास|एग्जिट|বের হওয়ার পথ|বাহির হওয়ার পথ|প্রস্থান|এক্সিট|പുറത്തേക്കുള്ള വഴികൾ|പുറത്തേക്കുള്ള വഴി|പുറത്തുകടക്കാനുള്ള വഴി|എക്സിറ്റ്|வெளியேறும் வழிகள்|வெளியேறும் வழி|வெளியேற்றம்|எக்ஸிட்','exits'],
+ ['پورا پروجیکٹ|پورا منصوبہ|واپس|पूरा प्रोजेक्ट|वापस|পুরো প্রজেক্ট|ফিরে যাও|ফিরে যান|മുഴുവൻ പ്രോജക്റ്റ്|തിരികെ|முழு திட்டம்|திரும்பு','back to overall'],
+ ['گراؤنڈ فلور|گراؤنڈ|زمینی منزل|ग्राउंड फ्लोर|ग्राउंड|भूतल|গ্রাউন্ড ফ্লোর|গ্রাউন্ড|নিচতলা|ഗ്രൗണ്ട് ഫ്ലോർ|ഗ്രൗണ്ട്|താഴത്തെ നില|கிரவுண்ட் ஃப்ளோர்|கிரவுண்ட்|தரைத் தளம்|தரைதளம்','ground'],
+ ['بیسمنٹ|تہہ خانہ|बेसमेंट|तहखाना|বেসমেন্ট|ബേസ്മെന്റ്|பேஸ்மென்ட்','basement'],['پوڈیم|पोडियम|পোডিয়াম|പോഡിയം|போடியம்','podium'],
+ ['ٹاور|टावर|टॉवर|টাওয়ার|ടവർ|டவர்|கோபுரம்','tower'],
+ ['منزل|فلور|मंज़िल|मंजिल|फ्लोर|तला|তলা|ফ্লোর|നില|ഫ്ലോർ|தளம்|மாடி|ஃப்ளோர்','floor'],
+ ['راستہ|راستے|انخلا|ایمرجنسی|रास्ता|रास्ते|मार्ग|आपातकाल|রাস্তা|পথ|വഴി|வழி','route'],
+ ['سیڑھیاں|سیڑھی|زینہ|सीढ़ियाँ|सीढ़ियां|सीढ़ी|जीना|সিঁড়ি|പടികൾ|പടി|സ്റ്റെയർ|படிக்கட்டு|படிகள்','stair'],
+ ['لفٹ|लिफ्ट|লিফট|ലിഫ്റ്റ്|லிஃப்ட்','lift'],
+ ['کھول دو|کھولو|کھولیں|دکھاؤ|دکھائیں|खोल दो|खोलो|खोलें|दिखाओ|दिखाइए|दिखाएं|খোলো|খুলুন|দেখাও|দেখান|തുറക്കുക|തുറക്കൂ|കാണിക്കുക|കാണിക്കൂ|திறக்கவும்|திற|காட்டவும்|காட்டு','open'],
+ ['راہداری|کوریڈور|गलियारा|कॉरिडोर|করিডোর|കോറിഡോർ|ഇടനാഴി|காரிடார்|தாழ்வாரம்','corridor'],['لابی|लॉबी|লবি|ലോബി|லாபி','lobby'],
+ ['دفتر|آفس|दफ्तर|ऑफिस|कार्यालय|অফিস|ഓഫീസ്|அலுவலகம்|ஆபீஸ்','office'],['ٹوائلٹ|بیت الخلا|واش روم|शौचालय|टॉयलेट|वॉशरूम|টয়লেট|ടോയ്‌ലറ്റ്|ടോയ്ലറ്റ്|கழிவறை|டாய்லெட்','toilets'],
+ ['نمبر|नंबर|নম্বর|നമ്പർ|எண்',' ']];
+function pivot(raw){let t=' '+raw.replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[०-९]/g,d=>'०१२३४५६७८९'.indexOf(d)).replace(/[০-৯]/g,d=>'০১২৩৪৫৬৭৮৯'.indexOf(d)).replace(/[൦-൯]/g,d=>'൦൧൨൩൪൫൬൭൮൯'.indexOf(d)).replace(/[௦-௯]/g,d=>'௦௧௨௩௪௫௬௭௮௯'.indexOf(d)).replace(/[،۔।,.!?؟]/g,' ')+' ';
+  const lg=detectLang(raw);if(lg==='en'||lg==='ar')return raw;
+  const iam=/(^|\s)(میں|मैं|আমি|ഞാൻ|நான்)\s/.test(t)&&!/(کھول|دکھا|खोल|दिखा|খোল|দেখা|തുറ|കാണി|திற|காட்)/.test(t);
+  for(const [re,w] of KW)t=t.replace(new RegExp(re,'g'),' '+w+' ');
+  for(const [re,n] of (NUMW[lg]||[]))t=t.replace(new RegExp('(^|\\s)('+re+')(?=\\s|-|$)','g'),' '+n+' ');
+  t=t.replace(/(^|\s)(پاس|قریب|पास|নিকটে|পাশে|അടുത്ത്|அருகில்|میں|मैं|আমি|ഞാൻ|நான்|پر|ہوں|ہیں|کی|کا|کے|ہے|पर|हूँ|हूं|हैं|है|की|का|के|आछি|আছি|আছেন|এ|আমার|ആണ്|ഉണ്ട്|ഇൽ|ൽ|இருக்கிறேன்|இல்|ல்)(?=\s|$)/g,' ');
+  t=t.replace(/(\d+)\s*-?(এ|ൽ|ഇൽ|இல்)(?=\s|$)/g,'$1 ');
+  return ((iam?'i am at ':'')+t).replace(/\s+/g,' ').trim();}
 const ctx={lastAsk:null};
-function cmd(textRaw){const q=normTxt(textRaw);const reply=[];let did=false;
+function fl2(i,t){return (F[i].k.startsWith('L')&&t?t+' ':'')+F[i].name;}
+function stairsHere(i,t){return placesOf(i,t).filter(p=>p.kind==='stair').map(p=>p.n.split(' (')[0]).join(', ')||L('none');}
+function cmd(textRaw){const q=normTxt(textRaw);
   if(!q)return {r:'…'};
-  // pending clarification (choose by number or name)
   if(ctx.lastAsk){const a=ctx.lastAsk;const n=numIn(q);let pick=null;if(n&&a.opts[n-1])pick=a.opts[n-1];else pick=a.opts.find(o=>placeScore(o.label,q)>0);if(pick){ctx.lastAsk=null;return pick.run();}ctx.lastAsk=null;}
   const tw=parseTower(q);let fl=parseFloor(q);
-  if(fl==='ask-b')return ask('Which basement? · أنهي بيزمنت؟',[1,2,3].map(b=>({label:'B'+b,run:()=>doFloor(F.findIndex(f=>f.k==='B'+b),tw)})));
-  if(fl==='ask-p')return ask('Which podium? · أنهي بوديوم؟',[1,2,3,4,5].map(b=>({label:'P'+b,run:()=>doFloor(F.findIndex(f=>f.k==='P'+b),tw)})));
-  if(fl===-1)return {r:'That floor is not in the project drawings (T3 has L01–L22, T4 has L01–L16). · الدور ده مش موجود في الرسومات.',err:1};
-  if(fl!==null&&tw&&!TW[tw].floors.includes(F[fl].k))return {r:`${tw} has no ${F[fl].name} in the drawings (T4 stops at L16). · البرج ${tw} مفيهوش الدور ده.`,err:1};
-  // 1) back to overall
-  if(/(ارجع|رجوع|رجعني|الرجوع).*(المشروع|كله|بالكامل|العام|الرئيسي)|عرض المشروع|المشروع كله|المشروع بالكامل|overall|whole project|back to (the )?(overall|project|start)|^back$|^home$/.test(q)){backToOverall();return {r:'✓ Showing the whole project. · ده المشروع بالكامل.'};}
-  // 2) assembly point
-  if(/نقطه التجمع|نقطة التجمع|التجمع|assembly|muster/.test(q)){selectFloor(GFI,tw||focusTw||'T3',true);setMode('orbit');flyTo(ASM.x,F[GFI].ffl,toZ(ASM.y),ASM.x+35,F[GFI].ffl+45,toZ(ASM.y)+50);pulseLabels('asm');return {r:'✓ This is the ASSEMBLY POINT (north of T4, ground floor). · دي نقطة التجمع.'};}
-  // 3) "I'm at …" + route
+  if(fl==='ask-b')return ask(L('whichB'),[1,2,3].map(b=>({label:'B'+b,run:()=>doFloor(F.findIndex(f=>f.k==='B'+b),tw)})));
+  if(fl==='ask-p')return ask(L('whichP'),[1,2,3,4,5].map(b=>({label:'P'+b,run:()=>doFloor(F.findIndex(f=>f.k==='P'+b),tw)})));
+  if(fl===-1)return {r:L('noFloor'),err:1};
+  if(fl!==null&&tw&&!TW[tw].floors.includes(F[fl].k))return {r:L('noFloorTw',{t:tw,f:F[fl].name}),err:1};
+  if(/(ارجع|رجوع|رجعني|الرجوع).*(المشروع|كله|بالكامل|العام|الرئيسي)|عرض المشروع|المشروع كله|المشروع بالكامل|overall|whole project|back to (the )?(overall|project|start)|^back$|^home$/.test(q)){backToOverall();return {r:'✓ '+L('overall')};}
+  if(/نقطه التجمع|نقطة التجمع|التجمع|assembly|muster/.test(q)){selectFloor(GFI,tw||focusTw||'T3',true);setMode('orbit');flyTo(ASM.x,F[GFI].ffl,toZ(ASM.y),ASM.x+35,F[GFI].ffl+45,toZ(ASM.y)+50);pulseLabels('asm');return {r:'✓ '+L('asm')};}
   const iam=/(انا|احنا) (عند|في|جنب|قدام)|i ?am (at|in|near)|i'?m (at|in|near)|we are (at|in)/.test(q);
   const wantRoute=/مسار|طريق|اخلاء|الاخلاء|اطلع ازاي|اخرج ازاي|route|evacuat|way out|escape|how do i get out/.test(q);
   const stairN=(q.match(/(سلم|السلم|stair|staircase)( رقم| no\.?| number| #)? ?(\d{1,2})/)||[])[3]||((/(سلم|السلم|stair)/.test(q))?numIn(q):null);
   if(iam||wantRoute&&!(/خروج|exits|مخارج/.test(q))){
     let i=fl!==null?fl:(overall?null:cur);const t=tw||focusTw||'T3';
-    if(i===null)return ask('Which floor are you on? · إنت في أنهي دور؟',[GFI,F.findIndex(f=>f.k==='L05'),F.findIndex(f=>f.k==='L10')].map(k=>({label:F[k].name,run:()=>{doFloor(k,t);return {r:'Now tell me where on '+F[k].name+' (e.g. “I’m at Corridor 1”) or tap your spot.'};}})).concat([{label:'Open the picker',run:()=>{openLoc(1);return {r:'Choose your tower, floor and place.'};}}]));
+    if(i===null)return ask(L('whichFloor'),[GFI,F.findIndex(f=>f.k==='L05'),F.findIndex(f=>f.k==='L10')].map(k=>({label:F[k].name,run:()=>{doFloor(k,t);return {r:L('tellPlace',{f:F[k].name})};}})).concat([{label:L('pickerBtn'),run:()=>{openLoc(1);return {r:L('openPicker')};}}]));
     if(stairN||/سلم|stair|فتحه|to ?-?\d/.test(q)){const cands=placesOf(i,t).filter(p=>p.kind==='stair'&&(!stairN||new RegExp('(^|\\D)0?'+stairN+'($|\\D)').test(p.n)));
-      if(!cands.length)return {r:`No stair ${stairN||''} on ${t} ${F[i].name} in the drawings. Stairs/accesses here: ${placesOf(i,t).filter(p=>p.kind==='stair').map(p=>p.n.split(' (')[0]).join(', ')||'none'}.`,err:1};
-      if(cands.length>1&&!cands.every(c=>c.n===cands[0].n))return ask('Which one? · أنهي واحد؟',cands.map(c=>({label:c.n,run:()=>{setHere(i,c.x,c.y,t,c.n);return {r:'✓ You are at '+c.n+' on '+F[i].name+'. The green route is shown.'};}})));
-      const c=cands[0];setHere(i,c.x,c.y,t,c.n);return {r:`✓ You are at ${c.n} — ${t} ${F[i].name}.\n`+stepsTxt()};}
-    const pl=bestPlaces(i,t,q);
-    if(pl.length>1&&pl[0].sc===pl[1].sc)return ask('Which place? · أنهي مكان؟',pl.slice(0,6).map(p=>({label:p.n,run:()=>{setHere(i,p.x,p.y,t,p.n);return {r:'✓ '+p.n+' — route shown.\n'+stepsTxt()};}})));
-    if(pl.length){const p=pl[0];setHere(i,p.x,p.y,t,p.n);return {r:`✓ You are at ${p.n} — ${t} ${F[i].name}.\n`+stepsTxt()};}
-    if(here&&here.i===i&&wantRoute){drawChain();return {r:'✓ Route from '+here.place+':\n'+stepsTxt()};}
-    if(fl!==null){startHere(i,t);return {r:`✓ ${t} ${F[i].name}: route from an open area shown. Tell me the exact place for a precise route.\n`+stepsTxt()};}
-    return {r:'I could not find that place on '+F[i].name+'. Try a name from the list: '+placesOf(i,t).slice(0,8).map(p=>p.n.split(' (')[0]).join(', ')+'…',err:1};}
-  // 4) exits / stairs on this floor
+      if(!cands.length)return {r:L('noStair',{n:stairN||'',f:fl2(i,t),l:stairsHere(i,t)}),err:1};
+      if(cands.length>1&&!cands.every(c=>c.n===cands[0].n))return ask(L('whichPlace'),cands.map(c=>({label:c.n,run:()=>{setHere(i,c.x,c.y,t,c.n);return {r:'✓ '+L('here',{p:c.n,f:fl2(i,t)})+'\n'+stepsTxt()};}})));
+      const c=cands[0];setHere(i,c.x,c.y,t,c.n);return {r:'✓ '+L('here',{p:c.n,f:fl2(i,t)})+'\n'+stepsTxt()};}
+    const pl=bestPlaces(i,t,stripFloor(q));
+    if(pl.length>1&&pl[0].sc===pl[1].sc)return ask(L('whichPlace'),pl.slice(0,6).map(p=>({label:p.n,run:()=>{setHere(i,p.x,p.y,t,p.n);return {r:'✓ '+L('here',{p:p.n,f:fl2(i,t)})+'\n'+stepsTxt()};}})));
+    if(pl.length){const p=pl[0];setHere(i,p.x,p.y,t,p.n);return {r:'✓ '+L('here',{p:p.n,f:fl2(i,t)})+'\n'+stepsTxt()};}
+    if(here&&here.i===i&&wantRoute){drawChain();return {r:'✓ '+L('routeFrom',{p:here.place})+'\n'+stepsTxt()};}
+    if(fl!==null){startHere(i,t);return {r:'✓ '+L('openArea',{f:fl2(i,t)})+'\n'+stepsTxt()};}
+    return {r:L('notFound',{f:fl2(i,t)})+' '+L('placesHere')+' '+placesOf(i,t).slice(0,8).map(p=>p.n.split(' (')[0]).join(', ')+'…',err:1};}
   if(/مخارج|المخارج|مخرج|المخرج|مداخل|السلالم|سلالم|exits?|accesses|stairs/.test(q)){let i=fl!==null?fl:(overall?null:cur);const t=tw||focusTw||'T3';
-    if(i===null)return ask('Which floor? · أنهي دور؟',[GFI,F.findIndex(f=>f.k==='L05')].map(k=>({label:F[k].name,run:()=>cmd('exits '+F[k].k)})));
+    if(i===null)return ask(L('whichFloor'),[GFI,F.findIndex(f=>f.k==='L05')].map(k=>({label:F[k].name,run:()=>cmd('exits '+F[k].k)})));
     if(i!==cur||overall)selectFloor(i,t,true);pulseLabels('stair');const st=placesOf(i,t).filter(p=>p.kind==='stair').map(p=>p.n);
-    const extra=F[i].gf?'\nOutside: follow the green route to the ASSEMBLY POINT.':'';
-    return {r:`✓ ${F[i].k.startsWith('L')?t+' ':''}${F[i].name} — ways out on the drawings:\n• `+(st.join('\n• ')||'none found')+extra+'\nLifts are not a way out. · ممنوع الأسانسير.'};}
-  // 5) place (go to Zone A on 3rd floor)
-  if(fl!==null){const t=tw||(F[fl].k.startsWith('L')?(focusTw||'T3'):(focusTw||'T3'));
-    const pl=bestPlaces(fl,t,stripFloor(q));
-    const isZone=/(^|\s)zone(\s|$)/.test(toEnWords(q));
-    if(isZone){doFloor(fl,t);return ask(`The ${F[fl].name} drawing has no “Zone” names.`+(pl.length?' Did you mean:':' Places on this floor: '+placesOf(fl,t).slice(0,10).map(p=>p.n.split(' (')[0]).join(', ')),pl.slice(0,6).map(p=>({label:p.n,run:()=>{setHere(fl,p.x,p.y,t,p.n);return {r:'✓ '+p.n+' — '+t+' '+F[fl].name+'.\n'+stepsTxt()};}})));}
-    if(pl.length){if(pl.length>1&&pl[0].sc===pl[1].sc)return (doFloor(fl,t),ask('Which place? · أنهي مكان؟',pl.slice(0,6).map(p=>({label:p.n,run:()=>placeReply(fl,p,t)}))));
-      const p=pl[0];return placeReply(fl,p,t);}
+    return {r:'✓ '+L('exitsH',{f:fl2(i,t)})+'\n• '+(st.join('\n• ')||L('none'))+(F[i].gf?'\n'+L('outside'):'')+'\n'+L('noLift')};}
+  if(fl!==null){const t=tw||focusTw||'T3';
+    const pl=bestPlaces(fl,t,stripFloor(q));const isZone=/(^|\s)zone(\s|$)/.test(toEnWords(q));
+    if(isZone){doFloor(fl,t);return ask(L('noZone',{f:F[fl].name})+' '+(pl.length?L('didYou'):L('placesHere')+' '+placesOf(fl,t).slice(0,10).map(p=>p.n.split(' (')[0]).join(', ')),pl.slice(0,6).map(p=>({label:p.n,run:()=>placeReply(fl,p,t)})));}
+    if(pl.length){if(pl.length>1&&pl[0].sc===pl[1].sc)return (doFloor(fl,t),ask(L('whichPlace'),pl.slice(0,6).map(p=>({label:p.n,run:()=>placeReply(fl,p,t)}))));return placeReply(fl,pl[0],t);}
     return doFloor(fl,t);}
-  // 6) tower only
-  if(tw){overall=true;here=null;setMode('orbit');viewTower(tw);focusTw=tw;crumb();return {r:`✓ Showing Tower ${tw.slice(1)} (${tw}) — ${twFloors(tw).filter(i=>F[i].k.startsWith('L')).length} tower floors. Tap a floor or say e.g. “open level 5 in ${tw}”.`};}
-  // 7) place on the current floor
-  if(!overall){const t=focusTw||'T3';const pl=bestPlaces(cur,t,q);if(pl.length){if(pl.length>1&&pl[0].sc===pl[1].sc)return ask('Which place? · أنهي مكان؟',pl.slice(0,6).map(p=>({label:p.n,run:()=>placeReply(cur,p,t)})));return placeReply(cur,pl[0],t);}}
+  if(tw){overall=true;here=null;setMode('orbit');viewTower(tw);focusTw=tw;crumb();return {r:'✓ '+L('tower',{t:tw,n:twFloors(tw).filter(i=>F[i].k.startsWith('L')).length})};}
+  if(!overall){const t=focusTw||'T3';const pl=bestPlaces(cur,t,q);if(pl.length){if(pl.length>1&&pl[0].sc===pl[1].sc)return ask(L('whichPlace'),pl.slice(0,6).map(p=>({label:p.n,run:()=>placeReply(cur,p,t)})));return placeReply(cur,pl[0],t);}}
   return null;}
-function stripFloor(q){return q.replace(/(level|floor|lvl|الدور|دور|الطابق|طابق)\s*(\d{1,2})/g,' ').replace(/\bl ?\d{1,2}\b/g,' ');}
-function placeReply(i,p,t){showPlace(i,p,t);return {r:`✓ ${p.n} — ${F[i].k.startsWith('L')?t+' ':''}${F[i].name} (📌 marked). Are you there?`,opts:[{label:'📍 I am here — show my route',run:()=>{setHere(i,p.x,p.y,t,p.n);return {r:'✓ You are at '+p.n+'.\n'+stepsTxt()};}},{label:'Walk me there',run:()=>{if(!(here&&here.i===i)){startHere(i,t);}goTo({x:p.x,y:p.y,n:p.n,kind:'place'});return {r:'Walking to '+p.n+' along the floor.'};}}]};}
-function doFloor(i,tw){closeLoc();selectFloor(i,tw||focusTw||'T3',true);return {r:`✓ Opened ${F[i].k.startsWith('L')?(focusTw)+' ':''}${F[i].name}. Tap your spot or tell me the place (e.g. “I’m at Corridor 1”).`};}
+function stripFloor(q){return q.replace(/(level|floor|lvl|الدور|دور|الطابق|طابق)\s*(\d{1,2})/g,' ').replace(/(\d{1,2})\s*(floor)/g,' ').replace(/\bl ?\d{1,2}\b/g,' ');}
+function placeReply(i,p,t){showPlace(i,p,t);return {r:'✓ '+L('marked',{p:p.n,f:fl2(i,t)}),opts:[{label:L('btnHere'),run:()=>{setHere(i,p.x,p.y,t,p.n);return {r:'✓ '+L('here',{p:p.n,f:fl2(i,t)})+'\n'+stepsTxt()};}},{label:L('btnWalk'),run:()=>{if(!(here&&here.i===i)){startHere(i,t);}goTo({x:p.x,y:p.y,n:p.n,kind:'place'});return {r:L('walking',{p:p.n})};}}]};}
+function doFloor(i,tw){closeLoc();selectFloor(i,tw||focusTw||'T3',true);return {r:'✓ '+L('opened',{f:fl2(i,focusTw)})};}
 function bestPlaces(i,tw,q){const all=placesOf(i,tw);return all.map(p=>({...p,sc:placeScore(p.n,q)})).filter(p=>p.sc>0).sort((a,b)=>b.sc-a.sc);}
-function stepsTxt(){if(!lastChain)return '';return chainSteps(lastChain).map((s,k)=>(k+1)+'. '+s.t).join('\n');}
+function stepsTxt(){if(!lastChain)return '';return chainStepsL(lastChain).map((s,k)=>(k+1)+'. '+s).join('\n');}
+function chainStepsL(ch){const out=[];let k=0;
+  while(k<ch.length){const c=ch[k],m=Math.round(plen(c.pts));
+    if(c.end==='stair'){let j=k;while(j+1<ch.length&&ch[j+1].end==='stair'&&ch[j+1].s.id===c.s.id&&plen(ch[j+1].pts)<8)j++;
+      const s=c.s.id||'STAIR';out.push(L('stWalk',{f:F[c.i].name,m,s,d:c.i>GFI?L('down'):L('up'),f2:F[ch[j].t].name})+(j>k?' '+L('stFloors',{k:j-k+1}):''));k=j+1;continue;}
+    if(c.end==='asm')out.push(L('stAsm',{m}));else if(c.end==='flag')out.push('⚑ '+c.flag.reason);else out.push(L('stMiss',{f:F[c.i].name}));k++;}
+  return out;}
 function ask(t,opts){ctx.lastAsk={opts};return {r:t,opts};}
 function pulseLabels(kind){const fg=FG[cur];if(!fg)return;fg.lb.children.forEach(o=>{if(o.isCSS2DObject&&o.element.classList.contains(kind)){o.element.classList.remove('pulse');void o.element.offsetWidth;o.element.classList.add('pulse');}});}
 // ---------- chat UI ----------
 let CFG={aiEndpoint:''};fetch('config.json',{cache:'no-store'}).then(r=>r.json()).then(c=>{CFG=c||CFG;chatMode();}).catch(()=>chatMode());
 function chatMode(){$('chatMode').textContent=navigator.onLine&&CFG.aiEndpoint?'· smart chat on':'· local commands'+(CFG.aiEndpoint?' (offline)':'');}
-const isAr=t=>/[؀-ۿ]/.test(t);
+const isAr=t=>/[؀-ۿ]/.test(t);const TTSL={ar:'ar-EG',ur:'ur-PK',hi:'hi-IN',bn:'bn-IN',ml:'ml-IN',ta:'ta-IN',en:'en-US'};
 function addMsg(t,who,err){const d=document.createElement('div');d.className='m '+who+(err?' err':'');d.textContent=t;if(isAr(t))d.dir='rtl';$('msgs').appendChild(d);$('msgs').scrollTop=1e9;return d;}
 function setSugg(opts){const s=$('sugg');s.innerHTML='';(opts||[]).forEach(o=>{const b=document.createElement('button');b.textContent=o.label;b.onclick=()=>{ctx.lastAsk=null;const r=o.run();showReply(r);};s.appendChild(b);});}
-const DEFAULT_SUGG=['ورّيني برج T3 بالكامل','افتح الدور الخامس في T4','أنا عند السلم رقم 2، ورّيني مسار الإخلاء','حدّد المخارج في الدور ده','ورّيني نقطة التجمع','ارجع لعرض المشروع بالكامل'];
+const DEFAULT_SUGG=['ورّيني برج T3 بالكامل','افتح الدور الخامس في T4','أنا عند السلم رقم 2، ورّيني مسار الإخلاء','حدّد المخارج في الدور ده','ورّيني نقطة التجمع','ارجع لعرض المشروع بالكامل','T3 کی پانچویں منزل کھولو','असेंबली पॉइंट दिखाओ'];
 function defaultSugg(){setSugg(DEFAULT_SUGG.map(t=>({label:t,run:()=>{addMsg(t,'u');return cmd(t)||{r:'?'};}})));}
 function showReply(r){if(!r)return;addMsg(r.r,'a',r.err);if(r.opts)setSugg(r.opts);else defaultSugg();speak(r.r);}
-async function handle(text){if(!text.trim())return;addMsg(text,'u');$('chatIn').value='';
-  let r=null;try{r=cmd(text);}catch(e){console.error(e);r={r:'Error running the command: '+e.message,err:1};}
-  if(!r){if(navigator.onLine&&CFG.aiEndpoint){r=await aiCall(text);}else r={r:(CFG.aiEndpoint?'Smart chat needs internet. ':'Smart chat is not set up on this page. ')+'I understood none of the local commands. Try: “افتح T3 الدور الخامس”, “ورّيني نقطة التجمع”, “I’m at Corridor 1”, “exits on this floor”, or use the buttons.',err:1};}
+async function handle(text){if(!text.trim())return;addMsg(text,'u');$('chatIn').value='';RL=detectLang(text);
+  let r=null;try{r=cmd(pivot(text));}catch(e){console.error(e);r={r:'Error running the command: '+e.message,err:1};}
+  if(!r){if(navigator.onLine&&CFG.aiEndpoint){r=await aiCall(text);}else r={r:(CFG.aiEndpoint?L('aiNeedNet'):L('aiOff'))+' '+L('unknown'),err:1};}
   showReply(r);}
 async function aiCall(text){const t0=addMsg('… thinking','a');
   try{const ctxs={tower:focusTw,floor:overall?null:F[cur].k,here:here&&here.place,floors:F.map(f=>f.k),places:overall?[]:placesOf(cur,focusTw||'T3').map(p=>p.n)};
@@ -686,7 +725,7 @@ async function aiCall(text){const t0=addMsg('… thinking','a');
   }catch(e){t0.remove();return {r:'Smart chat failed ('+e.message+'). Local commands and buttons still work.',err:1};}}
 $('send').onclick=()=>handle($('chatIn').value);$('chatIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')handle($('chatIn').value);});
 $('chatIn').addEventListener('keyup',e=>e.stopPropagation());
-$('chatBtn').onclick=()=>{const c=$('chat');const on=c.style.display!=='flex';c.style.display=on?'flex':'none';$('chatBtn').style.display=on?'none':'grid';if(on&&!$('msgs').children.length){addMsg('اكتب أو اتكلم: «افتح T3 الدور الخامس»، «أنا عند Corridor 1»، «ورّيني نقطة التجمع». Commands for floors, places, exits and the route work without internet too.','a');defaultSugg();}chatMode();};
+$('chatBtn').onclick=()=>{const c=$('chat');const on=c.style.display!=='flex';c.style.display=on?'flex':'none';$('chatBtn').style.display=on?'none':'grid';if(on&&!$('msgs').children.length){addMsg('اكتب أو اتكلم: «افتح T3 الدور الخامس»، «أنا عند Corridor 1»، «ورّيني نقطة التجمع».','a');addMsg('Type or speak in English, عربي, اردو, हिन्दी, বাংলা, മലയാളം or தமிழ். Floors, places, exits and the route work without internet too.','a');defaultSugg();}chatMode();};
 $('chatX').onclick=()=>{$('chat').style.display='none';$('chatBtn').style.display='grid';};
 // ---------- voice ----------
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null,recOn=false;
@@ -700,7 +739,7 @@ $('mic').onclick=()=>{if(!SR)return;if(recOn){rec&&rec.stop();return;}
     rec.onerror=e=>{micSt(e.error==='not-allowed'?'permission denied — allow the microphone, or type':e.error==='network'?'needs internet — type instead':'error: '+e.error,'proc');};
     rec.onend=()=>{recOn=false;$('mic').classList.remove('on');const t=$('chatIn').value.trim();if(t){micSt('Processing…','proc');handle(t).then(()=>micSt('Finished','done'));}else if(!/denied|internet|error/.test($('micSt').textContent))micSt('no speech heard');};
     rec.start();}catch(e){micSt('could not start: '+e.message,'proc');}};
-function speak(t){if(!$('ttsOn').checked||!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/[✓•⚑📍🟩🟢▫]/g,''));u.lang=isAr(t)?'ar-EG':'en-US';const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.startsWith(isAr(t)?'ar':'en'));if(v)u.voice=v;speechSynthesis.speak(u);}
+function speak(t){if(!$('ttsOn').checked||!('speechSynthesis' in window))return;speechSynthesis.cancel();const lg=detectLang(t);const u=new SpeechSynthesisUtterance(t.replace(/[✓•⚑📍📌🟩🟢▫]/g,''));u.lang=TTSL[lg];const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.toLowerCase().startsWith(lg));if(v)u.voice=v;else if(lg!=='en')micSt('no '+TTSL[lg]+' voice installed on this device — reply shown as text','proc');speechSynthesis.speak(u);}
 $('ttsStop').onclick=()=>{if('speechSynthesis' in window)speechSynthesis.cancel();};$('ttsOn').onchange=()=>{if(!$('ttsOn').checked&&'speechSynthesis' in window)speechSynthesis.cancel();};
 // ---------- offline (service worker + Cache Storage, verified by SHA-256) ----------
 let OFFMETA=null,VER=null;const META_CACHE='uptown-meta';
@@ -756,7 +795,13 @@ async function checkUpdate(manual){await readMeta();if(!navigator.onLine){offSta
   try{await download(VER,OFFMETA.floors.filter(k=>VER.floors[k]),(g,t)=>{$('prog').firstChild.style.width=(100*g/t).toFixed(0)+'%';});offStatus('✓ Updated to v'+VER.version+' (verified). The old copy was replaced only after the new one was complete.');toast('✓ Offline copy updated to v'+VER.version);}
   catch(e){await readMeta();offStatus('✗ Update failed: '+e.message+' — keeping the saved copy v'+OFFMETA.version+'.');}}
 addEventListener('online',()=>{netPill();chatMode();checkUpdate(false);});addEventListener('offline',()=>{netPill();chatMode();offStatus();});
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW',e));}
+if('serviceWorker' in navigator&&!window.__STANDALONE){navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW',e));}
+// shareable single-file copy: everything is inside the file, so there is nothing to download or update
+if(window.__STANDALONE){const SA=window.__STANDALONE;
+  netPill=function(){$('net').innerHTML='📄 File copy · '+fmtD(SA.date);$('net').title='v'+SA.version;};
+  checkUpdate=async()=>{netPill();};readMeta=async()=>null;offStatus=async()=>{};
+  $('net').onclick=()=>{$('off').style.display='grid';$('offSt').innerHTML=`<b>📄 Shareable file copy</b> of the evacuation plan — v${SA.version}, plan dated ${fmtD(SA.date)}.<br>Everything is inside this one file, so it works without internet on any phone or computer that opens it in a browser.<br><span style="color:#f5b50a">It does not update itself.</span> For the latest approved version open <a href="${SA.url}" target="_blank" style="color:#19c37d">${SA.url}</a>.`;
+    ['offScope','offF','offSize','prog','offProg','offGo','offUpd','offDel'].forEach(id=>{const e=$(id);if(e)e.style.display='none';});};}
 // texture missing while offline → say so instead of a blank floor
 const _ft=floorTexture;
 floorTexture=function(i){const f=F[i];const fg=FG[i];if(fg.mat||fg.texFail)return;const url=f.tex;
