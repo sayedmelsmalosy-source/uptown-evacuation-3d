@@ -1,11 +1,11 @@
 {
-"version": "2026.11.10-2320",
+"version": "2026.11.10-2335",
 "date": "2026-11-10",
 "core": [
 {
 "p": "index.html",
-"size": 134080,
-"sha": "aa4cb06d56d93c828210e2b4aed79f516bc7dc075866eff015b65eea752c8e23"
+"size": 137676,
+"sha": "14abdbea2f260ea077dd0efbcb522e2a9c1d234a8937260bbf2ebae52121ade3"
 },
 {
 "p": "manifest.webmanifest",
@@ -14,8 +14,8 @@
 },
 {
 "p": "config.json",
-"size": 18,
-"sha": "31a413608c2cdcfe942ed5ea102f024f72ed486a2ed410e3ec440c7b6c089b9c"
+"size": 43,
+"sha": "b862ad900e7f1dcd2b1e76e55d3f686f5f4d4511bf7d3ddb971c708236e525b3"
 },
 {
 "p": "icons/icon-192.png",
@@ -31,6 +31,11 @@
 "p": "data/building.json",
 "size": 1438149,
 "sha": "e10d909e83ecaa2dd50f45392cd591a701c8698d5bd835c08ae2659b90ffd372"
+},
+{
+"p": "avatar/me.png",
+"size": 401267,
+"sha": "c4aa43fb8f7f733aa02ba6e628ff27c025ea9286c5c89621b6f158d851174cc0"
 },
 {
 "p": "vendor/three/three.module.js",

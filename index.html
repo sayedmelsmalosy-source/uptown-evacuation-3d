@@ -23,7 +23,7 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 #map{right:12px;bottom:12px;width:230px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px}
 #map canvas{display:block;width:100%;height:auto;border-radius:6px;background:#fff}
 #pos{font-family:ui-monospace,monospace;font-size:11px;color:var(--muted);margin-top:6px;text-align:center;line-height:1.4}
-#dpad{display:none;left:50%;bottom:16px;transform:translateX(-50%);grid-template-columns:repeat(3,52px);gap:6px;z-index:6}
+#dpad{display:none;left:12px;bottom:16px;grid-template-columns:repeat(3,52px);gap:6px;z-index:6}
 #dpad button{all:unset;cursor:pointer;height:46px;border-radius:10px;background:var(--panel);border:1px solid var(--line);font-size:18px;text-align:center;user-select:none;touch-action:none}
 #dpad button.on{background:var(--safe);color:#04150c}
 #stairui{display:none;left:50%;bottom:130px;transform:translateX(-50%);gap:8px;flex-direction:column;align-items:center;z-index:6}
@@ -94,6 +94,7 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
   <label><input type="checkbox" id="ly-lbl" checked> Stair / lift labels</label>
   <label><input type="checkbox" id="ly-noclip"> Walk through walls</label>
   <label><input type="checkbox" id="ly-above"> Show floors above (overview)</label>
+  <label id="ly-me-row" style="display:none"><input type="checkbox" id="ly-me" checked> 👤 Show me walking (camera behind me)</label>
   <div class="src" style="color:var(--fg)">Tip: tap any floor in 3D to open it, tap your spot on the open floor (or use 📍 Where am I?) to see your route; tap a green STAIR / ASSEMBLY POINT label to walk there.</div>
   <div class="src" id="fSrc"></div><div class="ops" id="fOps"></div>
   <div class="leg"><b>Legend</b><br><span style="color:#e5484d">▭✕ dashed red</span> slab opening · green stair + landing + arrow = stair to the level shown on its sign · <span style="color:#19c37d">▯ green frame</span> = opening in the wall on the route · <span style="color:#e5484d">⚑</span> = route blocked, no approved opening → HSE review</div></div></div>
@@ -432,9 +433,13 @@ function step(dt){
     if(t>=1)anim=null;}
   rt+=dt;if(rt>0.35){rt=0;if(here){here.i=cur;here.x=player.x;here.y=player.y;}updateRoute();}
   if(F[cur].gf&&Math.hypot(player.x-ASM.x,player.y-ASM.y)<6&&!arrived){arrived=true;toast('✔ You reached the ASSEMBLY POINT — stay with your supervisor for the roll call');}
-  camera.position.set(player.x,eye,toZ(player.y));camera.rotation.set(pitch,player.yaw,0,'YXZ');
+  AV.eye=eye;
+  if(AV.ready&&AV.on){const back=4.4,fx=-Math.sin(player.yaw),fy=Math.cos(player.yaw);let d=back;for(let t=0.5;t<=back;t+=0.25){if(blocked(player.x-fx*t,player.y-fy*t)){d=Math.max(0.9,t-0.35);break;}}
+    const fl=eye-EYE,cy=Math.min(fl+1.75+0.9*(d/back),F[cur].ffl+(F[cur].h||4)-0.45);
+    camera.position.set(player.x-fx*d,cy,toZ(player.y-fy*d));camera.rotation.set(pitch-0.15,player.yaw,0,'YXZ');}
+  else{camera.position.set(player.x,eye,toZ(player.y));camera.rotation.set(pitch,player.yaw,0,'YXZ');}
 }
-function loop(){const dt=Math.min(clock.getDelta(),0.05);step(dt);renderer.render(scene,camera);labelR.render(scene,camera);drawMap();requestAnimationFrame(loop);}
+function loop(){const dt=Math.min(clock.getDelta(),0.05);step(dt);updAvatar(dt);renderer.render(scene,camera);labelR.render(scene,camera);drawMap();requestAnimationFrame(loop);}
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);labelR.setSize(innerWidth,innerHeight);});
 // =====================================================================
 // v2: location picker, clickable floors, full evacuation chain, assistant, voice, offline
@@ -810,6 +815,30 @@ floorTexture=function(i){const f=F[i];const fg=FG[i];if(fg.mat||fg.texFail)retur
   loader.load(url,t=>{t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;texCache[url]=t;use(t);},undefined,()=>{fg.texFail=true;if(!navigator.onLine){toast('⚠ '+f.name+': drawing not saved for offline use — walls, stairs and the route still shown');setTimeout(()=>{fg.texFail=false;},15000);}else{setTimeout(()=>{fg.texFail=false;},5000);}});};
 Object.assign(window.__dbg,{cmd,selectFloor,setHere,backToOverall,chainFrom,chainSteps,openLoc,download,readMeta,getVersion,checkUpdate,deleteOffline,meta:()=>OFFMETA,here:()=>here,overall:()=>overall,steps:()=>$('steps').innerText,floorAtScreen,F});
 
+// ---------- avatar: the user's own cut-out photo walks the route instead of an arrow ----------
+const AV={grp:new THREE.Group(),ready:false,on:false,phase:0,last:null,eye:0};AV.grp.visible=false;scene.add(AV.grp);
+function loadAvatar(url){new THREE.TextureLoader().load(url,t=>{t.colorSpace=THREE.SRGBColorSpace;const img=t.image,asp=img.width/img.height,Hh=1.78,Ww=Hh*asp,HIP=0.44;
+  const mat=new THREE.MeshBasicMaterial({map:t,transparent:true,alphaTest:0.4,side:THREE.DoubleSide});
+  const part=(u0,u1,v0,v1,w,h)=>{const g=new THREE.PlaneGeometry(w,h);const uv=g.attributes.uv;for(let k=0;k<uv.count;k++)uv.setXY(k,u0+(u1-u0)*uv.getX(k),v0+(v1-v0)*uv.getY(k));return new THREE.Mesh(g,mat);};
+  const body=part(0,1,HIP-0.02,1,Ww,Hh*(1-HIP+0.02));body.position.y=Hh*(HIP-0.02)+Hh*(1-HIP+0.02)/2;
+  const legL=new THREE.Group(),legR=new THREE.Group();const lL=part(0,0.5,0,HIP,Ww/2,Hh*HIP);lL.position.set(-Ww/4,-Hh*HIP/2,0);legL.add(lL);legL.position.set(0,Hh*HIP,-0.002);
+  const lR=part(0.5,1,0,HIP,Ww/2,Hh*HIP);lR.position.set(Ww/4,-Hh*HIP/2,0);legR.add(lR);legR.position.set(0,Hh*HIP,-0.004);
+  const inner=new THREE.Group();inner.add(body,legL,legR);AV.grp.add(inner);
+  const sh=new THREE.Mesh(new THREE.CircleGeometry(0.42,24),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.28,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=0.03;AV.grp.add(sh);
+  Object.assign(AV,{inner,legL,legR,mat,ready:true,on:true});$('ly-me-row').style.display='flex';$('ly-me').checked=true;},undefined,()=>console.warn('avatar not found'));}
+$('ly-me').addEventListener('change',()=>{AV.on=$('ly-me').checked;});
+function updAvatar(dt){const show=AV.ready&&AV.on&&!overall&&(mode==='walk'||(here&&here.i===cur));AV.grp.visible=show;
+  if(show){hereMark.children.forEach(o=>{if(!o.isCSS2DObject)o.visible=false;});}else hereMark.children.forEach(o=>{if(!o.isCSS2DObject)o.visible=true;});
+  if(!show){AV.last=null;return;}
+  const mv=AV.last?Math.hypot(player.x-AV.last[0],player.y-AV.last[1]):0;AV.last=[player.x,player.y];const sp=Math.min(4,mv/Math.max(dt,1e-3));const k=Math.min(1,sp/2);
+  if(sp>0.15)AV.phase+=dt*(2.2+sp*2.2);else AV.phase*=0.85;
+  const sw=Math.sin(AV.phase)*k;AV.legL.rotation.z=0.3*sw;AV.legR.rotation.z=0.3*sw*-1;AV.inner.position.y=Math.abs(Math.sin(AV.phase))*0.06*k;AV.inner.rotation.z=sw*0.035;
+  const fy=mode==='walk'?AV.eye-EYE:F[cur].ffl;AV.grp.position.set(player.x,fy,toZ(player.y));
+  AV.grp.rotation.y=Math.atan2(camera.position.x-AV.grp.position.x,camera.position.z-AV.grp.position.z);
+  AV.grp.scale.setScalar(mode==='walk'?1:Math.max(3,camera.position.distanceTo(AV.grp.position)/12));
+  const top=mode!=='walk';if(AV.mat&&AV.mat.depthTest===top){AV.mat.depthTest=!top;AV.mat.needsUpdate=true;}AV.grp.traverse(o=>{o.renderOrder=top?20:0;});}
+{const mp=new URLSearchParams(location.search).get('me');if(mp&&/^[\w\/.-]+\.png$/.test(mp))loadAvatar(mp);else fetch('config.json',{cache:'no-store'}).then(r=>r.json()).then(c=>{if(c&&c.avatar)loadAvatar(c.avatar);}).catch(()=>{});}
+window.__dbg.AV=AV;
 // ---------- layout: panels sit under the (wrapping) top bar; the info panel starts folded on phones ----------
 function layoutTop(){document.documentElement.style.setProperty('--tb',$('top').offsetHeight+'px');}
 addEventListener('resize',layoutTop);layoutTop();
