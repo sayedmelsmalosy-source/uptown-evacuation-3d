@@ -13,7 +13,7 @@ const NOCOPY=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta n
 <p><b>In an emergency:</b> leave by the nearest stair — never the lift — and go to the Assembly Point. Follow your supervisor.</p></div></body></html>`;
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);
   if(u.origin!==location.origin)return;
-  const base=new URL('./',self.registration.scope).pathname;if(!u.pathname.startsWith(base)||u.pathname.startsWith(base+'uptown-bim/'))return;
+  const base=new URL('./',self.registration.scope).pathname;if(!u.pathname.startsWith(base)||u.pathname.startsWith(base+'uptown-bim/')||u.pathname.startsWith(base+'fire-code-ch12/'))return;
   if(u.pathname.endsWith('/version.json')||u.searchParams.has('dl'))return; // update checks and downloads always go to the network
   e.respondWith((async()=>{
     try{const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),r.mode==='navigate'?8000:20000);const res=await fetch(r,{signal:ctl.signal});clearTimeout(to);return res;}

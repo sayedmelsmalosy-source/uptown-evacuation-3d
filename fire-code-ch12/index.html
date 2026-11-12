@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fire Code Chapter 12 3D</title>
+<link rel="stylesheet" href="assets/fonts-en.css">
+<link rel="stylesheet" href="assets/fonts-ar.css">
+<style>
+:root{--bg:#1A0C0B;--card:#FCFBF8;--ink:#231816;--muted:#6E605C;--red:#A3201D;--deep:#5E1212;--line:#E7DDD6;color-scheme:dark}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#EFE9E4;color-scheme:light}}
+:root[data-theme="light"]{--bg:#EFE9E4;color-scheme:light}
+:root[data-theme="dark"]{--bg:#1A0C0B;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(110% 80% at 50% 20%,#3A1513,var(--bg));font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;color:var(--ink);display:flex;align-items:center;justify-content:center;padding:28px max(16px,env(safe-area-inset-right,0px)) 28px max(16px,env(safe-area-inset-left,0px))}
+main{width:min(940px,100%);display:flex;flex-direction:column;gap:16px}
+.hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);background:linear-gradient(135deg,#7E1512,#2A0A09);color:#fff;border-radius:16px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+.hero .txt{padding:30px 30px 26px;display:flex;flex-direction:column;gap:10px}
+.kick{font:600 12px/1 "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.16em;text-transform:uppercase;opacity:.8}
+.hero h1{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:clamp(32px,5.4vw,50px);line-height:1;margin:2px 0 4px;text-wrap:balance}
+.hero h1 .ar{display:block;text-align:left;font-family:"Noto Naskh Arabic",sans-serif;font-size:.55em;line-height:1.5;margin-top:8px;font-weight:600}
+.hero p{margin:0;opacity:.9;max-width:36em;line-height:1.5}
+.hero .img{background:url('assets/img/cover.jpg') center/cover;min-height:260px}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.stats span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:4px 12px;font-size:13.5px}
+.stats b{font-variant-numeric:tabular-nums}
+.langs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.langs a{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink);background:var(--card);border-radius:14px;padding:18px 20px;border:2px solid transparent;transition:border-color .15s,transform .15s}
+.langs a:hover,.langs a:focus-visible{border-color:var(--red);outline:none;transform:translateY(-2px)}
+.langs .tag{flex:none;width:46px;height:46px;border-radius:10px;background:var(--red);color:#fff;display:grid;place-items:center;font:700 18px "Barlow Condensed",sans-serif}
+.langs a[lang="ar"] .tag{font-family:"Noto Naskh Arabic",sans-serif;font-size:16px}
+.langs div{display:flex;flex-direction:column;gap:2px}
+.langs b{font-size:22px}
+.langs a[lang="ar"] b,.langs a[lang="ar"] span{font-family:"Noto Naskh Arabic",sans-serif}
+.langs span{color:var(--muted);font-size:14px}
+.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.feat div{background:var(--card);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--muted);line-height:1.45}
+.feat b{display:block;color:var(--deep);font-size:15px;margin-bottom:2px}
+.note{background:var(--card);border-radius:12px;padding:14px 18px;font-size:13.5px;color:var(--muted);line-height:1.55;border-inline-start:4px solid var(--red)}
+.note b{color:var(--ink)}
+@media (max-width:640px){.hero{grid-template-columns:1fr}.hero .img{min-height:180px;order:-1}.hero .txt{padding:22px 20px}}
+</style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <div class="txt">
+      <span class="kick">UAE Fire &amp; Life Safety Code of Practice · Chapter 12</span>
+      <h1>Fire &amp; Life Safety During Construction and Maintenance<span class="ar" lang="ar" dir="rtl">السلامة من الحرائق أثناء الإنشاء والصيانة</span></h1>
+      <p>Interactive 3D study edition of the full chapter text — code pages 940–972, Tables 12.1–12.8 and Figure 13.1 — with the original page on every block.</p>
+      <div class="stats"><span><b>8</b> code tables</span><span><b>361</b> checklist items</span><span><b>8</b> 3D models</span><span><b>36</b> practice questions</span></div>
+    </div>
+    <div class="img" role="img" aria-label="Construction site at dusk"></div>
+  </section>
+  <nav class="langs" aria-label="Choose a language">
+    <a href="en.html" lang="en"><span class="tag">EN</span><div><b>English</b><span>Left to right · language of the published code</span></div></a>
+    <a href="ar.html" lang="ar" dir="rtl"><span class="tag">ع</span><div><b>العربية</b><span>من اليمين إلى اليسار · ترجمة غير رسمية</span></div></a>
+  </nav>
+  <section class="feat">
+    <div><b>Site compliance checklist</b>Tick every requirement your site meets and copy a summary of open items for your report.</div>
+    <div><b>Working 3D models</b>Site layout planner, hot work permit with fire watch timer, riser by building height, storage, roofing, tunnels, access.</div>
+    <div><b>Study tools</b>Search, contents, go to code page, bookmarks, quizzes with instant feedback and saved progress.</div>
+  </section>
+  <p class="note"><b>Educational edition.</b> The models are teaching aids, not approved engineering designs; Civil Defence approved drawings govern on site. Numbers come only from the code text. Editor’s notes flag printed inconsistencies without correcting them. The Arabic text is an unofficial translation. Progress, ticks and bookmarks stay in this browser only.</p>
+</main>
+</body>
+</html>
