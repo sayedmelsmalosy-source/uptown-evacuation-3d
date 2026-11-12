@@ -225,6 +225,7 @@ function layout(instant) {
     const near = Math.abs(i - k) <= 2 || (i === k - 1);
     if (near && !L.mounted) { mountFace(L.f, L.fi); if (L.bi >= 0) mountFace(L.b, L.bi); else { L.b.className = 'face back paper'; L.b.innerHTML = ''; } L.mounted = true; }
     if (!near && L.mounted) { L.f.innerHTML = ''; L.b.innerHTML = ''; L.mounted = false; }
+    L.el.style.display = near ? '' : 'none';
     if (instant) { void L.el.offsetWidth; L.el.style.transition = ''; }
   });
   // closed-book centering and page edges
@@ -266,7 +267,7 @@ function flip(dir) {
   const done = e => { if (e && e.target !== L.el) return; L.el.removeEventListener('transitionend', done); L.el.classList.remove('turning'); animating = false; layout(false); };
   L.el.addEventListener('transitionend', done); setTimeout(() => { if (animating) done(); }, 1100);
 }
-function preMount() { leaves.forEach((L, i) => { if (Math.abs(i - k) <= 2 && !L.mounted) { mountFace(L.f, L.fi); if (L.bi >= 0) mountFace(L.b, L.bi); L.mounted = true; } }); }
+function preMount() { leaves.forEach((L, i) => { if (Math.abs(i - k) <= 2 || i === k - 1) L.el.style.display = ''; if (Math.abs(i - k) <= 2 && !L.mounted) { mountFace(L.f, L.fi); if (L.bi >= 0) mountFace(L.b, L.bi); L.mounted = true; } }); }
 function goPage(pi, hl) {
   if (pi == null || pi < 0 || pi >= pages.length) return;
   const t = kForPage(pi);

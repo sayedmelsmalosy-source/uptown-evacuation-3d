@@ -5,7 +5,8 @@ const T = window.THREE, Bk = window.Book;
 if (!T || !Bk) return;
 const U = Bk.U, MD = Bk.B.models, inl = Bk.inl, esc = Bk.esc;
 let renderer = null, glOK = true;
-try { renderer = new T.WebGLRenderer({ antialias: true, alpha: true }); renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap; } catch (e) { glOK = false; }
+const MOB = matchMedia('(pointer:coarse)').matches || Math.min(screen.width, screen.height) < 820;
+try { renderer = new T.WebGLRenderer({ antialias: !MOB, alpha: true, powerPreference: 'low-power' }); renderer.shadowMap.enabled = !MOB; renderer.shadowMap.type = T.PCFSoftShadowMap; } catch (e) { glOK = false; }
 const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const C = { steel: 0x9aa3a8, steelD: 0x6f777c, timber: 0xb07a43, conc: 0xbdb8ad, concD: 0x8f8b82, sand: 0xd6c49a, hazard: 0xf2b705, black: 0x262626, red: 0xc8102e, green: 0x2e9e4f, white: 0xf4f4f0, blue: 0x1e2bb8, skin: 0xc99a72, hv: 0xff7a00, glass: 0x9fc3d6, brown: 0x7a5a3a, navy: 0x14206e, teal: 0x1b8a7a };
 const mc = {};
@@ -198,7 +199,7 @@ function activate(stage) {
   buildHotspots(); size(); setupUI();
   if (!loopOn) { loopOn = true; requestAnimationFrame(loop); }
 }
-function size() { if (!active) return; const s = active.stage; const w = s.clientWidth, h = s.clientHeight; if (!w || !h) return; renderer.setPixelRatio(Math.min(2.5, (window.devicePixelRatio || 1) * (active.modal ? 1 : Math.max(1, scale)))); renderer.setSize(w, h, false); renderer.domElement.style.width = w + 'px'; renderer.domElement.style.height = h + 'px'; active.sc.camera.aspect = w / h; active.sc.camera.updateProjectionMatrix(); }
+function size() { if (!active) return; const s = active.stage; const w = s.clientWidth, h = s.clientHeight; if (!w || !h) return; renderer.setPixelRatio(Math.min(MOB ? 1.5 : 2.5, (window.devicePixelRatio || 1) * (active.modal ? 1 : Math.max(1, scale)))); renderer.setSize(w, h, false); renderer.domElement.style.width = w + 'px'; renderer.domElement.style.height = h + 'px'; active.sc.camera.aspect = w / h; active.sc.camera.updateProjectionMatrix(); }
 let loopOn = false; const v = new T.Vector3();
 function loop(t) {
   if (!active) { loopOn = false; return; }
